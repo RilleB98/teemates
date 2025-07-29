@@ -9,25 +9,41 @@ All colors MUST be HSL.
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 140 15% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 140 15% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 140 15% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 140 60% 25%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 140 25% 95%;
+    --secondary-foreground: 140 60% 25%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 140 15% 96%;
+    --muted-foreground: 140 10% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 45 85% 65%;
+    --accent-foreground: 140 60% 15%;
+
+    --golf-green: 140 55% 35%;
+    --golf-green-light: 140 40% 85%;
+    --golf-fairway: 110 30% 45%;
+    --golf-sand: 45 60% 75%;
+    --golf-premium: 140 8% 25%;
+
+    --gradient-golf: linear-gradient(135deg, hsl(var(--golf-green)), hsl(var(--golf-fairway)));
+    --gradient-hero: linear-gradient(180deg, hsl(var(--golf-green) / 0.1), hsl(var(--golf-green) / 0.05)));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(140 15% 98%));
+
+    --shadow-golf: 0 8px 32px -8px hsl(var(--golf-green) / 0.2);
+    --shadow-premium: 0 20px 60px -10px hsl(var(--golf-premium) / 0.25);
+    
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
