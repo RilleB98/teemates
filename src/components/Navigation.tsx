@@ -28,9 +28,9 @@ export const Navigation = () => {
           
           {/* User Actions */}
           <div className="flex items-center space-x-4">
-            <Button variant="outline" size="sm" className="hidden sm:flex">
+            <Button variant="outline" size="sm">
               <User className="w-4 h-4 mr-2" />
-              Profile
+              Min sida
             </Button>
             <Button variant="premium" size="sm">
               Premium
