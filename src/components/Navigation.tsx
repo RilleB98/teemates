@@ -23,6 +23,7 @@ export const Navigation = () => {
             <NavLink icon={Users} label="Players" active />
             <NavLink icon={MapPin} label="Courses" />
             <NavLink icon={MessageCircle} label="Messages" badge="3" />
+            <NavLink icon={User} label="Min sida" />
           </div>
           
           {/* User Actions */}
