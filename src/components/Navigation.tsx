@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Target, Users, MapPin, MessageCircle, User, Menu } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 interface NavLinkProps {
   icon: React.ElementType;
@@ -75,9 +76,11 @@ export const Navigation = () => {
           
           {/* Desktop User Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="outline" size="sm">
-              <User className="w-4 h-4 mr-2" />
-              Profile
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/profile">
+                <User className="w-4 h-4 mr-2" />
+                Profile
+              </Link>
             </Button>
             <Button variant="premium" size="sm">
               Premium
@@ -115,9 +118,11 @@ export const Navigation = () => {
                   </div>
                   
                   <div className="pt-4 border-t border-golf-green-light space-y-3">
-                    <Button variant="outline" className="w-full justify-start">
-                      <User className="w-4 h-4 mr-3" />
-                      Profile
+                    <Button variant="outline" className="w-full justify-start" asChild>
+                      <Link to="/profile">
+                        <User className="w-4 h-4 mr-3" />
+                        Profile
+                      </Link>
                     </Button>
                   </div>
                 </div>
