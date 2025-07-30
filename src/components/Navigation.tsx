@@ -4,6 +4,49 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Target, Users, MapPin, MessageCircle, User, Menu } from "lucide-react";
 import { useState } from "react";
 
+interface NavLinkProps {
+  icon: React.ElementType;
+  label: string;
+  active?: boolean;
+  badge?: string;
+}
+
+const NavLink = ({ icon: Icon, label, active, badge }: NavLinkProps) => {
+  return (
+    <button className={`relative flex items-center space-x-2 px-3 py-2 rounded-lg transition-smooth ${
+      active 
+        ? 'text-golf-green bg-golf-green-light' 
+        : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
+    }`}>
+      <Icon className="w-5 h-5" />
+      <span className="text-sm font-medium">{label}</span>
+      {badge && (
+        <Badge variant="destructive" className="absolute -top-1 -right-1 w-5 h-5 text-xs p-0 flex items-center justify-center">
+          {badge}
+        </Badge>
+      )}
+    </button>
+  );
+};
+
+const MobileNavLink = ({ icon: Icon, label, active, badge }: NavLinkProps) => {
+  return (
+    <button className={`relative flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-smooth text-left ${
+      active 
+        ? 'text-golf-green bg-golf-green-light' 
+        : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
+    }`}>
+      <Icon className="w-5 h-5 flex-shrink-0" />
+      <span className="text-base font-medium">{label}</span>
+      {badge && (
+        <Badge variant="destructive" className="ml-auto w-6 h-6 text-xs p-0 flex items-center justify-center">
+          {badge}
+        </Badge>
+      )}
+    </button>
+  );
+};
+
 export const Navigation = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -84,48 +127,5 @@ export const Navigation = () => {
         </div>
       </div>
     </nav>
-  );
-};
-
-interface NavLinkProps {
-  icon: React.ElementType;
-  label: string;
-  active?: boolean;
-  badge?: string;
-}
-
-const NavLink = ({ icon: Icon, label, active, badge }: NavLinkProps) => {
-  return (
-    <button className={`relative flex items-center space-x-2 px-3 py-2 rounded-lg transition-smooth ${
-      active 
-        ? 'text-golf-green bg-golf-green-light' 
-        : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
-    }`}>
-      <Icon className="w-5 h-5" />
-      <span className="text-sm font-medium">{label}</span>
-      {badge && (
-        <Badge variant="destructive" className="absolute -top-1 -right-1 w-5 h-5 text-xs p-0 flex items-center justify-center">
-          {badge}
-        </Badge>
-      )}
-    </button>
-  );
-};
-
-const MobileNavLink = ({ icon: Icon, label, active, badge }: NavLinkProps) => {
-  return (
-    <button className={`relative flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-smooth text-left ${
-      active 
-        ? 'text-golf-green bg-golf-green-light' 
-        : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
-    }`}>
-      <Icon className="w-5 h-5 flex-shrink-0" />
-      <span className="text-base font-medium">{label}</span>
-      {badge && (
-        <Badge variant="destructive" className="ml-auto w-6 h-6 text-xs p-0 flex items-center justify-center">
-          {badge}
-        </Badge>
-      )}
-    </button>
   );
 };
