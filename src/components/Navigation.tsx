@@ -1,24 +1,28 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Target, Users, MapPin, MessageCircle, User } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Target, Users, MapPin, MessageCircle, User, Menu } from "lucide-react";
+import { useState } from "react";
 
 export const Navigation = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-golf-green-light">
-      <div className="max-w-7xl mx-auto px-6 py-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-golf rounded-full flex items-center justify-center">
-              <Target className="w-6 h-6 text-white" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-golf rounded-full flex items-center justify-center">
+              <Target className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-golf-premium">GolfConnect</h1>
-              <p className="text-xs text-muted-foreground">Find Your Match</p>
+              <h1 className="text-lg sm:text-xl font-bold text-golf-premium">GolfConnect</h1>
+              <p className="text-xs text-muted-foreground hidden sm:block">Find Your Match</p>
             </div>
           </div>
           
-          {/* Navigation Links */}
+          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             <NavLink icon={Users} label="Players" active />
             <NavLink icon={MapPin} label="Courses" />
@@ -26,15 +30,56 @@ export const Navigation = () => {
             <NavLink icon={User} label="Min sida" />
           </div>
           
-          {/* User Actions */}
-          <div className="flex items-center space-x-4">
-            <Button variant="outline" size="sm" className="hidden sm:flex">
+          {/* Desktop User Actions */}
+          <div className="hidden md:flex items-center space-x-4">
+            <Button variant="outline" size="sm">
               <User className="w-4 h-4 mr-2" />
               Profile
             </Button>
             <Button variant="premium" size="sm">
               Premium
             </Button>
+          </div>
+
+          {/* Mobile Menu */}
+          <div className="md:hidden flex items-center space-x-2">
+            <Button variant="premium" size="sm" className="text-xs px-3">
+              Premium
+            </Button>
+            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="sm" className="p-2">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80">
+                <div className="flex flex-col space-y-6 mt-8">
+                  <div className="flex items-center space-x-3 pb-4 border-b border-golf-green-light">
+                    <div className="w-12 h-12 bg-gradient-golf rounded-full flex items-center justify-center">
+                      <Target className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-bold text-golf-premium">GolfConnect</h2>
+                      <p className="text-sm text-muted-foreground">Find Your Match</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <MobileNavLink icon={Users} label="Players" active />
+                    <MobileNavLink icon={MapPin} label="Courses" />
+                    <MobileNavLink icon={MessageCircle} label="Messages" badge="3" />
+                    <MobileNavLink icon={User} label="Min sida" />
+                  </div>
+                  
+                  <div className="pt-4 border-t border-golf-green-light space-y-3">
+                    <Button variant="outline" className="w-full justify-start">
+                      <User className="w-4 h-4 mr-3" />
+                      Profile
+                    </Button>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
@@ -60,6 +105,24 @@ const NavLink = ({ icon: Icon, label, active, badge }: NavLinkProps) => {
       <span className="text-sm font-medium">{label}</span>
       {badge && (
         <Badge variant="destructive" className="absolute -top-1 -right-1 w-5 h-5 text-xs p-0 flex items-center justify-center">
+          {badge}
+        </Badge>
+      )}
+    </button>
+  );
+};
+
+const MobileNavLink = ({ icon: Icon, label, active, badge }: NavLinkProps) => {
+  return (
+    <button className={`relative flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-smooth text-left ${
+      active 
+        ? 'text-golf-green bg-golf-green-light' 
+        : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
+    }`}>
+      <Icon className="w-5 h-5 flex-shrink-0" />
+      <span className="text-base font-medium">{label}</span>
+      {badge && (
+        <Badge variant="destructive" className="ml-auto w-6 h-6 text-xs p-0 flex items-center justify-center">
           {badge}
         </Badge>
       )}
