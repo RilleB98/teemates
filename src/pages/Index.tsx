@@ -2,6 +2,7 @@ import { Hero } from "@/components/Hero";
 import { Navigation } from "@/components/Navigation";
 import { PlayerCard } from "@/components/PlayerCard";
 import { CourseCard } from "@/components/CourseCard";
+import { Link } from "react-router-dom";
 import player1 from "@/assets/player1.jpg";
 import course1 from "@/assets/course1.jpg";
 
@@ -131,9 +132,11 @@ const Index = () => {
             Join thousands of golfers already making connections and improving their game
           </p>
           <div className="animate-slide-up">
-            <button className="bg-white text-golf-green px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white/90 transition-smooth shadow-premium">
-              Get Started Today
-            </button>
+            <Link to="/auth">
+              <button className="bg-white text-golf-green px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white/90 transition-smooth shadow-premium">
+                Kom igång idag
+              </button>
+            </Link>
           </div>
         </div>
       </section>

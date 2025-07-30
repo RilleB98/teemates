@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Target, Users, MapPin, MessageCircle, User, Menu } from "lucide-react";
+import { Target, Users, MapPin, MessageCircle, User, Menu, LogOut, LogIn } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface NavLinkProps {
   icon: React.ElementType;
@@ -50,6 +53,13 @@ const MobileNavLink = ({ icon: Icon, label, active, badge }: NavLinkProps) => {
 
 export const Navigation = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, loading } = useAuth();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success("Du är nu utloggad");
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-golf-green-light">
@@ -76,12 +86,27 @@ export const Navigation = () => {
           
           {/* Desktop User Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/profile">
-                <User className="w-4 h-4 mr-2" />
-                Profile
-              </Link>
-            </Button>
+            {user ? (
+              <>
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/profile">
+                    <User className="w-4 h-4 mr-2" />
+                    Profil
+                  </Link>
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleLogout}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logga ut
+                </Button>
+              </>
+            ) : (
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/auth">
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Logga in
+                </Link>
+              </Button>
+            )}
             <Button variant="premium" size="sm">
               Premium
             </Button>
@@ -118,12 +143,27 @@ export const Navigation = () => {
                   </div>
                   
                   <div className="pt-4 border-t border-golf-green-light space-y-3">
-                    <Button variant="outline" className="w-full justify-start" asChild>
-                      <Link to="/profile">
-                        <User className="w-4 h-4 mr-3" />
-                        Profile
-                      </Link>
-                    </Button>
+                    {user ? (
+                      <>
+                        <Button variant="outline" className="w-full justify-start" asChild>
+                          <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)}>
+                            <User className="w-4 h-4 mr-3" />
+                            Profil
+                          </Link>
+                        </Button>
+                        <Button variant="outline" className="w-full justify-start" onClick={handleLogout}>
+                          <LogOut className="w-4 h-4 mr-3" />
+                          Logga ut
+                        </Button>
+                      </>
+                    ) : (
+                      <Button variant="outline" className="w-full justify-start" asChild>
+                        <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>
+                          <LogIn className="w-4 h-4 mr-3" />
+                          Logga in
+                        </Link>
+                      </Button>
+                    )}
                   </div>
                 </div>
               </SheetContent>
