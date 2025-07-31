@@ -22,6 +22,7 @@ export type Database = {
           handicap: number | null
           home_club: string | null
           id: string
+          selected_course: Json | null
           updated_at: string
           user_id: string
         }
@@ -32,6 +33,7 @@ export type Database = {
           handicap?: number | null
           home_club?: string | null
           id?: string
+          selected_course?: Json | null
           updated_at?: string
           user_id: string
         }
@@ -42,6 +44,7 @@ export type Database = {
           handicap?: number | null
           home_club?: string | null
           id?: string
+          selected_course?: Json | null
           updated_at?: string
           user_id?: string
         }

@@ -4,17 +4,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, User, Save, LogOut } from "lucide-react";
+import { Camera, User, Save, LogOut, MapPin, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { CourseSelector } from "@/components/CourseSelector";
 
 export const Profile = () => {
   const [profile, setProfile] = useState({
     age: "",
     handicap: "",
     home_club: "",
-    avatar_url: ""
+    avatar_url: "",
+    selected_course: null as any
   });
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -49,7 +51,8 @@ export const Profile = () => {
           age: data.age?.toString() || "",
           handicap: data.handicap?.toString() || "",
           home_club: data.home_club || "",
-          avatar_url: data.avatar_url || ""
+          avatar_url: data.avatar_url || "",
+          selected_course: data.selected_course || null
         });
       }
     } catch (error) {
@@ -117,7 +120,8 @@ export const Profile = () => {
         age: profile.age ? parseInt(profile.age) : null,
         handicap: profile.handicap ? parseFloat(profile.handicap) : null,
         home_club: profile.home_club || null,
-        avatar_url: profile.avatar_url || null
+        avatar_url: profile.avatar_url || null,
+        selected_course: profile.selected_course || null
       };
 
       const { error } = await supabase
@@ -175,6 +179,16 @@ export const Profile = () => {
                 </label>
               </div>
               <p className="text-sm text-muted-foreground">Klicka på kameran för att ladda upp en profilbild</p>
+              
+              {/* Selected Course Display */}
+              {profile.selected_course && (
+                <div className="flex items-center gap-2 text-center bg-golf-green/10 rounded-lg p-3">
+                  <MapPin className="w-4 h-4 text-golf-green" />
+                  <span className="text-sm font-medium text-golf-premium">{profile.selected_course.name}</span>
+                  <Star className="w-4 h-4 text-accent fill-current" />
+                  <span className="text-sm text-muted-foreground">{profile.selected_course.rating}</span>
+                </div>
+              )}
             </div>
 
             {/* Profile Form */}
@@ -210,6 +224,15 @@ export const Profile = () => {
                   placeholder="Ange din hemmaklubb"
                   value={profile.home_club}
                   onChange={(e) => setProfile(prev => ({ ...prev, home_club: e.target.value }))}
+                />
+              </div>
+
+              {/* Course Selector */}
+              <div className="space-y-2">
+                <Label>Närliggande golfbanor</Label>
+                <CourseSelector 
+                  selectedCourse={profile.selected_course}
+                  onCourseSelect={(course) => setProfile(prev => ({ ...prev, selected_course: course }))}
                 />
               </div>
             </div>
