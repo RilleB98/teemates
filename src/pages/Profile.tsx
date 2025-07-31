@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, User, Save, LogOut, MapPin, Star } from "lucide-react";
+import { Camera, User, Save, LogOut, MapPin, Star, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -153,7 +153,16 @@ export const Profile = () => {
     <div className="min-h-screen bg-gradient-hero pt-24 pb-12">
       <div className="max-w-2xl mx-auto px-6">
         <Card className="bg-white/95 backdrop-blur-sm border-golf-green-light">
-          <CardHeader className="text-center">
+          <CardHeader className="text-center relative">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => navigate("/")}
+              className="absolute left-4 top-4"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Tillbaka
+            </Button>
             <CardTitle className="text-2xl font-bold text-golf-premium">Min Profil</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
