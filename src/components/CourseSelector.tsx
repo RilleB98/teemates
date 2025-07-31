@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Star, Check } from "lucide-react";
+import { MapPin, Star, Check, Navigation } from "lucide-react";
+import { useLocation } from "@/hooks/useLocation";
 import course1 from "@/assets/course1.jpg";
 
 interface Course {
@@ -13,6 +14,8 @@ interface Course {
   holes: number;
   price: string;
   image: string;
+  latitude: number;
+  longitude: number;
 }
 
 interface CourseSelectorProps {
@@ -22,6 +25,7 @@ interface CourseSelectorProps {
 
 export const CourseSelector = ({ selectedCourse, onCourseSelect }: CourseSelectorProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { location, loading, error, getCurrentPosition, calculateDistance } = useLocation();
 
   const nearbyCourses: Course[] = [
     {
@@ -31,7 +35,9 @@ export const CourseSelector = ({ selectedCourse, onCourseSelect }: CourseSelecto
       difficulty: "Hard",
       holes: 18,
       price: "950 SEK",
-      image: course1
+      image: course1,
+      latitude: 59.3293,
+      longitude: 18.0686
     },
     {
       name: "Hills Golf Club", 
@@ -40,7 +46,9 @@ export const CourseSelector = ({ selectedCourse, onCourseSelect }: CourseSelecto
       difficulty: "Medium",
       holes: 18,
       price: "750 SEK",
-      image: course1
+      image: course1,
+      latitude: 57.7089,
+      longitude: 11.9746
     },
     {
       name: "Malmö Burlöv Golf Club",
@@ -49,9 +57,20 @@ export const CourseSelector = ({ selectedCourse, onCourseSelect }: CourseSelecto
       difficulty: "Easy",
       holes: 18,
       price: "650 SEK",
-      image: course1
+      image: course1,
+      latitude: 55.6050,
+      longitude: 13.0038
     }
   ];
+
+  // Sort courses by distance if user location is available
+  const sortedCourses = location 
+    ? [...nearbyCourses].sort((a, b) => {
+        const distanceA = calculateDistance(location.latitude, location.longitude, a.latitude, a.longitude);
+        const distanceB = calculateDistance(location.latitude, location.longitude, b.latitude, b.longitude);
+        return distanceA - distanceB;
+      })
+    : nearbyCourses;
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
@@ -87,60 +106,94 @@ export const CourseSelector = ({ selectedCourse, onCourseSelect }: CourseSelecto
 
       {/* Course selection */}
       <div>
-        <Button 
-          variant="outline" 
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full justify-between"
-        >
-          {selectedCourse ? "Ändra hemmaklubb" : "Välj hemmaklubb"}
-          <span className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}>▼</span>
-        </Button>
+        <div className="flex gap-2 mb-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="flex-1 justify-between"
+          >
+            {selectedCourse ? "Ändra hemmaklubb" : "Välj hemmaklubb"}
+            <span className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}>▼</span>
+          </Button>
+          
+          {!location && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={getCurrentPosition}
+              disabled={loading}
+              className="px-3"
+            >
+              <Navigation className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
+        
+        {error && (
+          <p className="text-xs text-red-500 mb-2">{error}</p>
+        )}
+        
+        {location && (
+          <p className="text-xs text-green-600 mb-2">📍 Kurser sorterade efter avstånd från din plats</p>
+        )}
 
         {isExpanded && (
           <div className="mt-4 space-y-3 max-h-96 overflow-y-auto">
-            {nearbyCourses.map((course, index) => (
-              <Card 
-                key={index} 
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  selectedCourse?.name === course.name ? 'ring-2 ring-golf-green' : ''
-                }`}
-                onClick={() => {
-                  onCourseSelect(course);
-                  setIsExpanded(false);
-                }}
-              >
-                <CardContent className="p-4">
-                  <div className="flex gap-4">
-                    <img 
-                      src={course.image} 
-                      alt={course.name}
-                      className="w-16 h-16 rounded-lg object-cover"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h4 className="font-semibold text-golf-premium">{course.name}</h4>
-                          <div className="flex items-center gap-2 mt-1">
-                            <MapPin className="w-3 h-3 text-muted-foreground" />
-                            <span className="text-sm text-muted-foreground">{course.location}</span>
+            {sortedCourses.map((course, index) => {
+              const distance = location 
+                ? calculateDistance(location.latitude, location.longitude, course.latitude, course.longitude)
+                : null;
+              
+              return (
+                <Card 
+                  key={index} 
+                  className={`cursor-pointer transition-all hover:shadow-md ${
+                    selectedCourse?.name === course.name ? 'ring-2 ring-golf-green' : ''
+                  }`}
+                  onClick={() => {
+                    onCourseSelect(course);
+                    setIsExpanded(false);
+                  }}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex gap-4">
+                      <img 
+                        src={course.image} 
+                        alt={course.name}
+                        className="w-16 h-16 rounded-lg object-cover"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h4 className="font-semibold text-golf-premium">{course.name}</h4>
+                            <div className="flex items-center gap-2 mt-1">
+                              <MapPin className="w-3 h-3 text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground">{course.location}</span>
+                              {distance && (
+                                <>
+                                  <span className="text-xs text-muted-foreground">•</span>
+                                  <span className="text-xs text-golf-green font-medium">{distance.toFixed(1)} km</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Star className="w-4 h-4 text-accent fill-current" />
+                            <span className="text-sm font-medium">{course.rating}</span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 text-accent fill-current" />
-                          <span className="text-sm font-medium">{course.rating}</span>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Badge variant="outline" className={getDifficultyColor(course.difficulty)}>
+                            {course.difficulty}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">{course.holes} hål</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Badge variant="outline" className={getDifficultyColor(course.difficulty)}>
-                          {course.difficulty}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">{course.holes} hål</span>
-                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>
