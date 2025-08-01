@@ -94,8 +94,21 @@ export const Profile = () => {
         .from('avatars')
         .getPublicUrl(fileName);
 
-      setProfile(prev => ({ ...prev, avatar_url: data.publicUrl }));
-      toast.success("Bild uppladdad!");
+      const newAvatarUrl = data.publicUrl;
+      setProfile(prev => ({ ...prev, avatar_url: newAvatarUrl }));
+
+      // Save avatar URL immediately to database
+      const { error: saveError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: newAvatarUrl })
+        .eq("user_id", user.id);
+
+      if (saveError) {
+        console.error("Error saving avatar URL:", saveError);
+        toast.error("Bild uppladdad men kunde inte sparas i profilen");
+      } else {
+        toast.success("Profilbild sparad!");
+      }
 
     } catch (error) {
       console.error("Error uploading avatar:", error);
