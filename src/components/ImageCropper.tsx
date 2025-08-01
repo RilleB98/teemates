@@ -27,6 +27,7 @@ export const ImageCropper = ({ image, isOpen, onClose, onCrop }: ImageCropperPro
 
     const img = new Image();
     img.onload = () => {
+      console.log('Image loaded in cropper:', img.width, 'x', img.height);
       setImageElement(img);
       
       // Calculate canvas size

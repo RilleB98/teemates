@@ -65,11 +65,14 @@ export const Profile = () => {
   };
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('handleImageSelect called');
     if (!event.target.files || event.target.files.length === 0) {
+      console.log('No files selected');
       return;
     }
 
     const file = event.target.files[0];
+    console.log('File selected:', file.name, file.size);
     setSelectedImage(file);
     setShowCropper(true);
     
