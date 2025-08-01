@@ -13,15 +13,19 @@ interface NavLinkProps {
   label: string;
   active?: boolean;
   badge?: string;
+  onClick?: () => void;
 }
 
-const NavLink = ({ icon: Icon, label, active, badge }: NavLinkProps) => {
+const NavLink = ({ icon: Icon, label, active, badge, onClick }: NavLinkProps) => {
   return (
-    <button className={`relative flex items-center space-x-2 px-3 py-2 rounded-lg transition-smooth ${
-      active 
-        ? 'text-golf-green bg-golf-green-light' 
-        : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
-    }`}>
+    <button 
+      onClick={onClick}
+      className={`relative flex items-center space-x-2 px-3 py-2 rounded-lg transition-smooth ${
+        active 
+          ? 'text-golf-green bg-golf-green-light' 
+          : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
+      }`}
+    >
       <Icon className="w-5 h-5" />
       <span className="text-sm font-medium">{label}</span>
       {badge && (
@@ -33,13 +37,16 @@ const NavLink = ({ icon: Icon, label, active, badge }: NavLinkProps) => {
   );
 };
 
-const MobileNavLink = ({ icon: Icon, label, active, badge }: NavLinkProps) => {
+const MobileNavLink = ({ icon: Icon, label, active, badge, onClick }: NavLinkProps) => {
   return (
-    <button className={`relative flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-smooth text-left ${
-      active 
-        ? 'text-golf-green bg-golf-green-light' 
-        : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
-    }`}>
+    <button 
+      onClick={onClick}
+      className={`relative flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-smooth text-left ${
+        active 
+          ? 'text-golf-green bg-golf-green-light' 
+          : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
+      }`}
+    >
       <Icon className="w-5 h-5 flex-shrink-0" />
       <span className="text-base font-medium">{label}</span>
       {badge && (
@@ -51,7 +58,11 @@ const MobileNavLink = ({ icon: Icon, label, active, badge }: NavLinkProps) => {
   );
 };
 
-export const Navigation = () => {
+interface NavigationProps {
+  onMessagesClick?: () => void;
+}
+
+export const Navigation = ({ onMessagesClick }: NavigationProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, loading } = useAuth();
 
@@ -80,7 +91,7 @@ export const Navigation = () => {
           <div className="hidden md:flex items-center space-x-8">
             <NavLink icon={Users} label="Players" active />
             <NavLink icon={MapPin} label="Courses" />
-            <NavLink icon={MessageCircle} label="Messages" badge="3" />
+            <NavLink icon={MessageCircle} label="Messages" badge="3" onClick={onMessagesClick} />
           </div>
           
           {/* Desktop User Actions */}
@@ -137,7 +148,15 @@ export const Navigation = () => {
                   <div className="space-y-2">
                     <MobileNavLink icon={Users} label="Players" active />
                     <MobileNavLink icon={MapPin} label="Courses" />
-                    <MobileNavLink icon={MessageCircle} label="Messages" badge="3" />
+                    <MobileNavLink 
+                      icon={MessageCircle} 
+                      label="Messages" 
+                      badge="3" 
+                      onClick={() => {
+                        onMessagesClick?.();
+                        setIsMobileMenuOpen(false);
+                      }} 
+                    />
                   </div>
                   
                   <div className="pt-4 border-t border-golf-green-light space-y-3">

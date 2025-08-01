@@ -2,11 +2,15 @@ import { Hero } from "@/components/Hero";
 import { Navigation } from "@/components/Navigation";
 import { PlayerCard } from "@/components/PlayerCard";
 import { CourseCard } from "@/components/CourseCard";
+import { ChatRoom } from "@/components/ChatRoom";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import player1 from "@/assets/player1.jpg";
 import course1 from "@/assets/course1.jpg";
 
 const Index = () => {
+  const [showChat, setShowChat] = useState(false);
+
   const samplePlayers = [
     {
       name: "Ahmed",
@@ -73,9 +77,13 @@ const Index = () => {
     }
   ];
 
+  if (showChat) {
+    return <ChatRoom onBack={() => setShowChat(false)} />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
+      <Navigation onMessagesClick={() => setShowChat(true)} />
       <Hero />
       
       {/* Players Section */}
