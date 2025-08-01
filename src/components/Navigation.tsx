@@ -106,12 +106,9 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
           </div>
           
           {/* Centered Logo */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center space-x-2">
+          <div className="absolute left-1/2 transform -translate-x-1/2">
             <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-gradient-golf rounded-full flex items-center justify-center">
               <Target className="w-4 h-4 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground hidden sm:block">Find Your Match</p>
             </div>
           </div>
           
