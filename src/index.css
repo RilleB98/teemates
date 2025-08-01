@@ -42,8 +42,8 @@ All colors MUST be HSL.
     --shadow-golf: 0 8px 32px -8px hsl(var(--golf-green) / 0.2);
     --shadow-premium: 0 20px 60px -10px hsl(var(--golf-premium) / 0.25);
     
-    --transition-smooth: all 4s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-spring: all 6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
