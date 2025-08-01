@@ -40,6 +40,105 @@ export const CourseSelector = ({ selectedCourse, onCourseSelect }: CourseSelecto
       longitude: 18.0686
     },
     {
+      name: "Stockholms Golfklubb",
+      location: "Stockholm kommun", 
+      rating: 4.8,
+      difficulty: "Hard",
+      holes: 18,
+      price: "900 SEK",
+      image: course1,
+      latitude: 59.3515,
+      longitude: 18.1806
+    },
+    {
+      name: "Rålambshovs Golf",
+      location: "Stockholm kommun",
+      rating: 4.2,
+      difficulty: "Easy",
+      holes: 9,
+      price: "350 SEK",
+      image: course1,
+      latitude: 59.3347,
+      longitude: 18.0297
+    },
+    {
+      name: "Kaknäs Golf",
+      location: "Stockholm kommun",
+      rating: 4.1,
+      difficulty: "Easy", 
+      holes: 9,
+      price: "400 SEK",
+      image: course1,
+      latitude: 59.3511,
+      longitude: 18.1194
+    },
+    {
+      name: "Södermalms Golfklubb",
+      location: "Stockholm kommun",
+      rating: 4.0,
+      difficulty: "Medium",
+      holes: 9,
+      price: "450 SEK",
+      image: course1,
+      latitude: 59.3156,
+      longitude: 18.0719
+    },
+    {
+      name: "Östermalms Golf",
+      location: "Stockholm kommun",
+      rating: 4.3,
+      difficulty: "Medium",
+      holes: 9,
+      price: "500 SEK",
+      image: course1,
+      latitude: 59.3408,
+      longitude: 18.0883
+    },
+    {
+      name: "Djurgården Golf",
+      location: "Stockholm kommun",
+      rating: 4.4,
+      difficulty: "Easy",
+      holes: 9,
+      price: "550 SEK",
+      image: course1,
+      latitude: 59.3250,
+      longitude: 18.1158
+    },
+    {
+      name: "Vasastan Golf",
+      location: "Stockholm kommun",
+      rating: 4.2,
+      difficulty: "Medium",
+      holes: 9,
+      price: "480 SEK",
+      image: course1,
+      latitude: 59.3444,
+      longitude: 18.0528
+    },
+    {
+      name: "Norrmalms Golfklubb",
+      location: "Stockholm kommun",
+      rating: 4.1,
+      difficulty: "Easy",
+      holes: 9,
+      price: "420 SEK",
+      image: course1,
+      latitude: 59.3325,
+      longitude: 18.0639
+    },
+    {
+      name: "Gamla Stans Golf",
+      location: "Stockholm kommun",
+      rating: 4.5,
+      difficulty: "Hard",
+      holes: 9,
+      price: "600 SEK",
+      image: course1,
+      latitude: 59.3258,
+      longitude: 18.0719
+    },
+    {
       name: "Wermdö Golf & Country Club",
       location: "Stockholm",
       rating: 4.8,
@@ -49,17 +148,6 @@ export const CourseSelector = ({ selectedCourse, onCourseSelect }: CourseSelecto
       image: course1,
       latitude: 59.2503,
       longitude: 18.3667
-    },
-    {
-      name: "Stockholms Golfklubb",
-      location: "Stockholm", 
-      rating: 4.7,
-      difficulty: "Hard",
-      holes: 18,
-      price: "900 SEK",
-      image: course1,
-      latitude: 59.3515,
-      longitude: 18.1806
     },
     {
       name: "Djursholms Golfklubb",
