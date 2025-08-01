@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { CourseSelector } from "@/components/CourseSelector";
+import { ImageCropper } from "@/components/ImageCropper";
 
 export const Profile = () => {
   const [profile, setProfile] = useState({
@@ -20,6 +21,8 @@ export const Profile = () => {
   });
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [showCropper, setShowCropper] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,16 +64,24 @@ export const Profile = () => {
     }
   };
 
-  const uploadAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files || event.target.files.length === 0) {
+      return;
+    }
+
+    const file = event.target.files[0];
+    setSelectedImage(file);
+    setShowCropper(true);
+    
+    // Reset the input value so the same file can be selected again
+    event.target.value = '';
+  };
+
+  const handleCroppedImage = async (croppedFile: File) => {
     try {
       setUploading(true);
+      setShowCropper(false);
       
-      if (!event.target.files || event.target.files.length === 0) {
-        return;
-      }
-
-      const file = event.target.files[0];
-      const fileExt = file.name.split('.').pop();
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
@@ -78,11 +89,11 @@ export const Profile = () => {
         return;
       }
 
-      const fileName = `${user.id}/avatar.${fileExt}`;
+      const fileName = `${user.id}/avatar.jpg`;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(fileName, file, { upsert: true });
+        .upload(fileName, croppedFile, { upsert: true });
 
       if (uploadError) {
         console.error("Upload error:", uploadError);
@@ -115,6 +126,7 @@ export const Profile = () => {
       toast.error("Ett fel uppstod vid uppladdning");
     } finally {
       setUploading(false);
+      setSelectedImage(null);
     }
   };
 
@@ -194,7 +206,7 @@ export const Profile = () => {
                     id="avatar-upload"
                     type="file"
                     accept="image/*"
-                    onChange={uploadAvatar}
+                    onChange={handleImageSelect}
                     disabled={uploading}
                     className="hidden"
                   />
@@ -281,6 +293,19 @@ export const Profile = () => {
             </div>
           </CardContent>
         </Card>
+        
+        {/* Image Cropper Modal */}
+        {selectedImage && (
+          <ImageCropper
+            image={selectedImage}
+            isOpen={showCropper}
+            onClose={() => {
+              setShowCropper(false);
+              setSelectedImage(null);
+            }}
+            onCrop={handleCroppedImage}
+          />
+        )}
       </div>
     </div>
   );
