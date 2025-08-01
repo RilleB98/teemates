@@ -66,6 +66,14 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, loading } = useAuth();
 
+  // Mock message count - replace with real data from your chat system
+  const messageCount = 12; // Change this to your actual message count
+
+  const formatBadgeCount = (count: number) => {
+    if (count === 0) return undefined;
+    return count > 9 ? "9+" : count.toString();
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     toast.success("Du är nu utloggad");
@@ -91,7 +99,7 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
           <div className="hidden md:flex items-center space-x-8">
             <NavLink icon={Users} label="Players" active />
             <NavLink icon={MapPin} label="Courses" />
-            <NavLink icon={MessageCircle} label="Messages" badge="3" onClick={onMessagesClick} />
+            <NavLink icon={MessageCircle} label="Messages" badge={formatBadgeCount(messageCount)} onClick={onMessagesClick} />
           </div>
           
           {/* Desktop User Actions */}
@@ -151,7 +159,7 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
                     <MobileNavLink 
                       icon={MessageCircle} 
                       label="Messages" 
-                      badge="3" 
+                      badge={formatBadgeCount(messageCount)} 
                       onClick={() => {
                         onMessagesClick?.();
                         setIsMobileMenuOpen(false);
