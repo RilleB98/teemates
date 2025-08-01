@@ -25,7 +25,7 @@ export const PlayerCard = ({
   achievements 
 }: PlayerCardProps) => {
   return (
-    <Card className="max-w-sm mx-auto bg-gradient-card shadow-premium hover:shadow-golf transition-spring transform hover:scale-105 overflow-hidden">
+    <Card className="max-w-sm mx-auto bg-gradient-card shadow-premium hover:shadow-golf transition-all duration-300 ease-in-out transform hover:scale-105 hover:-translate-y-2 overflow-hidden group">
       {/* Profile Image */}
       <div className="relative h-64 bg-golf-green-light">
         <img 
