@@ -15,8 +15,12 @@ export const Hero = () => {
       {/* Content */}
       <div className="relative z-10 text-center text-white px-6 max-w-4xl mx-auto animate-slide-up">
         <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-          Find Your Perfect
-          <span className="block text-accent">Golf Partner</span>
+          <span className="inline-block animate-fade-in" style={{ animationDelay: "0.2s" }}>
+            Find Your Perfect
+          </span>
+          <span className="block text-accent animate-scale-in" style={{ animationDelay: "0.6s" }}>
+            Golf Partner
+          </span>
         </h1>
         
         <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-2xl mx-auto leading-relaxed">
