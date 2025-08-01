@@ -74,7 +74,15 @@ export const ChatRoom = ({ onBack }: ChatRoomProps) => {
   };
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !user) return;
+    if (!newMessage.trim()) {
+      toast.error("Meddelandet kan inte vara tomt");
+      return;
+    }
+    
+    if (!user) {
+      toast.error("Du måste vara inloggad för att skicka meddelanden");
+      return;
+    }
 
     try {
       const { error } = await supabase
@@ -85,8 +93,12 @@ export const ChatRoom = ({ onBack }: ChatRoomProps) => {
           chat_room_id: 'golf-group'
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
       setNewMessage("");
+      toast.success("Meddelande skickat!");
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error("Kunde inte skicka meddelandet");
@@ -115,6 +127,20 @@ export const ChatRoom = ({ onBack }: ChatRoomProps) => {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-muted-foreground">Laddar meddelanden...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen p-6">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-golf-premium mb-4">Du måste logga in</h2>
+          <p className="text-muted-foreground mb-6">För att delta i chatten behöver du vara inloggad.</p>
+          <Button onClick={onBack} variant="outline">
+            Tillbaka
+          </Button>
+        </div>
       </div>
     );
   }
