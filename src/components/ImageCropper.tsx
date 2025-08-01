@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Check, X } from "lucide-react";
+import { Check, X, ZoomIn, ZoomOut } from "lucide-react";
 
 interface ImageCropperProps {
   image: File;
@@ -17,6 +17,9 @@ export const ImageCropper = ({ image, isOpen, onClose, onCrop }: ImageCropperPro
   const [isDragging, setIsDragging] = useState(false);
   const [cropArea, setCropArea] = useState({ x: 50, y: 50, size: 200 });
   const [canvasSize, setCanvasSize] = useState({ width: 400, height: 400 });
+  const [zoom, setZoom] = useState(1);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [imageOffset, setImageOffset] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     if (!image || !isOpen) return;
@@ -25,24 +28,19 @@ export const ImageCropper = ({ image, isOpen, onClose, onCrop }: ImageCropperPro
     img.onload = () => {
       setImageElement(img);
       
-      // Calculate canvas size to fit image while maintaining aspect ratio
-      const maxSize = 400;
-      let canvasWidth = img.width;
-      let canvasHeight = img.height;
+      // Calculate canvas size
+      const maxSize = Math.min(400, window.innerWidth - 100);
+      setCanvasSize({ width: maxSize, height: maxSize });
       
-      if (img.width > maxSize || img.height > maxSize) {
-        const ratio = Math.min(maxSize / img.width, maxSize / img.height);
-        canvasWidth = img.width * ratio;
-        canvasHeight = img.height * ratio;
-      }
+      // Reset zoom and offset
+      setZoom(1);
+      setImageOffset({ x: 0, y: 0 });
       
-      setCanvasSize({ width: canvasWidth, height: canvasHeight });
-      
-      // Set initial crop area to center of image
-      const cropSize = Math.min(canvasWidth, canvasHeight) * 0.6;
+      // Set initial crop area to center
+      const cropSize = maxSize * 0.6;
       setCropArea({
-        x: (canvasWidth - cropSize) / 2,
-        y: (canvasHeight - cropSize) / 2,
+        x: (maxSize - cropSize) / 2,
+        y: (maxSize - cropSize) / 2,
         size: cropSize
       });
     };
@@ -67,8 +65,23 @@ export const ImageCropper = ({ image, isOpen, onClose, onCrop }: ImageCropperPro
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw image scaled to fit canvas
-    ctx.drawImage(imageElement, 0, 0, canvasSize.width, canvasSize.height);
+    // Calculate image dimensions with zoom
+    const imgAspect = imageElement.width / imageElement.height;
+    let drawWidth = canvasSize.width * zoom;
+    let drawHeight = canvasSize.height * zoom;
+    
+    if (imgAspect > 1) {
+      drawHeight = drawWidth / imgAspect;
+    } else {
+      drawWidth = drawHeight * imgAspect;
+    }
+
+    // Calculate image position with offset
+    const imgX = (canvasSize.width - drawWidth) / 2 + imageOffset.x;
+    const imgY = (canvasSize.height - drawHeight) / 2 + imageOffset.y;
+
+    // Draw image
+    ctx.drawImage(imageElement, imgX, imgY, drawWidth, drawHeight);
 
     // Draw overlay
     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
@@ -81,11 +94,11 @@ export const ImageCropper = ({ image, isOpen, onClose, onCrop }: ImageCropperPro
     // Draw crop border
     ctx.globalCompositeOperation = 'source-over';
     ctx.strokeStyle = '#10b981';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
     ctx.strokeRect(cropArea.x, cropArea.y, cropArea.size, cropArea.size);
 
-    // Draw corner handles
-    const handleSize = 12;
+    // Draw corner handles for better mobile interaction
+    const handleSize = 20;
     const handles = [
       { x: cropArea.x - handleSize/2, y: cropArea.y - handleSize/2 },
       { x: cropArea.x + cropArea.size - handleSize/2, y: cropArea.y - handleSize/2 },
@@ -100,7 +113,7 @@ export const ImageCropper = ({ image, isOpen, onClose, onCrop }: ImageCropperPro
 
     // Update preview
     updatePreview();
-  }, [imageElement, cropArea, canvasSize]);
+  }, [imageElement, cropArea, canvasSize, zoom, imageOffset]);
 
   const updatePreview = () => {
     if (!imageElement || !previewCanvasRef.current) return;
@@ -114,11 +127,25 @@ export const ImageCropper = ({ image, isOpen, onClose, onCrop }: ImageCropperPro
     previewCanvas.height = previewSize;
 
     // Calculate source coordinates on original image
-    const scaleX = imageElement.width / canvasSize.width;
-    const scaleY = imageElement.height / canvasSize.height;
+    const imgAspect = imageElement.width / imageElement.height;
+    let drawWidth = canvasSize.width * zoom;
+    let drawHeight = canvasSize.height * zoom;
     
-    const sourceX = cropArea.x * scaleX;
-    const sourceY = cropArea.y * scaleY;
+    if (imgAspect > 1) {
+      drawHeight = drawWidth / imgAspect;
+    } else {
+      drawWidth = drawHeight * imgAspect;
+    }
+
+    const imgX = (canvasSize.width - drawWidth) / 2 + imageOffset.x;
+    const imgY = (canvasSize.height - drawHeight) / 2 + imageOffset.y;
+
+    // Calculate crop area relative to the actual image
+    const scaleX = imageElement.width / drawWidth;
+    const scaleY = imageElement.height / drawHeight;
+    
+    const sourceX = Math.max(0, (cropArea.x - imgX) * scaleX);
+    const sourceY = Math.max(0, (cropArea.y - imgY) * scaleY);
     const sourceSize = cropArea.size * Math.min(scaleX, scaleY);
 
     previewCtx.drawImage(
@@ -128,40 +155,64 @@ export const ImageCropper = ({ image, isOpen, onClose, onCrop }: ImageCropperPro
     );
   };
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const getEventPosition = (e: React.MouseEvent | React.TouchEvent) => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) return { x: 0, y: 0 };
 
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    // Check if click is inside crop area
-    if (x >= cropArea.x && x <= cropArea.x + cropArea.size &&
-        y >= cropArea.y && y <= cropArea.y + cropArea.size) {
-      setIsDragging(true);
+    
+    if ('touches' in e) {
+      const touch = e.touches[0] || e.changedTouches[0];
+      return {
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top
+      };
+    } else {
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleStart = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    const pos = getEventPosition(e);
+    
+    // Check if position is inside crop area
+    if (pos.x >= cropArea.x && pos.x <= cropArea.x + cropArea.size &&
+        pos.y >= cropArea.y && pos.y <= cropArea.y + cropArea.size) {
+      setIsDragging(true);
+      setDragStart({
+        x: pos.x - cropArea.x,
+        y: pos.y - cropArea.y
+      });
+    }
+  };
+
+  const handleMove = (e: React.MouseEvent | React.TouchEvent) => {
     if (!isDragging) return;
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
+    e.preventDefault();
+    
+    const pos = getEventPosition(e);
+    
     // Calculate new position, keeping crop area within bounds
-    const newX = Math.max(0, Math.min(x - cropArea.size/2, canvasSize.width - cropArea.size));
-    const newY = Math.max(0, Math.min(y - cropArea.size/2, canvasSize.height - cropArea.size));
+    const newX = Math.max(0, Math.min(pos.x - dragStart.x, canvasSize.width - cropArea.size));
+    const newY = Math.max(0, Math.min(pos.y - dragStart.y, canvasSize.height - cropArea.size));
 
     setCropArea(prev => ({ ...prev, x: newX, y: newY }));
   };
 
-  const handleMouseUp = () => {
+  const handleEnd = () => {
     setIsDragging(false);
+  };
+
+  const handleZoomIn = () => {
+    setZoom(prev => Math.min(prev + 0.2, 3));
+  };
+
+  const handleZoomOut = () => {
+    setZoom(prev => Math.max(prev - 0.2, 0.5));
   };
 
   const handleCrop = () => {
@@ -171,16 +222,30 @@ export const ImageCropper = ({ image, isOpen, onClose, onCrop }: ImageCropperPro
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const outputSize = 300; // Final output size
+    const outputSize = 300;
     canvas.width = outputSize;
     canvas.height = outputSize;
 
-    // Calculate source coordinates on original image
-    const scaleX = imageElement.width / canvasSize.width;
-    const scaleY = imageElement.height / canvasSize.height;
+    // Calculate image dimensions and position
+    const imgAspect = imageElement.width / imageElement.height;
+    let drawWidth = canvasSize.width * zoom;
+    let drawHeight = canvasSize.height * zoom;
     
-    const sourceX = cropArea.x * scaleX;
-    const sourceY = cropArea.y * scaleY;
+    if (imgAspect > 1) {
+      drawHeight = drawWidth / imgAspect;
+    } else {
+      drawWidth = drawHeight * imgAspect;
+    }
+
+    const imgX = (canvasSize.width - drawWidth) / 2 + imageOffset.x;
+    const imgY = (canvasSize.height - drawHeight) / 2 + imageOffset.y;
+
+    // Calculate source coordinates on original image
+    const scaleX = imageElement.width / drawWidth;
+    const scaleY = imageElement.height / drawHeight;
+    
+    const sourceX = Math.max(0, (cropArea.x - imgX) * scaleX);
+    const sourceY = Math.max(0, (cropArea.y - imgY) * scaleY);
     const sourceSize = cropArea.size * Math.min(scaleX, scaleY);
 
     ctx.drawImage(
@@ -202,46 +267,63 @@ export const ImageCropper = ({ image, isOpen, onClose, onCrop }: ImageCropperPro
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-xl w-full">
         <DialogHeader>
           <DialogTitle>Beskär din profilbild</DialogTitle>
         </DialogHeader>
         
-        <div className="flex gap-6 items-start">
-          <div className="flex-1">
-            <p className="text-sm text-muted-foreground mb-4">
-              Dra rutan för att välja vilket område som ska beskäras
-            </p>
-            <canvas
-              ref={canvasRef}
-              className="border border-gray-200 rounded-lg cursor-move"
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-            />
+        <div className="flex flex-col gap-4">
+          {/* Zoom Controls */}
+          <div className="flex items-center justify-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleZoomOut}>
+              <ZoomOut className="w-4 h-4" />
+            </Button>
+            <span className="text-sm px-3">Zoom: {Math.round(zoom * 100)}%</span>
+            <Button variant="outline" size="sm" onClick={handleZoomIn}>
+              <ZoomIn className="w-4 h-4" />
+            </Button>
           </div>
-          
-          <div className="flex flex-col items-center gap-4">
-            <div>
-              <p className="text-sm font-medium mb-2 text-center">Förhandsvisning</p>
+
+          <div className="flex flex-col lg:flex-row gap-4 items-start">
+            <div className="flex-1">
+              <p className="text-sm text-muted-foreground mb-2">
+                Dra den gröna rutan för att välja område. Använd zoom för att justera storleken.
+              </p>
               <canvas
-                ref={previewCanvasRef}
-                className="border border-gray-200 rounded-full"
-                width={150}
-                height={150}
+                ref={canvasRef}
+                className="border border-gray-200 rounded-lg cursor-move touch-none w-full"
+                onMouseDown={handleStart}
+                onMouseMove={handleMove}
+                onMouseUp={handleEnd}
+                onMouseLeave={handleEnd}
+                onTouchStart={handleStart}
+                onTouchMove={handleMove}
+                onTouchEnd={handleEnd}
+                style={{ maxWidth: '100%', height: 'auto' }}
               />
             </div>
             
-            <div className="flex gap-2">
-              <Button onClick={handleCrop} size="sm">
-                <Check className="w-4 h-4 mr-2" />
-                Använd
-              </Button>
-              <Button onClick={onClose} variant="outline" size="sm">
-                <X className="w-4 h-4 mr-2" />
-                Avbryt
-              </Button>
+            <div className="flex flex-col items-center gap-4 w-full lg:w-auto">
+              <div>
+                <p className="text-sm font-medium mb-2 text-center">Förhandsvisning</p>
+                <canvas
+                  ref={previewCanvasRef}
+                  className="border border-gray-200 rounded-full"
+                  width={150}
+                  height={150}
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                <Button onClick={handleCrop} size="sm">
+                  <Check className="w-4 h-4 mr-2" />
+                  Använd
+                </Button>
+                <Button onClick={onClose} variant="outline" size="sm">
+                  <X className="w-4 h-4 mr-2" />
+                  Avbryt
+                </Button>
+              </div>
             </div>
           </div>
         </div>
