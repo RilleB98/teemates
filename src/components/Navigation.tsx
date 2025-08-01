@@ -111,7 +111,6 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
               <Target className="w-4 h-4 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white" />
             </div>
             <div>
-              <h1 className="text-sm sm:text-lg lg:text-xl font-bold text-golf-premium">GolfConnect</h1>
               <p className="text-xs text-muted-foreground hidden sm:block">Find Your Match</p>
             </div>
           </div>
