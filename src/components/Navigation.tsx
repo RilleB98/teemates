@@ -88,7 +88,7 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
           <div className="flex items-center space-x-4 sm:space-x-6">
             <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth text-golf-green bg-golf-green-light`}>
               <Users className="w-5 h-5 sm:w-6 sm:h-6" />
-              <span className="text-xs font-medium">Players</span>
+              <span className="text-xs font-medium">Vänner</span>
             </button>
             
             <button 
