@@ -83,30 +83,51 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-golf-green-light">
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4">
-        <div className="flex items-center justify-center">
-          {/* Logo - left side */}
-          <div className="absolute left-2 sm:left-4 lg:left-6 flex items-center space-x-1 sm:space-x-2">
-            <div className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-gradient-golf rounded-full flex items-center justify-center">
-              <Target className="w-3 h-3 sm:w-4 sm:h-4 lg:w-6 lg:h-6 text-white" />
-            </div>
-            <div className="hidden sm:block">
-              <h1 className="text-sm sm:text-lg lg:text-xl font-bold text-golf-premium">GolfConnect</h1>
-              <p className="text-xs text-muted-foreground hidden lg:block">Find Your Match</p>
-            </div>
-          </div>
-          
-          {/* Centered Navigation */}
-          <div className="flex items-center justify-center space-x-6 sm:space-x-8 lg:space-x-12">
+        <div className="flex items-center justify-between">
+          {/* Left Navigation */}
+          <div className="flex items-center space-x-4 sm:space-x-6">
             <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth text-golf-green bg-golf-green-light`}>
               <Users className="w-5 h-5 sm:w-6 sm:h-6" />
               <span className="text-xs font-medium">Players</span>
             </button>
             
-            {/* Hamburger Menu - Larger and centered */}
+            <button 
+              onClick={onMessagesClick}
+              className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50`}
+            >
+              <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+              <span className="text-xs font-medium">Messages</span>
+              {formatBadgeCount(messageCount) && (
+                <Badge variant="destructive" className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 text-xs p-0 flex items-center justify-center">
+                  {formatBadgeCount(messageCount)}
+                </Badge>
+              )}
+            </button>
+          </div>
+          
+          {/* Centered Logo */}
+          <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center space-x-2">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-gradient-golf rounded-full flex items-center justify-center">
+              <Target className="w-4 h-4 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white" />
+            </div>
+            <div>
+              <h1 className="text-sm sm:text-lg lg:text-xl font-bold text-golf-premium">GolfConnect</h1>
+              <p className="text-xs text-muted-foreground hidden sm:block">Find Your Match</p>
+            </div>
+          </div>
+          
+          {/* Right Navigation and Hamburger */}
+          <div className="flex items-center space-x-4 sm:space-x-6">
+            <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50`}>
+              <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
+              <span className="text-xs font-medium">Courses</span>
+            </button>
+            
+            {/* Hamburger Menu - Far right */}
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
-                <button className="relative flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-golf-green text-white hover:bg-golf-green/90 transition-smooth">
-                  <Menu className="w-6 h-6 sm:w-7 sm:h-7" />
+                <button className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-golf-green text-white hover:bg-golf-green/90 transition-smooth">
+                  <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
               </SheetTrigger>
               <SheetContent side="right" className="w-80">
@@ -150,24 +171,6 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
                 </div>
               </SheetContent>
             </Sheet>
-            
-            <button 
-              onClick={onMessagesClick}
-              className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50`}
-            >
-              <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-              <span className="text-xs font-medium">Messages</span>
-              {formatBadgeCount(messageCount) && (
-                <Badge variant="destructive" className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 text-xs p-0 flex items-center justify-center">
-                  {formatBadgeCount(messageCount)}
-                </Badge>
-              )}
-            </button>
-            
-            <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50`}>
-              <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
-              <span className="text-xs font-medium">Courses</span>
-            </button>
           </div>
         </div>
       </div>
