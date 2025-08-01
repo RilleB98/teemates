@@ -67,7 +67,7 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
   const { user, loading } = useAuth();
 
   // Mock message count - replace with real data from your chat system
-  const messageCount = 12; // Change this to your actual message count
+  const messageCount = 7; // Change this to your actual message count
 
   const formatBadgeCount = (count: number) => {
     if (count === 0) return undefined;
