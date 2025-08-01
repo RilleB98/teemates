@@ -40,6 +40,72 @@ export const CourseSelector = ({ selectedCourse, onCourseSelect }: CourseSelecto
       longitude: 18.0686
     },
     {
+      name: "Wermdö Golf & Country Club",
+      location: "Stockholm",
+      rating: 4.8,
+      difficulty: "Medium",
+      holes: 18,
+      price: "850 SEK",
+      image: course1,
+      latitude: 59.2503,
+      longitude: 18.3667
+    },
+    {
+      name: "Stockholms Golfklubb",
+      location: "Stockholm", 
+      rating: 4.7,
+      difficulty: "Hard",
+      holes: 18,
+      price: "900 SEK",
+      image: course1,
+      latitude: 59.3515,
+      longitude: 18.1806
+    },
+    {
+      name: "Djursholms Golfklubb",
+      location: "Stockholm",
+      rating: 4.6,
+      difficulty: "Medium",
+      holes: 18,
+      price: "800 SEK",
+      image: course1,
+      latitude: 59.4006,
+      longitude: 18.1289
+    },
+    {
+      name: "Kevinge Golf & Country Club",
+      location: "Stockholm",
+      rating: 4.5,
+      difficulty: "Easy",
+      holes: 18,
+      price: "700 SEK",
+      image: course1,
+      latitude: 59.4847,
+      longitude: 17.9158
+    },
+    {
+      name: "Österåkers Golfklubb",
+      location: "Stockholm",
+      rating: 4.4,
+      difficulty: "Medium",
+      holes: 18,
+      price: "750 SEK",
+      image: course1,
+      latitude: 59.4583,
+      longitude: 18.3333
+    },
+    {
+      name: "Viksjö Golfklubb",
+      location: "Stockholm",
+      rating: 4.3,
+      difficulty: "Easy",
+      holes: 18,
+      price: "650 SEK",
+      image: course1,
+      latitude: 59.4167,
+      longitude: 17.8833
+    },
+    {
       name: "Hills Golf Club", 
       location: "Göteborg",
       rating: 4.7,
