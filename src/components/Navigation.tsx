@@ -62,7 +62,7 @@ export const Navigation = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-golf-green-light">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-golf-green-light">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -81,7 +81,6 @@ export const Navigation = () => {
             <NavLink icon={Users} label="Players" active />
             <NavLink icon={MapPin} label="Courses" />
             <NavLink icon={MessageCircle} label="Messages" badge="3" />
-            <NavLink icon={User} label="Min sida" />
           </div>
           
           {/* Desktop User Actions */}
@@ -139,7 +138,6 @@ export const Navigation = () => {
                     <MobileNavLink icon={Users} label="Players" active />
                     <MobileNavLink icon={MapPin} label="Courses" />
                     <MobileNavLink icon={MessageCircle} label="Messages" badge="3" />
-                    <MobileNavLink icon={User} label="Min sida" />
                   </div>
                   
                   <div className="pt-4 border-t border-golf-green-light space-y-3">
