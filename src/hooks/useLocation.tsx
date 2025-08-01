@@ -21,10 +21,11 @@ export const useLocation = () => {
     loading: false,
     error: null
   });
+  const [watchId, setWatchId] = useState<string | null>(null);
 
-  // Load saved location preference on mount
+  // Load saved location preference and start live tracking if enabled
   useEffect(() => {
-    const loadLocationPreference = async () => {
+    const initializeLocation = async () => {
       if (!user) return;
 
       try {
@@ -34,10 +35,14 @@ export const useLocation = () => {
           .eq('user_id', user.id)
           .maybeSingle();
 
-        if (data?.location_enabled && data?.last_location && 
+        if (data?.location_enabled) {
+          // If location was previously enabled, start live tracking automatically
+          await startLiveTracking();
+        } else if (data?.last_location && 
             typeof data.last_location === 'object' && 
             data.last_location !== null &&
             !Array.isArray(data.last_location)) {
+          // Load last known location as fallback
           const locationData = data.last_location as Record<string, any>;
           if ('latitude' in locationData && 'longitude' in locationData) {
             setState(prev => ({
@@ -54,7 +59,14 @@ export const useLocation = () => {
       }
     };
 
-    loadLocationPreference();
+    initializeLocation();
+
+    // Cleanup on unmount
+    return () => {
+      if (watchId) {
+        stopLiveTracking();
+      }
+    };
   }, [user]);
 
   const saveLocationPreference = async (location: Location) => {
@@ -73,49 +85,57 @@ export const useLocation = () => {
     }
   };
 
-  const getCurrentPosition = async () => {
+  
+  const startLiveTracking = async () => {
+    if (watchId) return; // Already tracking
+
     setState(prev => ({ ...prev, loading: true, error: null }));
     
     try {
-      // First try to get permission
+      // Check permissions first
       const permissions = await Geolocation.checkPermissions();
       
       if (permissions.location !== 'granted') {
         const permissionRequest = await Geolocation.requestPermissions();
         
         if (permissionRequest.location !== 'granted') {
-          throw new Error('Platstillstånd krävs för att hitta närliggande golfbanor');
+          throw new Error('Platstillstånd krävs för live GPS-spårning');
         }
       }
 
-      // Get current position
-      const position = await Geolocation.getCurrentPosition({
+      // Start watching position
+      const id = await Geolocation.watchPosition({
         enableHighAccuracy: true,
-        timeout: 10000
+        timeout: 10000,
+        maximumAge: 30000 // Use cached position for up to 30 seconds
+      }, (position) => {
+        if (position) {
+          const newLocation = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          };
+
+          setState({
+            location: newLocation,
+            loading: false,
+            error: null
+          });
+
+          // Save updated location
+          saveLocationPreference(newLocation);
+        }
       });
 
-      const newLocation = {
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude
-      };
-
-      setState({
-        location: newLocation,
-        loading: false,
-        error: null
-      });
-
-      // Save location preference
-      await saveLocationPreference(newLocation);
-
+      setWatchId(id);
+      
     } catch (error) {
-      // Fallback to browser geolocation if Capacitor fails
+      // Fallback to browser geolocation
       try {
         if (!navigator.geolocation) {
           throw new Error('Geolocation stöds inte av din webbläsare');
         }
 
-        navigator.geolocation.getCurrentPosition(
+        const id = navigator.geolocation.watchPosition(
           async (position) => {
             const newLocation = {
               latitude: position.coords.latitude,
@@ -128,11 +148,10 @@ export const useLocation = () => {
               error: null
             });
 
-            // Save location preference
             await saveLocationPreference(newLocation);
           },
           (error) => {
-            let errorMessage = 'Kunde inte hämta din plats';
+            let errorMessage = 'Kunde inte spåra din plats';
             switch (error.code) {
               case error.PERMISSION_DENIED:
                 errorMessage = 'Platstillstånd nekades. Aktivera platsdelning i dina inställningar.';
@@ -141,7 +160,7 @@ export const useLocation = () => {
                 errorMessage = 'Platsinformation är inte tillgänglig.';
                 break;
               case error.TIMEOUT:
-                errorMessage = 'Timeout - kunde inte hämta din plats.';
+                errorMessage = 'Timeout - kunde inte spåra din plats.';
                 break;
             }
             setState(prev => ({ ...prev, loading: false, error: errorMessage }));
@@ -149,17 +168,39 @@ export const useLocation = () => {
           {
             enableHighAccuracy: true,
             timeout: 10000,
-            maximumAge: 60000
+            maximumAge: 30000
           }
         );
+
+        setWatchId(id.toString());
+        
       } catch (fallbackError) {
         setState(prev => ({ 
           ...prev, 
           loading: false, 
-          error: error instanceof Error ? error.message : 'Kunde inte hämta din plats' 
+          error: error instanceof Error ? error.message : 'Kunde inte starta live GPS-spårning' 
         }));
       }
     }
+  };
+
+  const stopLiveTracking = async () => {
+    if (!watchId) return;
+
+    try {
+      // Try Capacitor first
+      await Geolocation.clearWatch({ id: watchId });
+    } catch (error) {
+      // Fallback to browser geolocation
+      navigator.geolocation.clearWatch(parseInt(watchId));
+    }
+    
+    setWatchId(null);
+  };
+
+  const getCurrentPosition = async () => {
+    // Start live tracking instead of just getting current position
+    await startLiveTracking();
   };
 
   // Calculate distance between two coordinates (in km)
