@@ -121,33 +121,55 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
             </button>
           </div>
           
-          {/* User Actions - scales with screen size */}
-          <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-4">
-            {user ? (
-              <>
-                <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3" asChild>
-                  <Link to="/profile">
-                    <User className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
-                    <span className="hidden sm:inline">Profil</span>
-                  </Link>
+          {/* Hamburger Menu for User Actions */}
+          <div className="flex items-center">
+            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="sm" className="p-1 sm:p-2">
+                  <Menu className="w-4 h-4 sm:w-5 sm:h-5 text-golf-green" />
                 </Button>
-                <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3" onClick={handleLogout}>
-                  <LogOut className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
-                  <span className="hidden lg:inline">Logga ut</span>
-                </Button>
-              </>
-            ) : (
-              <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3" asChild>
-                <Link to="/auth">
-                  <LogIn className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Logga in</span>
-                </Link>
-              </Button>
-            )}
-            <Button variant="premium" size="sm" className="text-xs sm:text-sm px-2 sm:px-3">
-              <span className="hidden sm:inline">Premium</span>
-              <span className="sm:hidden">P</span>
-            </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80">
+                <div className="flex flex-col space-y-6 mt-8">
+                  <div className="flex items-center space-x-3 pb-4 border-b border-golf-green-light">
+                    <div className="w-12 h-12 bg-gradient-golf rounded-full flex items-center justify-center">
+                      <Target className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-bold text-golf-premium">GolfConnect</h2>
+                      <p className="text-sm text-muted-foreground">Find Your Match</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {user ? (
+                      <>
+                        <Button variant="outline" className="w-full justify-start" asChild>
+                          <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)}>
+                            <User className="w-4 h-4 mr-3" />
+                            Profil
+                          </Link>
+                        </Button>
+                        <Button variant="outline" className="w-full justify-start" onClick={handleLogout}>
+                          <LogOut className="w-4 h-4 mr-3" />
+                          Logga ut
+                        </Button>
+                      </>
+                    ) : (
+                      <Button variant="outline" className="w-full justify-start" asChild>
+                        <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>
+                          <LogIn className="w-4 h-4 mr-3" />
+                          Logga in
+                        </Link>
+                      </Button>
+                    )}
+                    <Button variant="premium" className="w-full">
+                      Premium
+                    </Button>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
