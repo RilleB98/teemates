@@ -138,14 +138,14 @@ export const ChatRoom = ({ onBack }: ChatRoomProps) => {
         <div className="text-center">
           <h2 className="text-xl font-semibold text-golf-premium mb-4">Du måste logga in</h2>
           <p className="text-muted-foreground mb-6">För att delta i chatten behöver du vara inloggad.</p>
-          <div className="flex gap-3">
-            <Button onClick={onBack} variant="outline">
-              Tillbaka
-            </Button>
+          <div className="flex justify-center gap-4">
             <Button asChild>
               <Link to="/auth">
                 Logga in
               </Link>
+            </Button>
+            <Button onClick={onBack} variant="outline">
+              Tillbaka
             </Button>
           </div>
         </div>
