@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Check, X, ZoomIn, ZoomOut } from "lucide-react";
+import { Check, X } from "lucide-react";
 
 interface ImageCropperProps {
   image: File;
@@ -20,6 +20,7 @@ export const ImageCropper = ({ image, isOpen, onClose, onCrop }: ImageCropperPro
   const [zoom, setZoom] = useState(1);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [imageOffset, setImageOffset] = useState({ x: 0, y: 0 });
+  const [lastTouchDistance, setLastTouchDistance] = useState(0);
 
   useEffect(() => {
     if (!image || !isOpen) return;
@@ -155,6 +156,13 @@ export const ImageCropper = ({ image, isOpen, onClose, onCrop }: ImageCropperPro
     );
   };
 
+  const getTouchDistance = (touches: React.TouchList) => {
+    if (touches.length < 2) return 0;
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
   const getEventPosition = (e: React.MouseEvent | React.TouchEvent) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
@@ -175,44 +183,91 @@ export const ImageCropper = ({ image, isOpen, onClose, onCrop }: ImageCropperPro
     }
   };
 
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    setZoom(prev => Math.max(0.5, Math.min(3, prev + delta)));
+  };
+
   const handleStart = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
-    const pos = getEventPosition(e);
     
-    // Check if position is inside crop area
-    if (pos.x >= cropArea.x && pos.x <= cropArea.x + cropArea.size &&
-        pos.y >= cropArea.y && pos.y <= cropArea.y + cropArea.size) {
-      setIsDragging(true);
-      setDragStart({
-        x: pos.x - cropArea.x,
-        y: pos.y - cropArea.y
-      });
+    if ('touches' in e) {
+      if (e.touches.length === 2) {
+        // Two finger pinch start
+        const distance = getTouchDistance(e.touches);
+        setLastTouchDistance(distance);
+        return;
+      } else if (e.touches.length === 1) {
+        // Single finger drag start
+        const pos = getEventPosition(e);
+        
+        // Check if position is inside crop area
+        if (pos.x >= cropArea.x && pos.x <= cropArea.x + cropArea.size &&
+            pos.y >= cropArea.y && pos.y <= cropArea.y + cropArea.size) {
+          setIsDragging(true);
+          setDragStart({
+            x: pos.x - cropArea.x,
+            y: pos.y - cropArea.y
+          });
+        }
+      }
+    } else {
+      // Mouse drag start
+      const pos = getEventPosition(e);
+      
+      // Check if position is inside crop area
+      if (pos.x >= cropArea.x && pos.x <= cropArea.x + cropArea.size &&
+          pos.y >= cropArea.y && pos.y <= cropArea.y + cropArea.size) {
+        setIsDragging(true);
+        setDragStart({
+          x: pos.x - cropArea.x,
+          y: pos.y - cropArea.y
+        });
+      }
     }
   };
 
   const handleMove = (e: React.MouseEvent | React.TouchEvent) => {
-    if (!isDragging) return;
     e.preventDefault();
     
-    const pos = getEventPosition(e);
-    
-    // Calculate new position, keeping crop area within bounds
-    const newX = Math.max(0, Math.min(pos.x - dragStart.x, canvasSize.width - cropArea.size));
-    const newY = Math.max(0, Math.min(pos.y - dragStart.y, canvasSize.height - cropArea.size));
+    if ('touches' in e) {
+      if (e.touches.length === 2) {
+        // Two finger pinch zoom
+        const distance = getTouchDistance(e.touches);
+        if (lastTouchDistance > 0) {
+          const scale = distance / lastTouchDistance;
+          setZoom(prev => Math.max(0.5, Math.min(3, prev * scale)));
+        }
+        setLastTouchDistance(distance);
+        return;
+      } else if (e.touches.length === 1 && isDragging) {
+        // Single finger drag
+        const pos = getEventPosition(e);
+        
+        // Calculate new position, keeping crop area within bounds
+        const newX = Math.max(0, Math.min(pos.x - dragStart.x, canvasSize.width - cropArea.size));
+        const newY = Math.max(0, Math.min(pos.y - dragStart.y, canvasSize.height - cropArea.size));
 
-    setCropArea(prev => ({ ...prev, x: newX, y: newY }));
+        setCropArea(prev => ({ ...prev, x: newX, y: newY }));
+      }
+    } else {
+      // Mouse drag
+      if (!isDragging) return;
+      
+      const pos = getEventPosition(e);
+      
+      // Calculate new position, keeping crop area within bounds
+      const newX = Math.max(0, Math.min(pos.x - dragStart.x, canvasSize.width - cropArea.size));
+      const newY = Math.max(0, Math.min(pos.y - dragStart.y, canvasSize.height - cropArea.size));
+
+      setCropArea(prev => ({ ...prev, x: newX, y: newY }));
+    }
   };
 
   const handleEnd = () => {
     setIsDragging(false);
-  };
-
-  const handleZoomIn = () => {
-    setZoom(prev => Math.min(prev + 0.2, 3));
-  };
-
-  const handleZoomOut = () => {
-    setZoom(prev => Math.max(prev - 0.2, 0.5));
+    setLastTouchDistance(0);
   };
 
   const handleCrop = () => {
@@ -273,21 +328,11 @@ export const ImageCropper = ({ image, isOpen, onClose, onCrop }: ImageCropperPro
         </DialogHeader>
         
         <div className="flex flex-col gap-4">
-          {/* Zoom Controls */}
-          <div className="flex items-center justify-center gap-2">
-            <Button variant="outline" size="sm" onClick={handleZoomOut}>
-              <ZoomOut className="w-4 h-4" />
-            </Button>
-            <span className="text-sm px-3">Zoom: {Math.round(zoom * 100)}%</span>
-            <Button variant="outline" size="sm" onClick={handleZoomIn}>
-              <ZoomIn className="w-4 h-4" />
-            </Button>
-          </div>
-
           <div className="flex flex-col lg:flex-row gap-4 items-start">
             <div className="flex-1">
               <p className="text-sm text-muted-foreground mb-2">
-                Dra den gröna rutan för att välja område. Använd zoom för att justera storleken.
+                <span className="block">📱 Mobil: Dra rutan för att flytta, nyp med två fingrar för zoom</span>
+                <span className="block">🖥️ Dator: Dra rutan för att flytta, scrolla för zoom</span>
               </p>
               <canvas
                 ref={canvasRef}
@@ -296,11 +341,15 @@ export const ImageCropper = ({ image, isOpen, onClose, onCrop }: ImageCropperPro
                 onMouseMove={handleMove}
                 onMouseUp={handleEnd}
                 onMouseLeave={handleEnd}
+                onWheel={handleWheel}
                 onTouchStart={handleStart}
                 onTouchMove={handleMove}
                 onTouchEnd={handleEnd}
                 style={{ maxWidth: '100%', height: 'auto' }}
               />
+              <p className="text-xs text-muted-foreground mt-2 text-center">
+                Zoom: {Math.round(zoom * 100)}%
+              </p>
             </div>
             
             <div className="flex flex-col items-center gap-4 w-full lg:w-auto">
