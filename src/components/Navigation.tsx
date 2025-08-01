@@ -83,9 +83,9 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-golf-green-light">
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4">
-        <div className="flex items-center justify-between">
-          {/* Logo - scales with screen size */}
-          <div className="flex items-center space-x-1 sm:space-x-2">
+        <div className="flex items-center justify-center">
+          {/* Logo - left side */}
+          <div className="absolute left-2 sm:left-4 lg:left-6 flex items-center space-x-1 sm:space-x-2">
             <div className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-gradient-golf rounded-full flex items-center justify-center">
               <Target className="w-3 h-3 sm:w-4 sm:h-4 lg:w-6 lg:h-6 text-white" />
             </div>
@@ -95,39 +95,19 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
             </div>
           </div>
           
-          {/* Navigation - always visible, scales with screen size */}
-          <div className="flex items-center space-x-2 sm:space-x-4 lg:space-x-8">
-            <button className={`relative flex flex-col sm:flex-row items-center space-y-0 sm:space-y-0 sm:space-x-2 px-1 sm:px-2 lg:px-3 py-1 sm:py-2 rounded-lg transition-smooth text-golf-green bg-golf-green-light`}>
-              <Users className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="text-xs sm:text-sm font-medium hidden sm:block">Players</span>
+          {/* Centered Navigation */}
+          <div className="flex items-center justify-center space-x-6 sm:space-x-8 lg:space-x-12">
+            <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth text-golf-green bg-golf-green-light`}>
+              <Users className="w-5 h-5 sm:w-6 sm:h-6" />
+              <span className="text-xs font-medium">Players</span>
             </button>
             
-            <button className={`relative flex flex-col sm:flex-row items-center space-y-0 sm:space-y-0 sm:space-x-2 px-1 sm:px-2 lg:px-3 py-1 sm:py-2 rounded-lg transition-smooth text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50`}>
-              <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="text-xs sm:text-sm font-medium hidden sm:block">Courses</span>
-            </button>
-            
-            <button 
-              onClick={onMessagesClick}
-              className={`relative flex flex-col sm:flex-row items-center space-y-0 sm:space-y-0 sm:space-x-2 px-1 sm:px-2 lg:px-3 py-1 sm:py-2 rounded-lg transition-smooth text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50`}
-            >
-              <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="text-xs sm:text-sm font-medium hidden sm:block">Messages</span>
-              {formatBadgeCount(messageCount) && (
-                <Badge variant="destructive" className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 text-xs p-0 flex items-center justify-center">
-                  {formatBadgeCount(messageCount)}
-                </Badge>
-              )}
-            </button>
-          </div>
-          
-          {/* Hamburger Menu for User Actions */}
-          <div className="flex items-center">
+            {/* Hamburger Menu - Larger and centered */}
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="sm" className="p-1 sm:p-2">
-                  <Menu className="w-4 h-4 sm:w-5 sm:h-5 text-golf-green" />
-                </Button>
+                <button className="relative flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-golf-green text-white hover:bg-golf-green/90 transition-smooth">
+                  <Menu className="w-6 h-6 sm:w-7 sm:h-7" />
+                </button>
               </SheetTrigger>
               <SheetContent side="right" className="w-80">
                 <div className="flex flex-col space-y-6 mt-8">
@@ -170,6 +150,24 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
                 </div>
               </SheetContent>
             </Sheet>
+            
+            <button 
+              onClick={onMessagesClick}
+              className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50`}
+            >
+              <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+              <span className="text-xs font-medium">Messages</span>
+              {formatBadgeCount(messageCount) && (
+                <Badge variant="destructive" className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 text-xs p-0 flex items-center justify-center">
+                  {formatBadgeCount(messageCount)}
+                </Badge>
+              )}
+            </button>
+            
+            <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50`}>
+              <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
+              <span className="text-xs font-medium">Courses</span>
+            </button>
           </div>
         </div>
       </div>
