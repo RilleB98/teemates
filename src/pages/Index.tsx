@@ -9,7 +9,7 @@ import course1 from "@/assets/course1.jpg";
 const Index = () => {
   const samplePlayers = [
     {
-      name: "Marcus",
+      name: "Ahmed",
       age: 28,
       handicap: 12,
       location: "Stockholm",
