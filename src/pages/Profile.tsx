@@ -78,7 +78,7 @@ export const Profile = () => {
         return;
       }
 
-      const fileName = `${user.id}.${fileExt}`;
+      const fileName = `${user.id}/avatar.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
