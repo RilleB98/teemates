@@ -117,11 +117,13 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
             </Link>
           </div>
           
-          {/* Centered Logo */}
+          {/* Centered Logo - Now links to SwipeMatch */}
           <div className="absolute left-1/2 transform -translate-x-1/2">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-gradient-golf rounded-full flex items-center justify-center">
-              <Target className="w-5 h-5 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white" />
-            </div>
+            <Link to="/swipe">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-gradient-golf rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer">
+                <Target className="w-5 h-5 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white" />
+              </div>
+            </Link>
           </div>
           
           {/* Right Navigation and Hamburger */}
