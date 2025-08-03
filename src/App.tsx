@@ -10,6 +10,7 @@ import { Friends } from "./pages/Friends";
 import { Messages } from "./pages/Messages";
 import { Auth } from "./pages/Auth";
 import { AuthProvider } from "./hooks/useAuth";
+import { AdminGolf } from "./pages/AdminGolf";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/courses" element={<Courses />} />
             <Route path="/friends" element={<Friends />} />
             <Route path="/messages" element={<Messages />} />
+            <Route path="/admin/golf" element={<AdminGolf />} />
             <Route path="/profile" element={
               <ProtectedRoute>
                 <Profile />
