@@ -1,4 +1,3 @@
-import { Hero } from "@/components/Hero";
 import { Navigation } from "@/components/Navigation";
 import { PlayerCard } from "@/components/PlayerCard";
 import { CourseCard } from "@/components/CourseCard";
@@ -84,7 +83,6 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation onMessagesClick={() => setShowChat(true)} />
-      <Hero />
       
       {/* Players Section */}
       <section className="py-20 px-6 bg-gradient-hero">
