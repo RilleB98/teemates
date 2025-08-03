@@ -563,6 +563,20 @@ export const Profile = () => {
                   />
                 </div>
 
+                {/* Missing fields indicator */}
+                {(!profile.name || !profile.birth_date || !profile.gender || !profile.handicap || !profile.selected_course) && (
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
+                    <h4 className="text-sm font-semibold text-orange-800 mb-2">Du behöver fylla i följande fält:</h4>
+                    <ul className="text-sm text-orange-700 space-y-1">
+                      {!profile.name && <li>• Namn</li>}
+                      {!profile.birth_date && <li>• Födelsedatum</li>}
+                      {!profile.gender && <li>• Kön</li>}
+                      {!profile.handicap && <li>• Handikapp</li>}
+                      {!profile.selected_course && <li>• Hemmaklubb</li>}
+                    </ul>
+                  </div>
+                )}
+
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-3 pt-4">
                   <Button 
