@@ -231,7 +231,10 @@ export const Profile = () => {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Tillbaka
             </Button>
-            <div className="flex items-center gap-2 justify-center mt-20">
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Name Section - moved here */}
+            <div className="flex items-center gap-2 justify-center mt-8 mb-6">
               {isEditingName ? (
                 <div className="flex items-center gap-2">
                   <Input
@@ -249,9 +252,9 @@ export const Profile = () => {
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <CardTitle className="text-2xl font-bold text-golf-premium">
+                  <h2 className="text-2xl font-bold text-golf-premium">
                     {profile.name || "Min Profil"}
-                  </CardTitle>
+                  </h2>
                   <Button
                     size="sm"
                     variant="ghost"
@@ -263,8 +266,6 @@ export const Profile = () => {
                 </div>
               )}
             </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
             {/* Avatar Upload */}
             <div className="flex flex-col items-center space-y-4">
               <div className="relative">
