@@ -10,20 +10,26 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export const SwipeMatch = () => {
-  const [isInIframe, setIsInIframe] = useState(false);
-  
+  const [isInIframe, setIsInIframe] = useState(true); // Force preview mode
+
   useEffect(() => {
-    // Check if we're in an iframe (preview environment)
-    try {
-      setIsInIframe(window.self !== window.top);
-    } catch (error) {
-      setIsInIframe(true); // Assume iframe if we can't check
-    }
+    // Always assume iframe for now to debug
+    setIsInIframe(true);
   }, []);
 
-  // Show completely separate component for preview
-  if (isInIframe) {
-    return <SwipeMatchPreview />;
+  // Always show simple version for now
+  if (true) {
+    return (
+      <div className="min-h-screen bg-gray-100 p-8">
+        <div className="max-w-sm mx-auto">
+          <h1 className="text-2xl font-bold mb-4 text-center">Golf Match - Preview</h1>
+          <div className="bg-white p-6 rounded-lg shadow">
+            <p className="text-center mb-4">Detta är en förenklad version för preview.</p>
+            <p className="text-center text-sm text-gray-600">Öppna webbplatsen för full funktionalitet.</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // Only use hooks in non-iframe environment
