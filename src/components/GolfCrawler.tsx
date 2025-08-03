@@ -3,49 +3,29 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { FirecrawlService } from '@/utils/FirecrawlService';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Search, Download, Globe, MapPin } from "lucide-react";
+import { Search, Download, Globe, MapPin, CheckCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CrawlResult {
   success: boolean;
+  jobId?: string;
   status?: string;
   completed?: number;
   total?: number;
-  creditsUsed?: number;
-  expiresAt?: string;
   data?: any[];
+  message?: string;
 }
 
 export const GolfCrawler = () => {
   const { toast } = useToast();
   const [url, setUrl] = useState('https://golf.se/golfsallskap');
-  const [apiKey, setApiKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [crawlResult, setCrawlResult] = useState<CrawlResult | null>(null);
   const [extractedData, setExtractedData] = useState<string>('');
-
-  const handleSaveApiKey = () => {
-    if (!apiKey.trim()) {
-      toast({
-        title: "Fel",
-        description: "Ange din Firecrawl API-nyckel",
-        variant: "destructive",
-        duration: 3000,
-      });
-      return;
-    }
-
-    FirecrawlService.saveApiKey(apiKey);
-    toast({
-      title: "Sparad",
-      description: "API-nyckel sparad lokalt",
-      duration: 3000,
-    });
-  };
 
   const handleCrawl = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,34 +35,31 @@ export const GolfCrawler = () => {
     setExtractedData('');
     
     try {
-      const savedApiKey = FirecrawlService.getApiKey();
-      if (!savedApiKey) {
-        toast({
-          title: "Fel",
-          description: "Spara din API-nyckel först",
-          variant: "destructive",
-          duration: 3000,
-        });
-        return;
-      }
-
       console.log('Starting crawl for golf courses:', url);
       setProgress(25);
       
-      const result = await FirecrawlService.crawlGolfCourses(url);
+      // Call our Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke('crawl-golf-courses', {
+        body: { url }
+      });
+
       setProgress(75);
       
-      if (result.success && result.data) {
+      if (error) {
+        throw error;
+      }
+
+      if (data?.success) {
         toast({
-          title: "Framgång",
-          description: "Golfbanor crawlade framgångsrikt",
+          title: "Framgång! ✅",
+          description: data.message || "Golfbanor crawlade framgångsrikt",
           duration: 3000,
         });
-        setCrawlResult(result.data);
+        setCrawlResult(data);
         
         // Extract golf course information from the crawled data
-        if (result.data.data && Array.isArray(result.data.data)) {
-          const extractedInfo = result.data.data
+        if (data.data && Array.isArray(data.data)) {
+          const extractedInfo = data.data
             .map((page: any) => page.markdown || page.content || '')
             .join('\n\n---\n\n');
           setExtractedData(extractedInfo);
@@ -92,16 +69,16 @@ export const GolfCrawler = () => {
       } else {
         toast({
           title: "Fel",
-          description: result.error || "Misslyckades att crawla webbsida",
+          description: data?.error || "Misslyckades att crawla webbsida",
           variant: "destructive",
           duration: 3000,
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error crawling website:', error);
       toast({
         title: "Fel",
-        description: "Misslyckades att crawla webbsida",
+        description: error.message || "Misslyckades att crawla webbsida",
         variant: "destructive",
         duration: 3000,
       });
@@ -123,45 +100,14 @@ export const GolfCrawler = () => {
       <Card className="backdrop-blur-sm bg-white/95 shadow-xl border-0">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-golf-premium">
-            <Globe className="w-6 h-6" />
+            <CheckCircle className="w-6 h-6 text-green-500" />
             Samla alla Sveriges golfbanor
           </CardTitle>
           <p className="text-muted-foreground">
-            Använd Firecrawl för att automatiskt samla in data om alla golfbanor i Sverige från webben.
+            Din Firecrawl API-nyckel är säkert lagrad i Supabase. Välj bara en webbsida och starta crawlingen!
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* API Key Input */}
-          <div className="space-y-3">
-            <label htmlFor="apiKey" className="text-sm font-medium text-golf-premium">
-              Firecrawl API-nyckel
-            </label>
-            <div className="flex gap-2">
-              <Input
-                id="apiKey"
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                className="flex-1"
-                placeholder="fc-xxxxxxxxxxxxxxxx"
-              />
-              <Button onClick={handleSaveApiKey} variant="outline">
-                Spara
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Få din gratis API-nyckel på{' '}
-              <a 
-                href="https://firecrawl.dev" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-golf-green hover:underline"
-              >
-                firecrawl.dev
-              </a>
-            </p>
-          </div>
-
           {/* URL Input */}
           <form onSubmit={handleCrawl} className="space-y-4">
             <div className="space-y-3">
@@ -179,7 +125,7 @@ export const GolfCrawler = () => {
               />
               
               <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground">Föreslagna källor:</p>
+                <p className="text-xs font-medium text-muted-foreground">Rekommenderade källor för svenska golfbanor:</p>
                 <div className="flex flex-wrap gap-2">
                   {suggestedUrls.map((suggestedUrl, index) => (
                     <Badge 
@@ -211,7 +157,7 @@ export const GolfCrawler = () => {
               className="w-full hover-scale touch-manipulation"
             >
               <Search className="w-4 h-4 mr-2" />
-              {isLoading ? "Crawlar..." : "Starta crawling"}
+              {isLoading ? "Crawlar..." : "Starta crawling av golfbanor"}
             </Button>
           </form>
 
@@ -227,32 +173,39 @@ export const GolfCrawler = () => {
               <CardContent className="space-y-3">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="font-medium">Status:</span> {crawlResult.status}
+                    <span className="font-medium">Status:</span> {crawlResult.status || 'Completed'}
                   </div>
                   <div>
-                    <span className="font-medium">Sidor:</span> {crawlResult.completed}/{crawlResult.total}
+                    <span className="font-medium">Sidor:</span> {crawlResult.completed || 0}/{crawlResult.total || 0}
                   </div>
                   <div>
-                    <span className="font-medium">Krediter:</span> {crawlResult.creditsUsed}
+                    <span className="font-medium">Job ID:</span> {crawlResult.jobId || 'N/A'}
                   </div>
                   <div>
-                    <span className="font-medium">Utgår:</span> {crawlResult.expiresAt ? new Date(crawlResult.expiresAt).toLocaleString() : 'N/A'}
+                    <span className="font-medium">Meddelande:</span> {crawlResult.message || 'Framgång'}
                   </div>
                 </div>
 
                 {extractedData && (
                   <div className="space-y-2">
-                    <p className="font-medium text-sm">Extraherad data:</p>
+                    <p className="font-medium text-sm">Extraherad golfbanedata:</p>
                     <Textarea
                       value={extractedData}
                       onChange={(e) => setExtractedData(e.target.value)}
                       className="min-h-[200px] max-h-[400px] text-xs font-mono"
-                      placeholder="Crawlad data kommer att visas här..."
+                      placeholder="Crawlad golfbanedata kommer att visas här..."
                     />
                     <div className="flex gap-2">
                       <Button 
                         size="sm" 
-                        onClick={() => navigator.clipboard.writeText(extractedData)}
+                        onClick={() => {
+                          navigator.clipboard.writeText(extractedData);
+                          toast({
+                            title: "Kopierat!",
+                            description: "Golfbanedata kopierad till urklipp",
+                            duration: 2000,
+                          });
+                        }}
                       >
                         Kopiera data
                       </Button>
@@ -264,7 +217,7 @@ export const GolfCrawler = () => {
                           const url = URL.createObjectURL(blob);
                           const a = document.createElement('a');
                           a.href = url;
-                          a.download = 'golfbanor-sverige.txt';
+                          a.download = 'svenska-golfbanor.txt';
                           a.click();
                           URL.revokeObjectURL(url);
                         }}
@@ -282,15 +235,24 @@ export const GolfCrawler = () => {
 
       <Card className="bg-accent/5">
         <CardContent className="pt-6">
-          <h3 className="font-semibold mb-3 text-golf-premium">Så här funkar det:</h3>
+          <h3 className="font-semibold mb-3 text-golf-premium">✅ API-nyckel konfigurerad!</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Din Firecrawl API-nyckel är nu säkert lagrad i Supabase Edge Functions. 
+            Så här funkar crawlingen:
+          </p>
           <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
-            <li>Få en gratis Firecrawl API-nyckel från firecrawl.dev</li>
-            <li>Ange API-nyckeln ovan och spara den</li>
-            <li>Välj en webbsida som listar svenska golfbanor (eller använd en föreslagen)</li>
-            <li>Klicka "Starta crawling" för att samla in data</li>
-            <li>Kopiera eller ladda ner den extraherade datan</li>
-            <li>Använd datan för att uppdatera golfbanornas databas</li>
+            <li>Välj en webbsida från de rekommenderade källorna ovan</li>
+            <li>Klicka "Starta crawling av golfbanor"</li>
+            <li>Vänta medan systemet samlar in data från alla undersidor</li>
+            <li>Kopiera eller ladda ner den extraherade golfbanedatan</li>
+            <li>Använd datan för att uppdatera din apps golfbanedatabas</li>
           </ol>
+          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-sm text-green-700">
+              <CheckCircle className="w-4 h-4 inline mr-1" />
+              Systemet kommer automatiskt att crawla alla undersidor och extrahera information om svenska golfbanor!
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>
