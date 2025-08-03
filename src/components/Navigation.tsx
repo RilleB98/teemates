@@ -5,6 +5,7 @@ import { Target, Users, MapPin, MessageCircle, User, Menu, LogOut, LogIn, Home, 
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -65,6 +66,7 @@ interface NavigationProps {
 export const Navigation = ({ onMessagesClick }: NavigationProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, loading } = useAuth();
+  const { isAdmin } = useUserRole();
   const location = useLocation();
 
   // Mock message count - replace with real data from your chat system
@@ -181,14 +183,16 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
                           Logga in
                         </Link>
                       </Button>
-                    )}
-                    <Button variant="outline" className="w-full justify-start" asChild>
-                      <Link to="/admin/golf" onClick={() => setIsMobileMenuOpen(false)}>
-                        <Settings className="w-4 h-4 mr-3" />
-                        Admin Golfbanor
-                      </Link>
-                    </Button>
-                    <Button variant="premium" className="w-full">
+                     )}
+                     {isAdmin && (
+                       <Button variant="outline" className="w-full justify-start" asChild>
+                         <Link to="/admin/golf" onClick={() => setIsMobileMenuOpen(false)}>
+                           <Settings className="w-4 h-4 mr-3" />
+                           Admin Golfbanor
+                         </Link>
+                       </Button>
+                     )}
+                     <Button variant="premium" className="w-full">
                       Premium
                     </Button>
                   </div>
