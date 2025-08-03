@@ -11,23 +11,18 @@ import course1 from "@/assets/course1.jpg";
 export const SimpleGolfImporter = () => {
   const { toast } = useToast();
   const [golfClubName, setGolfClubName] = useState('');
+  const [location, setLocation] = useState('');
   const [isAdding, setIsAdding] = useState(false);
 
   const generateRandomData = () => {
     const difficulties = ['Easy', 'Medium', 'Hard'];
     const holes = [9, 18, 27];
-    const swedishLocations = [
-      'Stockholm', 'Göteborg', 'Malmö', 'Uppsala', 'Västerås', 'Örebro', 
-      'Linköping', 'Helsingborg', 'Jönköping', 'Norrköping', 'Lund', 
-      'Umeå', 'Gävle', 'Borås', 'Eskilstuna', 'Skåne', 'Småland'
-    ];
     
     return {
       rating: parseFloat((Math.random() * 1.5 + 3.5).toFixed(1)),
       difficulty: difficulties[Math.floor(Math.random() * difficulties.length)],
       holes: holes[Math.floor(Math.random() * holes.length)],
       price: `${Math.floor(Math.random() * 700) + 300} SEK`,
-      location: swedishLocations[Math.floor(Math.random() * swedishLocations.length)],
       latitude: parseFloat((Math.random() * 14 + 55).toFixed(4)),
       longitude: parseFloat((Math.random() * 14 + 10).toFixed(4))
     };
@@ -44,6 +39,16 @@ export const SimpleGolfImporter = () => {
       return;
     }
 
+    if (!location.trim()) {
+      toast({
+        title: "Plats saknas",
+        description: "Skriv var golfbanan ligger",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+
     setIsAdding(true);
     
     try {
@@ -54,7 +59,7 @@ export const SimpleGolfImporter = () => {
       
       const newCourse: Course = {
         name: golfClubName.trim(),
-        location: randomData.location,
+        location: location.trim(),
         rating: randomData.rating,
         difficulty: randomData.difficulty,
         holes: randomData.holes,
@@ -71,6 +76,7 @@ export const SimpleGolfImporter = () => {
       
       // Reset formulär
       setGolfClubName('');
+      setLocation('');
       
       toast({
         title: "Golfbana tillagd! ⛳",
@@ -110,38 +116,54 @@ export const SimpleGolfImporter = () => {
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-3">
-            <Label htmlFor="golfclub" className="text-base font-medium">
-              Golfbanans namn
-            </Label>
-            <div className="flex gap-3">
+          <div className="space-y-4">
+            <div className="space-y-3">
+              <Label htmlFor="golfclub" className="text-base font-medium">
+                Golfbanans namn
+              </Label>
               <Input
                 id="golfclub"
                 value={golfClubName}
                 onChange={(e) => setGolfClubName(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="T.ex. Wittsjö Golfklubb"
-                className="flex-1 text-base h-12"
+                className="text-base h-12"
                 disabled={isAdding}
               />
-              <Button 
-                onClick={addGolfClub}
-                disabled={isAdding || !golfClubName.trim()}
-                className="h-12 px-6 touch-manipulation"
-              >
-                {isAdding ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                    Lägger till...
-                  </>
-                ) : (
-                  <>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Lägg till
-                  </>
-                )}
-              </Button>
             </div>
+            
+            <div className="space-y-3">
+              <Label htmlFor="location" className="text-base font-medium">
+                Plats
+              </Label>
+              <Input
+                id="location"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="T.ex. Stockholm"
+                className="text-base h-12"
+                disabled={isAdding}
+              />
+            </div>
+            
+            <Button 
+              onClick={addGolfClub}
+              disabled={isAdding || !golfClubName.trim() || !location.trim()}
+              className="w-full h-12 touch-manipulation"
+            >
+              {isAdding ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                  Lägger till...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Lägg till golfbana
+                </>
+              )}
+            </Button>
           </div>
           
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
