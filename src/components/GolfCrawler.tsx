@@ -177,11 +177,11 @@ export const GolfCrawler = () => {
   ];
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-6 space-y-6">
+    <div className="w-full mx-auto space-y-4 sm:space-y-6">
       <Card className="backdrop-blur-sm bg-white/95 shadow-xl border-0">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-golf-premium">
-            <CheckCircle className="w-6 h-6 text-green-500" />
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-golf-premium text-lg sm:text-xl">
+            <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
             Samla alla Sveriges golfbanor
           </CardTitle>
           <p className="text-muted-foreground">

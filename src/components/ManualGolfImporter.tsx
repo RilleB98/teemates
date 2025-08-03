@@ -190,38 +190,40 @@ export const ManualGolfImporter = () => {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-6 space-y-6">
+    <div className="w-full mx-auto space-y-4 sm:space-y-6">
       {/* Manual Add Form */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-golf-premium">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-golf-premium text-lg sm:text-xl">
             <Plus className="w-5 h-5" />
             Lägg till golfbana manuellt
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="name">Namn</Label>
+              <Label htmlFor="name" className="text-sm font-medium">Namn</Label>
               <Input
                 id="name"
                 value={currentCourse.name}
                 onChange={(e) => setCurrentCourse({...currentCourse, name: e.target.value})}
                 placeholder="Bro Hof Slott Golf Club"
+                className="mt-1"
               />
             </div>
             <div>
-              <Label htmlFor="location">Plats</Label>
+              <Label htmlFor="location" className="text-sm font-medium">Plats</Label>
               <Input
                 id="location"
                 value={currentCourse.location}
                 onChange={(e) => setCurrentCourse({...currentCourse, location: e.target.value})}
                 placeholder="Stockholm"
+                className="mt-1"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             <div>
               <Label htmlFor="rating">Betyg</Label>
               <Input
@@ -294,7 +296,7 @@ export const ManualGolfImporter = () => {
             </div>
           </div>
 
-          <Button onClick={addCourse} className="w-full">
+          <Button onClick={addCourse} className="w-full touch-manipulation">
             <Plus className="w-4 h-4 mr-2" />
             Lägg till golfbana
           </Button>
@@ -303,29 +305,37 @@ export const ManualGolfImporter = () => {
 
       {/* Bulk Import */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-golf-premium">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-golf-premium text-lg sm:text-xl">
             <Upload className="w-5 h-5" />
             Bulk-import från text
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="bulkText">Klistra in golfbanenamn (en per rad)</Label>
+            <Label htmlFor="bulkText" className="text-sm font-medium">Klistra in golfbanenamn (en per rad)</Label>
             <Textarea
               id="bulkText"
               value={bulkText}
               onChange={(e) => setBulkText(e.target.value)}
               placeholder="Arlandastad Golf, Stockholm&#10;Kungsängen Golf Club, Uppsala&#10;Hills Golf Club, Göteborg"
-              className="min-h-[120px]"
+              className="min-h-[100px] sm:min-h-[120px] mt-1"
             />
           </div>
-          <div className="flex gap-2">
-            <Button onClick={processBulkText} disabled={!bulkText.trim()}>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button 
+              onClick={processBulkText} 
+              disabled={!bulkText.trim()}
+              className="flex-1 sm:flex-initial touch-manipulation"
+            >
               <Upload className="w-4 h-4 mr-2" />
               Importera från text
             </Button>
-            <Button onClick={loadSampleData} variant="outline">
+            <Button 
+              onClick={loadSampleData} 
+              variant="outline"
+              className="flex-1 sm:flex-initial touch-manipulation"
+            >
               Ladda exempel-data
             </Button>
           </div>
@@ -335,29 +345,43 @@ export const ManualGolfImporter = () => {
       {/* Course List */}
       {courses.length > 0 && (
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Tillagda golfbanor ({courses.length})</span>
-              <Button onClick={exportCourses}>
+          <CardHeader className="pb-4">
+            <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <span className="text-lg sm:text-xl">Tillagda golfbanor ({courses.length})</span>
+              <Button 
+                onClick={exportCourses}
+                size="sm"
+                className="touch-manipulation self-start sm:self-auto"
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Exportera JSON
               </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2 max-h-[400px] overflow-y-auto">
+            <div className="space-y-3 max-h-[400px] overflow-y-auto">
               {courses.map((course, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                  <div className="flex-1">
-                    <h4 className="font-medium">{course.name}</h4>
-                    <p className="text-sm text-gray-600">
-                      {course.location} • {course.holes} hål • {course.difficulty} • {course.price}
-                    </p>
+                <div key={index} className="flex items-start sm:items-center justify-between p-3 bg-gray-50 rounded gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium text-sm sm:text-base truncate">{course.name}</h4>
+                    <div className="text-xs sm:text-sm text-gray-600 space-y-1 sm:space-y-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                        <span>{course.location}</span>
+                        <span className="hidden sm:inline">•</span>
+                        <span>{course.holes} hål</span>
+                        <span className="hidden sm:inline">•</span>
+                        <span>{course.difficulty}</span>
+                        <span className="hidden sm:inline">•</span>
+                        <span>{course.price}</span>
+                      </div>
+                    </div>
                   </div>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => removeCourse(index)}
+                    className="touch-manipulation flex-shrink-0 h-8 w-8 p-0"
+                    aria-label="Ta bort golfbana"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
