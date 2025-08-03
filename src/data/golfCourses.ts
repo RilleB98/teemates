@@ -81,6 +81,13 @@ export const golfCourses: Course[] = [
     longitude: 18.3167
   },
   {
+    name: "Ågesta Golfklubb",
+    location: "Stockholm",
+    image: course1,
+    latitude: 59.2403,
+    longitude: 18.0331
+  },
+  {
     name: "Wittsjö Golfklubb",
     location: "Skåne",
     image: course1,

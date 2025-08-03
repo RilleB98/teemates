@@ -199,6 +199,7 @@ export const swedishGolfClubs = [
   { name: "Österåker Golfklubb", location: "Österåker" },
   { name: "Royal Drottningholm Golf Club", location: "Drottningholm" },
   { name: "Saltsjöbadens Golfklubb", location: "Saltsjöbaden" },
+  { name: "Ågesta Golfklubb", location: "Farsta" },
   { name: "Sigtuna Golfklubb", location: "Sigtuna" },
   { name: "Sollentuna Golfklubb", location: "Sollentuna" },
   { name: "Stockholms Golfklubb", location: "Stockholm" },
