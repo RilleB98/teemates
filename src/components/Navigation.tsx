@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Target, Users, MapPin, MessageCircle, User, Menu, LogOut, LogIn } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -65,6 +65,7 @@ interface NavigationProps {
 export const Navigation = ({ onMessagesClick }: NavigationProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   // Mock message count - replace with real data from your chat system
   const messageCount = 7; // Change this to your actual message count
@@ -87,14 +88,22 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
           {/* Left Navigation */}
           <div className="flex items-center space-x-4 sm:space-x-6">
             <Link to="/friends">
-              <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth text-golf-green bg-golf-green-light`}>
+              <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${
+                location.pathname === '/friends' 
+                  ? 'text-golf-green bg-golf-green-light' 
+                  : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
+              }`}>
                 <Users className="w-5 h-5 sm:w-6 sm:h-6" />
                 <span className="text-xs font-medium">Vänner</span>
               </button>
             </Link>
             
             <Link to="/messages">
-              <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50`}>
+              <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${
+                location.pathname === '/messages' 
+                  ? 'text-golf-green bg-golf-green-light' 
+                  : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
+              }`}>
                 <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
                 <span className="text-xs font-medium">Messages</span>
                 {formatBadgeCount(messageCount) && (
@@ -116,7 +125,11 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
           {/* Right Navigation and Hamburger */}
           <div className="flex items-center space-x-4 sm:space-x-6">
             <Link to="/courses">
-              <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50`}>
+              <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${
+                location.pathname === '/courses' 
+                  ? 'text-golf-green bg-golf-green-light' 
+                  : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
+              }`}>
                 <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
                 <span className="text-xs font-medium">Courses</span>
               </button>
