@@ -1,0 +1,1 @@
+UPDATE profiles SET home_club = 'Saltsjöbadens Golfklubb' WHERE home_club = 'Ågesta';
