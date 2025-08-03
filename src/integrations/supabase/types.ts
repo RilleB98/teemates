@@ -41,6 +41,39 @@ export type Database = {
         }
         Relationships: []
       }
+      golf_courses: {
+        Row: {
+          created_at: string
+          id: string
+          image: string
+          latitude: number
+          location: string
+          longitude: number
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image?: string
+          latitude?: number
+          location: string
+          longitude?: number
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image?: string
+          latitude?: number
+          location?: string
+          longitude?: number
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           chat_room_id: string

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,24 +7,59 @@ import { Search, MapPin, Star, Navigation, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "@/hooks/useLocation";
 import { useGolfClubUsers } from "@/hooks/useGolfClubUsers";
-import { golfCourses, Course } from "@/data/golfCourses";
+import { supabase } from "@/integrations/supabase/client";
 import { Navigation as NavComponent } from "@/components/Navigation";
+
+interface Course {
+  id: string;
+  name: string;
+  location: string;
+  image: string;
+  latitude: number;
+  longitude: number;
+}
 
 
 export const Courses = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [coursesLoading, setCoursesLoading] = useState(true);
   const navigate = useNavigate();
   const { location, loading, error, getCurrentPosition, calculateDistance } = useLocation();
   const { clubUserCounts, loading: usersLoading } = useGolfClubUsers();
 
+  // Load courses from database
+  useEffect(() => {
+    loadCourses();
+  }, []);
+
+  const loadCourses = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('golf_courses')
+        .select('*')
+        .order('name');
+
+      if (error) {
+        console.error('Error loading courses:', error);
+      } else {
+        setCourses(data || []);
+      }
+    } catch (error) {
+      console.error('Error loading courses:', error);
+    } finally {
+      setCoursesLoading(false);
+    }
+  };
+
   // Filter and sort courses
   const filteredAndSortedCourses = useMemo(() => {
-    let courses = [...golfCourses];
+    let coursesToFilter = [...courses];
 
     // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
-      courses = courses.filter(course => 
+      coursesToFilter = coursesToFilter.filter(course => 
         course.name.toLowerCase().includes(query) ||
         course.location.toLowerCase().includes(query)
       );
@@ -32,15 +67,19 @@ export const Courses = () => {
 
     // Sort by distance if location is available
     if (location) {
-      courses = courses.sort((a, b) => {
+      coursesToFilter = coursesToFilter.sort((a, b) => {
+        // Only calculate distance for courses with coordinates
+        if (a.latitude === 0 || a.longitude === 0) return 1;
+        if (b.latitude === 0 || b.longitude === 0) return -1;
+        
         const distanceA = calculateDistance(location.latitude, location.longitude, a.latitude, a.longitude);
         const distanceB = calculateDistance(location.latitude, location.longitude, b.latitude, b.longitude);
         return distanceA - distanceB;
       });
     }
 
-    return courses;
-  }, [searchQuery, location, calculateDistance]);
+    return coursesToFilter;
+  }, [searchQuery, location, calculateDistance, courses]);
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
@@ -85,12 +124,18 @@ export const Courses = () => {
             Golfbanor i Sverige
           </h1>
           <p className="text-lg sm:text-xl text-white/90 backdrop-blur-sm bg-white/10 rounded-full px-4 sm:px-6 py-2 inline-block max-w-full">
-            <span className="hidden sm:inline">{golfCourses.length} golfbanor att upptäcka</span>
-            <span className="sm:hidden">{golfCourses.length} banor</span>
-            {location && (
+            {coursesLoading ? (
+              <span>Laddar golfbanor...</span>
+            ) : (
               <>
-                <span className="hidden sm:inline"> • Sorterade efter avstånd</span>
-                <span className="sm:hidden"> • Närhet</span>
+                <span className="hidden sm:inline">{courses.length} golfbanor att upptäcka</span>
+                <span className="sm:hidden">{courses.length} banor</span>
+                {location && (
+                  <>
+                    <span className="hidden sm:inline"> • Sorterade efter avstånd</span>
+                    <span className="sm:hidden"> • Närhet</span>
+                  </>
+                )}
               </>
             )}
           </p>

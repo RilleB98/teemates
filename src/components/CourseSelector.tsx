@@ -1,11 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Star, Check, Navigation } from "lucide-react";
 import { useLocation } from "@/hooks/useLocation";
-import { golfCourses, Course } from "@/data/golfCourses";
-import { swedishGolfClubs } from "@/data/swedishGolfCourses";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Course {
+  id: string;
+  name: string;
+  location: string;
+  image: string;
+  latitude: number;
+  longitude: number;
+  hasCoordinates?: boolean;
+}
 
 interface CourseSelectorProps {
   selectedCourse: any;
@@ -15,38 +24,51 @@ interface CourseSelectorProps {
 export const CourseSelector = ({ selectedCourse, onCourseSelect }: CourseSelectorProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const { location, loading, error, getCurrentPosition, calculateDistance } = useLocation();
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { location, loading: locationLoading, error, getCurrentPosition, calculateDistance } = useLocation();
 
-  // Combine all courses - detailed ones first, then all Swedish clubs
-  const allCourses = [
-    ...golfCourses.map(course => ({ 
-      ...course, 
-      hasCoordinates: true 
-    })),
-    ...swedishGolfClubs
-      .filter(club => !golfCourses.some(course => course.name === club.name))
-      .map(club => ({ 
-        ...club, 
-        image: "/placeholder.svg",
-        latitude: 0,
-        longitude: 0,
-        hasCoordinates: false
-      }))
-  ];
+  // Load courses from database
+  useEffect(() => {
+    loadCourses();
+  }, []);
+
+  const loadCourses = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('golf_courses')
+        .select('*')
+        .order('name');
+
+      if (error) {
+        console.error('Error loading courses:', error);
+      } else {
+        const coursesWithCoordinateCheck = (data || []).map(course => ({
+          ...course,
+          hasCoordinates: course.latitude !== 0 && course.longitude !== 0
+        }));
+        setCourses(coursesWithCoordinateCheck);
+      }
+    } catch (error) {
+      console.error('Error loading courses:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Filter courses based on search query
-  const filteredCourses = allCourses.filter(course =>
+  const filteredCourses = courses.filter(course =>
     course.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     course.location.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Sort courses with selected course first, then by distance if user location is available
   const sortedCourses = (() => {
-    let courses = [...filteredCourses];
+    let coursesToSort = [...filteredCourses];
     
     // Sort by distance if location is available (only for courses with coordinates)
     if (location) {
-      courses = courses.sort((a, b) => {
+      coursesToSort = coursesToSort.sort((a, b) => {
         if (!a.hasCoordinates && !b.hasCoordinates) return 0;
         if (!a.hasCoordinates) return 1;
         if (!b.hasCoordinates) return -1;
@@ -59,24 +81,15 @@ export const CourseSelector = ({ selectedCourse, onCourseSelect }: CourseSelecto
     
     // Move selected course to top if it exists
     if (selectedCourse) {
-      const selectedIndex = courses.findIndex(course => course.name === selectedCourse.name);
+      const selectedIndex = coursesToSort.findIndex(course => course.name === selectedCourse.name);
       if (selectedIndex > -1) {
-        const [selected] = courses.splice(selectedIndex, 1);
-        courses.unshift(selected);
+        const [selected] = coursesToSort.splice(selectedIndex, 1);
+        coursesToSort.unshift(selected);
       }
     }
     
-    return courses;
+    return coursesToSort;
   })();
-
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty.toLowerCase()) {
-      case 'easy': return 'bg-green-100 text-green-700 border-green-200';
-      case 'medium': return 'bg-accent/20 text-accent-foreground border-accent/30';
-      case 'hard': return 'bg-red-100 text-red-700 border-red-200';
-      default: return 'bg-secondary';
-    }
-  };
 
   return (
     <div className="space-y-4">
@@ -106,8 +119,9 @@ export const CourseSelector = ({ selectedCourse, onCourseSelect }: CourseSelecto
             variant="outline" 
             onClick={() => setIsExpanded(!isExpanded)}
             className="flex-1 justify-between"
+            disabled={loading}
           >
-            {selectedCourse ? "Ändra hemmaklubb" : "Välj hemmaklubb"}
+            {loading ? "Laddar..." : selectedCourse ? "Ändra hemmaklubb" : "Välj hemmaklubb"}
             <span className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}>▼</span>
           </Button>
           
@@ -116,7 +130,7 @@ export const CourseSelector = ({ selectedCourse, onCourseSelect }: CourseSelecto
               variant="outline" 
               size="sm"
               onClick={getCurrentPosition}
-              disabled={loading}
+              disabled={locationLoading}
               className="px-3"
             >
               <Navigation className="w-4 h-4" />
@@ -146,7 +160,9 @@ export const CourseSelector = ({ selectedCourse, onCourseSelect }: CourseSelecto
 
         {isExpanded && (
           <div className="mt-4 space-y-2 max-h-96 overflow-y-auto">
-            {sortedCourses.length === 0 ? (
+            {loading ? (
+              <p className="text-center text-muted-foreground py-4">Laddar golfklubbar...</p>
+            ) : sortedCourses.length === 0 ? (
               <p className="text-center text-muted-foreground py-4">Inga golfklubbar hittades</p>
             ) : (
               sortedCourses.map((course, index) => {
@@ -156,7 +172,7 @@ export const CourseSelector = ({ selectedCourse, onCourseSelect }: CourseSelecto
                 
                 return (
                   <Card 
-                    key={index} 
+                    key={course.id || index} 
                     className={`cursor-pointer transition-all hover:shadow-md hover:bg-gray-50 ${
                       selectedCourse?.name === course.name ? 'ring-2 ring-primary bg-primary/5' : ''
                     }`}

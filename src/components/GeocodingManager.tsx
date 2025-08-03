@@ -1,18 +1,47 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/components/ui/use-toast";
-import { swedishGolfClubs } from "@/data/swedishGolfCourses";
-import { golfCourses } from "@/data/golfCourses";
-import { batchGeocodeGolfClubs, getApproximateCoordinates } from "@/utils/geocodingService";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Course {
+  id: string;
+  name: string;
+  location: string;
+  latitude: number;
+  longitude: number;
+}
 
 export const GeocodingManager = () => {
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [currentClub, setCurrentClub] = useState("");
+  const [courses, setCourses] = useState<Course[]>([]);
   const [results, setResults] = useState<any[]>([]);
   const { toast } = useToast();
+
+  // Load courses from database
+  useEffect(() => {
+    loadCourses();
+  }, []);
+
+  const loadCourses = async () => {
+    const { data, error } = await supabase
+      .from('golf_courses')
+      .select('*')
+      .order('name');
+
+    if (error) {
+      console.error('Error loading courses:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load golf courses",
+        variant: "destructive",
+      });
+    } else {
+      setCourses(data || []);
+    }
+  };
 
   const handleStartGeocoding = async () => {
     setIsGeocoding(true);
@@ -20,103 +49,48 @@ export const GeocodingManager = () => {
     setResults([]);
 
     try {
-      // Filter out clubs that already have coordinates in golfCourses
-      const existingClubNames = golfCourses.map(course => course.name);
-      const clubsToGeocode = swedishGolfClubs.filter(
-        club => !existingClubNames.includes(club.name)
-      );
-
       toast({
         title: "Geocoding Started",
-        description: `Starting to geocode ${clubsToGeocode.length} golf clubs. This will take about ${Math.ceil(clubsToGeocode.length / 60)} minutes.`,
+        description: "Starting automatic geocoding of all golf courses that need coordinates.",
       });
 
-      const geocodedResults = await batchGeocodeGolfClubs(
-        clubsToGeocode,
-        (completed, total, current) => {
-          setProgress((completed / total) * 100);
-          setCurrentClub(current);
-        }
-      );
+      // Call the edge function to start geocoding
+      const { data, error } = await supabase.functions.invoke('geocode-golf-courses');
 
-      // Add approximate coordinates for failed geocoding attempts
-      const finalResults = geocodedResults.map(result => {
-        if (!result.success) {
-          const approxCoords = getApproximateCoordinates(result.location);
-          return {
-            ...result,
-            latitude: approxCoords.latitude,
-            longitude: approxCoords.longitude,
-            success: false,
-            approximated: true
-          };
-        }
-        return { ...result, approximated: false };
-      });
+      if (error) {
+        throw error;
+      }
 
-      setResults(finalResults);
+      setResults(data.results || []);
+      setProgress(100);
 
-      const successCount = finalResults.filter(r => r.success).length;
-      const approximatedCount = finalResults.filter(r => r.approximated).length;
+      // Reload courses to show updated data
+      await loadCourses();
 
       toast({
         title: "Geocoding Complete",
-        description: `Successfully geocoded ${successCount} clubs, ${approximatedCount} used approximate coordinates.`,
+        description: `${data.message}. Successfully geocoded ${data.stats?.successful || 0} courses, ${data.stats?.approximate || 0} used approximate coordinates.`,
       });
-
-      // Generate TypeScript code for the new coordinates
-      generateCoordinatesCode(finalResults);
 
     } catch (error) {
       console.error("Geocoding error:", error);
       toast({
         title: "Geocoding Error",
-        description: "An error occurred during geocoding. Check console for details.",
+        description: error.message || "An error occurred during geocoding. Check console for details.",
         variant: "destructive",
       });
     } finally {
       setIsGeocoding(false);
-      setCurrentClub("");
     }
   };
 
-  const generateCoordinatesCode = (geocodedResults: any[]) => {
-    const codeLines = geocodedResults.map(result => {
-      const comment = result.approximated ? "  // Approximate coordinates" : "";
-      return `  {
-    name: "${result.name}",
-    location: "${result.location}",
-    image: course1,
-    latitude: ${result.latitude.toFixed(6)},
-    longitude: ${result.longitude.toFixed(6)}${comment}
-  }`;
-    });
-
-    const fullCode = `// Updated golf courses with geocoded coordinates
-export const extendedGolfCourses: Course[] = [
-  // Existing courses with verified coordinates
-  ...golfCourses,
+  const coursesWithCoordinates = courses.filter(course => 
+    course.latitude !== 0 && course.longitude !== 0
+  );
   
-  // Newly geocoded courses
-${codeLines.join(',\n')}
-];`;
-
-    console.log("Generated coordinates code:");
-    console.log(fullCode);
-    
-    // Also create a downloadable file
-    const blob = new Blob([fullCode], { type: 'text/typescript' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'geocoded-golf-courses.ts';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const clubsWithoutCoordinates = swedishGolfClubs.filter(
-    club => !golfCourses.some(course => course.name === club.name)
-  ).length;
+  const coursesWithoutCoordinates = courses.filter(course => 
+    course.latitude === 0 || course.longitude === 0
+  );
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -125,41 +99,49 @@ ${codeLines.join(',\n')}
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="text-sm text-muted-foreground">
-          <p>Clubs with coordinates: <strong>{golfCourses.length}</strong></p>
-          <p>Clubs without coordinates: <strong>{clubsWithoutCoordinates}</strong></p>
+          <p>Clubs with coordinates: <strong>{coursesWithCoordinates.length}</strong></p>
+          <p>Clubs without coordinates: <strong>{coursesWithoutCoordinates.length}</strong></p>
+          <p>Total clubs in database: <strong>{courses.length}</strong></p>
         </div>
 
-        {!isGeocoding ? (
-          <Button 
-            onClick={handleStartGeocoding}
-            className="w-full"
-            size="lg"
-          >
-            Start Geocoding All Golf Clubs
-          </Button>
-        ) : (
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between text-sm mb-2">
-                <span>Progress</span>
-                <span>{Math.round(progress)}%</span>
-              </div>
-              <Progress value={progress} />
-            </div>
-            
-            {currentClub && (
-              <div className="text-sm text-muted-foreground">
-                Currently processing: <strong>{currentClub}</strong>
-              </div>
-            )}
-            
+        {coursesWithoutCoordinates.length > 0 ? (
+          !isGeocoding ? (
             <Button 
-              disabled 
+              onClick={handleStartGeocoding}
               className="w-full"
               size="lg"
             >
-              Geocoding in progress...
+              Start Geocoding ({coursesWithoutCoordinates.length} clubs)
             </Button>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between text-sm mb-2">
+                  <span>Progress</span>
+                  <span>{Math.round(progress)}%</span>
+                </div>
+                <Progress value={progress} />
+              </div>
+              
+              <div className="text-sm text-muted-foreground">
+                Processing golf clubs and updating database automatically...
+              </div>
+              
+              <Button 
+                disabled 
+                className="w-full"
+                size="lg"
+              >
+                Geocoding in progress...
+              </Button>
+            </div>
+          )
+        ) : (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <p className="text-green-800 font-medium">✅ All golf courses have coordinates!</p>
+            <p className="text-green-700 text-sm mt-1">
+              All {courses.length} golf courses in the database now have geocoded coordinates.
+            </p>
           </div>
         )}
 
@@ -169,16 +151,16 @@ ${codeLines.join(',\n')}
             <div className="text-sm space-y-1">
               <p>Total processed: {results.length}</p>
               <p>Successfully geocoded: {results.filter(r => r.success).length}</p>
-              <p>Approximated coordinates: {results.filter(r => r.approximated).length}</p>
+              <p>Approximated coordinates: {results.filter(r => !r.success).length}</p>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              The TypeScript code has been generated and downloaded. Check your Downloads folder for 'geocoded-golf-courses.ts'.
+              All results have been automatically updated in the database. The app now uses the live geocoded data.
             </p>
           </div>
         )}
 
         <div className="text-xs text-muted-foreground mt-4">
-          <p><strong>Note:</strong> This process uses OpenStreetMap's Nominatim service and respects their usage limits (1 request per second). The entire process will take approximately {Math.ceil(clubsWithoutCoordinates / 60)} minutes.</p>
+          <p><strong>Note:</strong> This process automatically geocodes golf courses using OpenStreetMap's Nominatim service and updates the database in real-time. The app will immediately use the new coordinates.</p>
         </div>
       </CardContent>
     </Card>
