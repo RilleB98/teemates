@@ -218,145 +218,185 @@ export const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero pt-24 pb-12">
-      <div className="max-w-2xl mx-auto px-6">
-        <Card className="bg-white/95 backdrop-blur-sm border-golf-green-light">
-          <CardHeader className="text-center relative">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => navigate("/")}
-              className="absolute left-4 top-4"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Tillbaka
-            </Button>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Name Section - moved here */}
-            <div className="flex items-center gap-2 justify-center mt-8 mb-6">
-              {isEditingName ? (
-                <div className="flex items-center gap-2">
-                  <Input
-                    value={tempName}
-                    onChange={(e) => setTempName(e.target.value)}
-                    placeholder="Ange ditt namn"
-                    className="text-center font-bold text-2xl h-auto py-2"
-                  />
-                  <Button size="sm" onClick={handleNameSave}>
-                    <Save className="w-4 h-4" />
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={handleNameCancel}>
-                    ×
-                  </Button>
+    <div className="min-h-screen bg-gradient-hero">
+      {/* Header */}
+      <div className="pt-6 pb-8">
+        <div className="max-w-4xl mx-auto px-6">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => navigate("/")}
+            className="text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Tillbaka
+          </Button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-4xl mx-auto px-6 pb-12">
+        <div className="grid lg:grid-cols-3 gap-6">
+          
+          {/* Profile Header Card */}
+          <div className="lg:col-span-1">
+            <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl">
+              <CardContent className="pt-6">
+                {/* Avatar Section */}
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="relative group">
+                    <Avatar className="w-32 h-32 border-4 border-white shadow-lg ring-2 ring-primary/20">
+                      <AvatarImage src={profile.avatar_url} alt="Profilbild" />
+                      <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary text-3xl">
+                        <User className="w-16 h-16" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <label htmlFor="avatar-upload" className="absolute bottom-2 right-2 p-2 bg-primary rounded-full cursor-pointer hover:bg-primary/90 transition-all duration-200 shadow-lg group-hover:scale-110">
+                      <Camera className="w-4 h-4 text-white" />
+                      <input
+                        id="avatar-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageSelect}
+                        disabled={uploading}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+
+                  {/* Name Section */}
+                  <div className="w-full text-center">
+                    {isEditingName ? (
+                      <div className="space-y-2">
+                        <Input
+                          value={tempName}
+                          onChange={(e) => setTempName(e.target.value)}
+                          placeholder="Ange ditt namn"
+                          className="text-center font-bold text-xl border-primary/30 focus:border-primary"
+                        />
+                        <div className="flex gap-2 justify-center">
+                          <Button size="sm" onClick={handleNameSave} className="flex-1">
+                            <Save className="w-4 h-4 mr-1" />
+                            Spara
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={handleNameCancel}>
+                            Avbryt
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="group cursor-pointer" onClick={handleNameEdit}>
+                        <h2 className="text-2xl font-bold text-primary group-hover:text-primary/80 transition-colors">
+                          {profile.name || "Min Profil"}
+                        </h2>
+                        <p className="text-sm text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+                          Klicka för att redigera
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Selected Course Display */}
+                  {profile.selected_course && (
+                    <div className="w-full bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl p-4 border border-primary/20">
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <MapPin className="w-4 h-4 text-primary" />
+                        <span className="font-semibold text-primary">Hemmaklubb</span>
+                      </div>
+                      <div className="text-center">
+                        <p className="font-medium text-foreground">{profile.selected_course.name}</p>
+                        <div className="flex items-center justify-center gap-1 mt-1">
+                          <Star className="w-3 h-3 text-accent fill-current" />
+                          <span className="text-sm text-muted-foreground">{profile.selected_course.rating}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {uploading && (
+                    <div className="w-full text-center py-2">
+                      <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
+                        Laddar upp bild...
+                      </div>
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <h2 className="text-2xl font-bold text-golf-premium">
-                    {profile.name || "Min Profil"}
-                  </h2>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={handleNameEdit}
-                    className="p-1 h-auto"
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Profile Details Card */}
+          <div className="lg:col-span-2">
+            <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-xl font-bold text-primary flex items-center gap-2">
+                  <User className="w-5 h-5" />
+                  Profilinformation
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Profile Form */}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="age" className="text-sm font-semibold text-foreground">Ålder</Label>
+                    <Input
+                      id="age"
+                      type="number"
+                      placeholder="Ange din ålder"
+                      value={profile.age}
+                      onChange={(e) => setProfile(prev => ({ ...prev, age: e.target.value }))}
+                      className="border-muted focus:border-primary transition-colors"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="handicap" className="text-sm font-semibold text-foreground">Handikapp</Label>
+                    <Input
+                      id="handicap"
+                      type="number"
+                      step="0.1"
+                      placeholder="Ange ditt handikapp"
+                      value={profile.handicap}
+                      onChange={(e) => setProfile(prev => ({ ...prev, handicap: e.target.value }))}
+                      className="border-muted focus:border-primary transition-colors"
+                    />
+                  </div>
+                </div>
+
+                {/* Course Selector */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-foreground">Hemmaklubb</Label>
+                  <CourseSelector 
+                    selectedCourse={profile.selected_course}
+                    onCourseSelect={(course) => setProfile(prev => ({ ...prev, selected_course: course }))}
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                  <Button 
+                    onClick={saveProfile} 
+                    disabled={loading || uploading}
+                    className="flex-1 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white shadow-lg"
                   >
-                    <Edit2 className="w-4 h-4 text-golf-green" />
+                    <Save className="w-4 h-4 mr-2" />
+                    {loading ? "Sparar..." : "Spara Profil"}
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    onClick={handleLogout}
+                    className="flex-1 border-destructive/30 text-destructive hover:bg-destructive hover:text-white transition-colors"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logga ut
                   </Button>
                 </div>
-              )}
-            </div>
-            {/* Avatar Upload */}
-            <div className="flex flex-col items-center space-y-4">
-              <div className="relative">
-                <Avatar className="w-32 h-32 border-4 border-golf-green-light">
-                  <AvatarImage src={profile.avatar_url} alt="Profilbild" />
-                  <AvatarFallback className="bg-golf-green-light text-golf-green text-3xl">
-                    <User className="w-16 h-16" />
-                  </AvatarFallback>
-                </Avatar>
-                <label htmlFor="avatar-upload" className="absolute bottom-0 right-0 p-2 bg-golf-green rounded-full cursor-pointer hover:bg-golf-green/80 transition-colors">
-                  <Camera className="w-5 h-5 text-white" />
-                  <input
-                    id="avatar-upload"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageSelect}
-                    disabled={uploading}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-              <p className="text-sm text-muted-foreground">Klicka på kameran för att ladda upp en profilbild</p>
-              
-              {/* Selected Course Display */}
-              {profile.selected_course && (
-                <div className="flex items-center gap-2 text-center bg-golf-green/10 rounded-lg p-3">
-                  <MapPin className="w-4 h-4 text-golf-green" />
-                  <span className="text-sm font-medium text-golf-premium">{profile.selected_course.name}</span>
-                  <Star className="w-4 h-4 text-accent fill-current" />
-                  <span className="text-sm text-muted-foreground">{profile.selected_course.rating}</span>
-                </div>
-              )}
-            </div>
-
-            {/* Profile Form */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="age">Ålder</Label>
-                <Input
-                  id="age"
-                  type="number"
-                  placeholder="Ange din ålder"
-                  value={profile.age}
-                  onChange={(e) => setProfile(prev => ({ ...prev, age: e.target.value }))}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="handicap">Handikapp</Label>
-                <Input
-                  id="handicap"
-                  type="number"
-                  step="0.1"
-                  placeholder="Ange ditt handikapp"
-                  value={profile.handicap}
-                  onChange={(e) => setProfile(prev => ({ ...prev, handicap: e.target.value }))}
-                />
-              </div>
-
-              {/* Course Selector */}
-              <div className="space-y-2">
-                <Label>Hemmaklubb</Label>
-                <CourseSelector 
-                  selectedCourse={profile.selected_course}
-                  onCourseSelect={(course) => setProfile(prev => ({ ...prev, selected_course: course }))}
-                />
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col space-y-3 pt-4">
-              <Button 
-                onClick={saveProfile} 
-                disabled={loading || uploading}
-                className="w-full"
-              >
-                <Save className="w-4 h-4 mr-2" />
-                {loading ? "Sparar..." : "Spara Profil"}
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                onClick={handleLogout}
-                className="w-full"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Logga ut
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
         
         {/* Image Cropper Modal */}
         {selectedImage && (
