@@ -6,8 +6,10 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Search, Download, Globe, MapPin, CheckCircle } from "lucide-react";
+import { Search, Download, Globe, MapPin, CheckCircle, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { GolfDataParser } from "@/utils/golfDataParser";
+import { Course } from "@/data/golfCourses";
 
 interface CrawlResult {
   success: boolean;
@@ -26,6 +28,8 @@ export const GolfCrawler = () => {
   const [progress, setProgress] = useState(0);
   const [crawlResult, setCrawlResult] = useState<CrawlResult | null>(null);
   const [extractedData, setExtractedData] = useState<string>('');
+  const [parsedCourses, setParsedCourses] = useState<Course[]>([]);
+  const [isImporting, setIsImporting] = useState(false);
 
   const handleCrawl = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,6 +89,83 @@ export const GolfCrawler = () => {
     } finally {
       setIsLoading(false);
       setProgress(100);
+    }
+  };
+
+  const handleParseData = () => {
+    if (!extractedData.trim()) {
+      toast({
+        title: "Ingen data",
+        description: "Crawla först en webbsida för att få data att parsa",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+
+    try {
+      console.log('Parsing crawled data...');
+      const parsedClubs = GolfDataParser.parseMarkdownData(extractedData);
+      const courses = GolfDataParser.convertToCourses(parsedClubs);
+      
+      setParsedCourses(courses);
+      
+      toast({
+        title: "Data parsad! 🎯",
+        description: `Hittade ${courses.length} golfbanor i den crawlade datan`,
+        duration: 3000,
+      });
+    } catch (error: any) {
+      console.error('Error parsing data:', error);
+      toast({
+        title: "Parsningsfel",
+        description: error.message || "Misslyckades att parsa golfbanedata",
+        variant: "destructive",
+        duration: 3000,
+      });
+    }
+  };
+
+  const handleImportCourses = async () => {
+    if (parsedCourses.length === 0) {
+      toast({
+        title: "Ingen data att importera",
+        description: "Parsa först crawlad data för att få golfbanor att importera",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+
+    setIsImporting(true);
+    
+    try {
+      // Here you would typically save to database or update the golfCourses data
+      // For now, we'll just download as JSON for manual import
+      const coursesJson = JSON.stringify(parsedCourses, null, 2);
+      const blob = new Blob([coursesJson], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'parsed-golf-courses.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Golfbanor exporterade! 📥",
+        description: `${parsedCourses.length} golfbanor exporterade till JSON-fil`,
+        duration: 3000,
+      });
+    } catch (error: any) {
+      console.error('Error importing courses:', error);
+      toast({
+        title: "Importfel",
+        description: error.message || "Misslyckades att importera golfbanor",
+        variant: "destructive",
+        duration: 3000,
+      });
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -224,6 +305,65 @@ export const GolfCrawler = () => {
                       >
                         Ladda ner
                       </Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Data Parsing and Import Section */}
+          {extractedData && (
+            <Card className="bg-blue-50/50 border-blue-200">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2 text-blue-700">
+                  <Upload className="w-5 h-5" />
+                  Parsa och importera golfbanor
+                </CardTitle>
+                <p className="text-sm text-blue-600">
+                  Konvertera crawlad data till Course-objekt som kan användas i appen
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleParseData}
+                    variant="outline"
+                    className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                  >
+                    <Search className="w-4 h-4 mr-2" />
+                    Parsa crawlad data
+                  </Button>
+                  
+                  {parsedCourses.length > 0 && (
+                    <Button 
+                      onClick={handleImportCourses}
+                      disabled={isImporting}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      {isImporting ? "Exporterar..." : `Exportera ${parsedCourses.length} golfbanor`}
+                    </Button>
+                  )}
+                </div>
+
+                {parsedCourses.length > 0 && (
+                  <div className="bg-white p-4 rounded border border-blue-200">
+                    <h4 className="font-medium text-blue-700 mb-2">
+                      Hittade {parsedCourses.length} golfbanor:
+                    </h4>
+                    <div className="max-h-40 overflow-y-auto space-y-1">
+                      {parsedCourses.slice(0, 10).map((course, index) => (
+                        <div key={index} className="text-xs text-gray-600 flex justify-between">
+                          <span className="font-medium">{course.name}</span>
+                          <span className="text-gray-500">{course.location}</span>
+                        </div>
+                      ))}
+                      {parsedCourses.length > 10 && (
+                        <div className="text-xs text-gray-500 italic">
+                          ...och {parsedCourses.length - 10} fler
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
