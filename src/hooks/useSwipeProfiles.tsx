@@ -22,6 +22,8 @@ export interface SwipeFilters {
 }
 
 export const useSwipeProfiles = () => {
+  console.log("useSwipeProfiles hook called");
+  
   const { user } = useAuth();
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -34,9 +36,16 @@ export const useSwipeProfiles = () => {
     gender: 'all'
   });
 
-  const fetchProfiles = async () => {
-    if (!user) return;
+  console.log("useSwipeProfiles state:", { user: !!user, profiles: profiles.length, currentIndex, loading, filters });
 
+  const fetchProfiles = async () => {
+    console.log("fetchProfiles called, user:", !!user);
+    if (!user) {
+      console.log("No user, returning early");
+      return;
+    }
+
+    console.log("Setting loading to true");
     setLoading(true);
     try {
       // Get users that are not me and not already friends

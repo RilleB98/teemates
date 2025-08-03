@@ -15,6 +15,7 @@ interface SwipeFiltersProps {
 }
 
 export const SwipeFiltersComponent = ({ filters, onFiltersChange }: SwipeFiltersProps) => {
+  console.log("SwipeFiltersComponent rendering with filters:", filters);
   const [localFilters, setLocalFilters] = useState<SwipeFilters>(filters);
 
   const handleAgeChange = (values: number[]) => {
