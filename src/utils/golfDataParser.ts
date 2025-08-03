@@ -18,6 +18,8 @@ export class GolfDataParser {
     const lines = markdownContent.split('\n');
     
     console.log('Parsing markdown content, total lines:', lines.length);
+    console.log('First 20 lines of content:', lines.slice(0, 20));
+    console.log('Sample content around middle:', lines.slice(Math.floor(lines.length/2), Math.floor(lines.length/2) + 10));
     
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
