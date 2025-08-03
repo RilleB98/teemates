@@ -219,23 +219,21 @@ export const Profile = () => {
 
   return (
     <div className="min-h-screen bg-gradient-hero">
-      {/* Header */}
-      <div className="pt-6 pb-8">
-        <div className="max-w-4xl mx-auto px-6">
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => navigate("/")}
-            className="text-white/80 hover:text-white hover:bg-white/10 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Tillbaka
-          </Button>
-        </div>
+      {/* Elegant Back Button */}
+      <div className="fixed top-6 left-6 z-10">
+        <Button 
+          variant="outline"
+          size="sm"
+          onClick={() => navigate("/")}
+          className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 hover:border-white/50 transition-all duration-200 shadow-lg"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Tillbaka
+        </Button>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-6 pb-12">
+      <div className="max-w-4xl mx-auto px-6 pt-20 pb-12">
         <div className="grid lg:grid-cols-3 gap-6">
           
           {/* Profile Header Card */}
