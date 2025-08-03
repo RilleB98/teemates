@@ -147,7 +147,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    console.log('Starting geocoding process for golf courses...');
+    console.log('Starting comprehensive geocoding process for all golf courses...');
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -155,24 +155,76 @@ Deno.serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch golf courses that need re-geocoding (duplicated coordinates or 0,0)
-    const { data: courses, error: fetchError } = await supabase
+    // First, fetch ALL golf courses
+    const { data: allCourses, error: fetchAllError } = await supabase
       .from('golf_courses')
       .select('*')
-      .or('latitude.eq.0,longitude.eq.0,latitude.eq.57.7089,latitude.eq.59.3485505,latitude.eq.55.6059,latitude.eq.55.605');
+      .order('name');
 
-    if (fetchError) {
-      console.error('Error fetching golf courses:', fetchError);
-      throw fetchError;
+    if (fetchAllError) {
+      console.error('Error fetching all golf courses:', fetchAllError);
+      throw fetchAllError;
     }
 
-    console.log(`Found ${courses?.length || 0} golf courses that need geocoding`);
+    console.log(`Found ${allCourses?.length || 0} total golf courses`);
 
-    if (!courses || courses.length === 0) {
+    if (!allCourses || allCourses.length === 0) {
       return new Response(
         JSON.stringify({
-          message: 'No golf courses need geocoding',
-          stats: { total: 0, successful: 0, approximate: 0 },
+          message: 'No golf courses found in database',
+          stats: { total: 0, duplicates: 0, processed: 0, successful: 0, approximate: 0 },
+          results: []
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      );
+    }
+
+    // Find duplicate coordinates
+    const coordinateMap = new Map<string, number>();
+    const duplicateCoordinates = new Set<string>();
+    
+    allCourses.forEach(course => {
+      const coordKey = `${course.latitude},${course.longitude}`;
+      const count = coordinateMap.get(coordKey) || 0;
+      coordinateMap.set(coordKey, count + 1);
+      
+      if (count >= 1) {
+        duplicateCoordinates.add(coordKey);
+      }
+    });
+
+    // Identify courses that need geocoding
+    const coursesToGeocode = allCourses.filter(course => {
+      const coordKey = `${course.latitude},${course.longitude}`;
+      return (
+        course.latitude === 0 || 
+        course.longitude === 0 || 
+        duplicateCoordinates.has(coordKey) ||
+        // Check for obviously wrong coordinates (city centers)
+        (course.latitude === 57.7089 && course.longitude === 11.9746) || // Göteborg center
+        (course.latitude === 59.3485505 && course.longitude === 17.9374022) || // Stockholm center
+        (course.latitude === 55.6059 && course.longitude === 13.0007) || // Malmö center
+        (course.latitude === 55.605 && course.longitude === 13.0038) // Malmö center variant
+      );
+    });
+
+    console.log(`Found ${duplicateCoordinates.size} sets of duplicate coordinates`);
+    console.log(`${coursesToGeocode.length} courses need geocoding`);
+
+    if (coursesToGeocode.length === 0) {
+      return new Response(
+        JSON.stringify({
+          message: 'All golf courses have unique, valid coordinates',
+          stats: { 
+            total: allCourses.length, 
+            duplicates: duplicateCoordinates.size, 
+            processed: 0, 
+            successful: 0, 
+            approximate: 0 
+          },
           results: []
         }),
         {
@@ -186,9 +238,9 @@ Deno.serve(async (req) => {
     let successful = 0;
     let approximate = 0;
 
-    // Process each course
-    for (const course of courses) {
-      console.log(`Processing: ${course.name}`);
+    // Process each course that needs geocoding
+    for (const course of coursesToGeocode) {
+      console.log(`Processing: ${course.name} in ${course.location}`);
       
       // Get coordinates
       const geocodeResult = await geocodeGolfClub(course.name, course.location);
@@ -218,25 +270,33 @@ Deno.serve(async (req) => {
       results.push({
         name: course.name,
         location: course.location,
-        latitude: geocodeResult.latitude,
-        longitude: geocodeResult.longitude,
+        old_coordinates: `${course.latitude}, ${course.longitude}`,
+        new_coordinates: `${geocodeResult.latitude}, ${geocodeResult.longitude}`,
         success: geocodeResult.success
       });
+
+      // Progress logging
+      if (results.length % 10 === 0) {
+        console.log(`Progress: ${results.length}/${coursesToGeocode.length} courses processed`);
+      }
     }
 
     const stats = {
-      total: courses.length,
+      total: allCourses.length,
+      duplicates: duplicateCoordinates.size,
+      processed: coursesToGeocode.length,
       successful,
       approximate
     };
 
-    console.log('Geocoding completed:', stats);
+    console.log('Comprehensive geocoding completed:', stats);
 
     return new Response(
       JSON.stringify({
-        message: `Geocoding completed. Processed ${courses.length} golf courses.`,
+        message: `Geocoding completed. Checked ${allCourses.length} total courses, processed ${coursesToGeocode.length} that needed updates.`,
         stats,
-        results
+        results,
+        duplicate_coordinates: Array.from(duplicateCoordinates)
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
