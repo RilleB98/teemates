@@ -115,11 +115,15 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
 
   const handleMouseMove = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     handleMove(e.clientX, e.clientY);
   };
 
   const handleMouseUp = (e?: React.MouseEvent) => {
-    if (e) e.preventDefault();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     handleEnd();
   };
 
@@ -144,6 +148,28 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
 
   return (
     <div className="relative w-full max-w-sm mx-auto h-[600px]">
+      {/* Preview-friendly action buttons at top */}
+      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex gap-4 z-20 md:hidden">
+        <Button
+          variant="outline"
+          size="sm"
+          className="bg-white/90 border-red-200 hover:bg-red-50 text-red-600"
+          onClick={handleSwipeLeft}
+        >
+          <X className="h-4 w-4 mr-1" />
+          Hoppa över
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="bg-white/90 border-green-200 hover:bg-green-50 text-green-600"
+          onClick={handleSwipeRight}
+        >
+          <Heart className="h-4 w-4 mr-1" />
+          Gilla
+        </Button>
+      </div>
+
       <div
         ref={cardRef}
         onMouseDown={handleMouseDown}
@@ -157,7 +183,9 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
         style={{
           transform: `translateX(${dragOffset.x}px) translateY(${dragOffset.y * 0.1}px) rotate(${rotation}deg)`,
           opacity: isDragging ? opacity : 1,
-          willChange: 'transform, opacity'
+          willChange: 'transform, opacity',
+          userSelect: 'none',
+          touchAction: 'none'
         }}
       >
         <Card className="h-full shadow-xl border-2 border-muted overflow-hidden bg-white">
@@ -219,8 +247,8 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
         </Card>
       </div>
 
-      {/* Action Buttons */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4 z-10">
+      {/* Bottom Action Buttons - Hidden on mobile, shown on desktop */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 hidden md:flex gap-4 z-10">
         <Button
           variant="outline"
           size="icon"
