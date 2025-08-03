@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useLocation } from "@/hooks/useLocation";
 import { golfCourses, Course } from "@/data/golfCourses";
 import { Navigation as NavComponent } from "@/components/Navigation";
-import { Hero } from "@/components/Hero";
+
 
 export const Courses = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -59,7 +59,6 @@ export const Courses = () => {
       <NavComponent />
       
       <div className="pb-24"> {/* Account for fixed bottom navigation */}
-        <Hero />
         
         <div className="max-w-4xl mx-auto px-6 py-6">
         {/* Header */}
