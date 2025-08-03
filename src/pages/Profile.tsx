@@ -362,7 +362,6 @@ export const Profile = () => {
                         <SelectItem value="kvinna">Kvinna</SelectItem>
                         <SelectItem value="man">Man</SelectItem>
                         <SelectItem value="annat">Annat</SelectItem>
-                        <SelectItem value="vill_inte_uppge">Vill inte uppge</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
