@@ -206,8 +206,10 @@ export const Courses = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-1 sm:gap-2 bg-accent/10 px-2 sm:px-3 py-1 rounded-full flex-shrink-0">
-                            <MapPin className="w-3 sm:w-4 h-3 sm:h-4 text-accent" />
-                            <span className="font-bold text-accent text-sm">Tillgänglig</span>
+                            <Navigation className="w-3 sm:w-4 h-3 sm:h-4 text-accent" />
+                            <span className="font-bold text-accent text-sm">
+                              {location ? `${calculateDistance(location.latitude, location.longitude, course.latitude, course.longitude).toFixed(1)} km` : 'Okänd distans'}
+                            </span>
                           </div>
                         </div>
                         
