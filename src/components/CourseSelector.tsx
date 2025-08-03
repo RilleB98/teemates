@@ -57,8 +57,8 @@ export const CourseSelector = ({ selectedCourse, onCourseSelect }: CourseSelecto
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-semibold text-golf-premium">Vald hemmaklubb</h4>
-                <p className="text-sm text-muted-foreground">{selectedCourse.name}</p>
+                <h4 className="font-semibold text-golf-premium">{selectedCourse.name}</h4>
+                <p className="text-sm text-muted-foreground">Vald hemmaklubb</p>
                 <div className="flex items-center gap-2 mt-1">
                   <MapPin className="w-3 h-3 text-muted-foreground" />
                   <span className="text-xs text-muted-foreground">{selectedCourse.location}</span>
