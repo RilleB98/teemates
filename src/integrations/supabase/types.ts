@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      friends: {
+        Row: {
+          created_at: string
+          friend_id: string
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          friend_id: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          friend_id?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           chat_room_id: string
@@ -24,7 +51,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          chat_room_id?: string
+          chat_room_id: string
           content: string
           created_at?: string
           id?: string
@@ -112,6 +139,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_chat_room_id: {
+        Args: { user1_id: string; user2_id: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _user_id: string
