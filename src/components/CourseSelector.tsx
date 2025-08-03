@@ -5,23 +5,52 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Star, Check, Navigation } from "lucide-react";
 import { useLocation } from "@/hooks/useLocation";
 import { golfCourses, Course } from "@/data/golfCourses";
+import { swedishGolfClubs } from "@/data/swedishGolfCourses";
 
 interface CourseSelectorProps {
-  selectedCourse: Course | null;
-  onCourseSelect: (course: Course) => void;
+  selectedCourse: any;
+  onCourseSelect: (course: any) => void;
 }
 
 export const CourseSelector = ({ selectedCourse, onCourseSelect }: CourseSelectorProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { location, loading, error, getCurrentPosition, calculateDistance } = useLocation();
+
+  // Combine all courses - detailed ones first, then all Swedish clubs
+  const allCourses = [
+    ...golfCourses.map(course => ({ 
+      ...course, 
+      hasCoordinates: true 
+    })),
+    ...swedishGolfClubs
+      .filter(club => !golfCourses.some(course => course.name === club.name))
+      .map(club => ({ 
+        ...club, 
+        image: "/placeholder.svg",
+        latitude: 0,
+        longitude: 0,
+        hasCoordinates: false
+      }))
+  ];
+
+  // Filter courses based on search query
+  const filteredCourses = allCourses.filter(course =>
+    course.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    course.location.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Sort courses with selected course first, then by distance if user location is available
   const sortedCourses = (() => {
-    let courses = [...golfCourses];
+    let courses = [...filteredCourses];
     
-    // Sort by distance if location is available
+    // Sort by distance if location is available (only for courses with coordinates)
     if (location) {
       courses = courses.sort((a, b) => {
+        if (!a.hasCoordinates && !b.hasCoordinates) return 0;
+        if (!a.hasCoordinates) return 1;
+        if (!b.hasCoordinates) return -1;
+        
         const distanceA = calculateDistance(location.latitude, location.longitude, a.latitude, a.longitude);
         const distanceB = calculateDistance(location.latitude, location.longitude, b.latitude, b.longitude);
         return distanceA - distanceB;
@@ -104,52 +133,60 @@ export const CourseSelector = ({ selectedCourse, onCourseSelect }: CourseSelecto
         )}
 
         {isExpanded && (
-          <div className="mt-4 space-y-3 max-h-96 overflow-y-auto">
-            {sortedCourses.map((course, index) => {
-              const distance = location 
-                ? calculateDistance(location.latitude, location.longitude, course.latitude, course.longitude)
-                : null;
-              
-              return (
-                <Card 
-                  key={index} 
-                  className={`cursor-pointer transition-all hover:shadow-md ${
-                    selectedCourse?.name === course.name ? 'ring-2 ring-golf-green' : ''
-                  }`}
-                  onClick={() => {
-                    onCourseSelect(course);
-                    setIsExpanded(false);
-                  }}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex gap-4">
-                      <img 
-                        src={course.image} 
-                        alt={course.name}
-                        className="w-16 h-16 rounded-lg object-cover"
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-golf-premium">{course.name}</h4>
-                            <div className="flex items-center gap-2 mt-1">
-                              <MapPin className="w-3 h-3 text-muted-foreground" />
-                              <span className="text-sm text-muted-foreground">{course.location}</span>
-                            </div>
+          <div className="mb-4">
+            <input
+              type="text"
+              placeholder="Sök golfklubb..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
+          </div>
+        )}
+
+        {isExpanded && (
+          <div className="mt-4 space-y-2 max-h-96 overflow-y-auto">
+            {sortedCourses.length === 0 ? (
+              <p className="text-center text-muted-foreground py-4">Inga golfklubbar hittades</p>
+            ) : (
+              sortedCourses.map((course, index) => {
+                const distance = location && course.hasCoordinates
+                  ? calculateDistance(location.latitude, location.longitude, course.latitude, course.longitude)
+                  : null;
+                
+                return (
+                  <Card 
+                    key={index} 
+                    className={`cursor-pointer transition-all hover:shadow-md hover:bg-gray-50 ${
+                      selectedCourse?.name === course.name ? 'ring-2 ring-primary bg-primary/5' : ''
+                    }`}
+                    onClick={() => {
+                      onCourseSelect(course);
+                      setIsExpanded(false);
+                      setSearchQuery("");
+                    }}
+                  >
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-foreground">{course.name}</h4>
+                          <div className="flex items-center gap-2 mt-1">
+                            <MapPin className="w-3 h-3 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">{course.location}</span>
                           </div>
-                          {distance && (
-                            <div className="text-right">
-                              <span className="text-sm text-golf-green font-medium">{distance.toFixed(1)} km</span>
-                              <p className="text-xs text-muted-foreground">avstånd</p>
-                            </div>
-                          )}
                         </div>
+                        {distance && (
+                          <div className="text-right">
+                            <span className="text-sm text-primary font-medium">{distance.toFixed(1)} km</span>
+                            <p className="text-xs text-muted-foreground">avstånd</p>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                    </CardContent>
+                  </Card>
+                );
+              })
+            )}
           </div>
         )}
       </div>
