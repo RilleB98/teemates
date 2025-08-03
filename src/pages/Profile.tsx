@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, User, Save, LogOut, MapPin, Star, ArrowLeft } from "lucide-react";
+import { Camera, User, Save, LogOut, MapPin, Star, ArrowLeft, Edit2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -13,12 +13,14 @@ import { ImageCropper } from "@/components/ImageCropper";
 
 export const Profile = () => {
   const [profile, setProfile] = useState({
+    name: "",
     age: "",
     handicap: "",
-    home_club: "",
     avatar_url: "",
     selected_course: null as any
   });
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [tempName, setTempName] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -51,9 +53,9 @@ export const Profile = () => {
 
       if (data) {
         setProfile({
+          name: data.name || "",
           age: data.age?.toString() || "",
           handicap: data.handicap?.toString() || "",
-          home_club: data.home_club || "",
           avatar_url: data.avatar_url || "",
           selected_course: data.selected_course || null
         });
@@ -145,9 +147,9 @@ export const Profile = () => {
 
       const profileData = {
         user_id: user.id,
+        name: profile.name || null,
         age: profile.age ? parseInt(profile.age) : null,
         handicap: profile.handicap ? parseFloat(profile.handicap) : null,
-        home_club: profile.home_club || null,
         avatar_url: profile.avatar_url || null,
         selected_course: profile.selected_course || null
       };
@@ -171,6 +173,44 @@ export const Profile = () => {
     }
   };
 
+  const handleNameEdit = () => {
+    setTempName(profile.name);
+    setIsEditingName(true);
+  };
+
+  const handleNameSave = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Du måste vara inloggad");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({ name: tempName })
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("Error saving name:", error);
+        toast.error("Kunde inte spara namn");
+        return;
+      }
+
+      setProfile(prev => ({ ...prev, name: tempName }));
+      setIsEditingName(false);
+      toast.success("Namn sparat!");
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Ett fel uppstod");
+    }
+  };
+
+  const handleNameCancel = () => {
+    setTempName("");
+    setIsEditingName(false);
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/");
@@ -191,7 +231,38 @@ export const Profile = () => {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Tillbaka
             </Button>
-            <CardTitle className="text-2xl font-bold text-golf-premium">Min Profil</CardTitle>
+            <div className="flex items-center gap-2 justify-center">
+              {isEditingName ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={tempName}
+                    onChange={(e) => setTempName(e.target.value)}
+                    placeholder="Ange ditt namn"
+                    className="text-center font-bold text-2xl h-auto py-2"
+                  />
+                  <Button size="sm" onClick={handleNameSave}>
+                    <Save className="w-4 h-4" />
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={handleNameCancel}>
+                    ×
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-2xl font-bold text-golf-premium">
+                    {profile.name || "Min Profil"}
+                  </CardTitle>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleNameEdit}
+                    className="p-1 h-auto"
+                  >
+                    <Edit2 className="w-4 h-4 text-golf-green" />
+                  </Button>
+                </div>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Avatar Upload */}
