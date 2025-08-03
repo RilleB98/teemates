@@ -7,6 +7,8 @@ import { ArrowLeft, Search, MapPin, Star, Navigation, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "@/hooks/useLocation";
 import { golfCourses, Course } from "@/data/golfCourses";
+import { Navigation as NavComponent } from "@/components/Navigation";
+import { Hero } from "@/components/Hero";
 
 export const Courses = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -53,8 +55,13 @@ export const Courses = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero pt-6 pb-24">
-      <div className="max-w-4xl mx-auto px-6">
+    <div className="min-h-screen bg-gradient-subtle">
+      <NavComponent />
+      
+      <div className="pb-24"> {/* Account for fixed bottom navigation */}
+        <Hero />
+        
+        <div className="max-w-4xl mx-auto px-6 py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <Button 
@@ -213,6 +220,7 @@ export const Courses = () => {
               );
             })
           )}
+        </div>
         </div>
       </div>
     </div>

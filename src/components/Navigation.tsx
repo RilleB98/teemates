@@ -86,23 +86,24 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
         <div className="flex items-center justify-between">
           {/* Left Navigation */}
           <div className="flex items-center space-x-4 sm:space-x-6">
-            <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth text-golf-green bg-golf-green-light`}>
-              <Users className="w-5 h-5 sm:w-6 sm:h-6" />
-              <span className="text-xs font-medium">Vänner</span>
-            </button>
+            <Link to="/friends">
+              <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth text-golf-green bg-golf-green-light`}>
+                <Users className="w-5 h-5 sm:w-6 sm:h-6" />
+                <span className="text-xs font-medium">Vänner</span>
+              </button>
+            </Link>
             
-            <button 
-              onClick={onMessagesClick}
-              className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50`}
-            >
-              <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-              <span className="text-xs font-medium">Messages</span>
-              {formatBadgeCount(messageCount) && (
-                <Badge variant="destructive" className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 text-xs p-0 flex items-center justify-center">
-                  {formatBadgeCount(messageCount)}
-                </Badge>
-              )}
-            </button>
+            <Link to="/messages">
+              <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50`}>
+                <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+                <span className="text-xs font-medium">Messages</span>
+                {formatBadgeCount(messageCount) && (
+                  <Badge variant="destructive" className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 text-xs p-0 flex items-center justify-center">
+                    {formatBadgeCount(messageCount)}
+                  </Badge>
+                )}
+              </button>
+            </Link>
           </div>
           
           {/* Centered Logo */}
