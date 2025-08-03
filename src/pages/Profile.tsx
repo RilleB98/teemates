@@ -342,6 +342,11 @@ export const Profile = () => {
                       <div className="group cursor-pointer" onClick={handleNameEdit}>
                         <h2 className="text-2xl font-bold text-primary group-hover:text-primary/80 transition-colors">
                           {profile.name || "Min Profil"}
+                          {profile.birth_date && (
+                            <span className="text-lg text-muted-foreground ml-2">
+                              ({differenceInYears(new Date(), profile.birth_date)} år)
+                            </span>
+                          )}
                         </h2>
                         <p className="text-sm text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
                           Klicka för att redigera
