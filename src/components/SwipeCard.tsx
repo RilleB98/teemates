@@ -91,29 +91,7 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
                   </Avatar>
                 </div>
               )}
-              
-              {/* Swipe Indicators */}
-              <motion.div 
-                className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                style={{
-                  opacity: useTransform(x, [50, 150], [0, 1])
-                }}
-              >
-                <div className="bg-green-500 text-white px-6 py-3 rounded-full font-bold text-xl transform rotate-12 border-4 border-white">
-                  GILLAR
-                </div>
-              </motion.div>
-              
-              <motion.div 
-                className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                style={{
-                  opacity: useTransform(x, [-150, -50], [1, 0])
-                }}
-              >
-                <div className="bg-red-500 text-white px-6 py-3 rounded-full font-bold text-xl transform -rotate-12 border-4 border-white">
-                  NOPE
-                </div>
-              </motion.div>
+              {/* Profile image without overlay indicators */}
             </div>
 
             {/* Profile Info */}

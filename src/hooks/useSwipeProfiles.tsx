@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
 
 export interface UserProfile {
   user_id: string;
@@ -24,7 +23,6 @@ export interface SwipeFilters {
 
 export const useSwipeProfiles = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -83,11 +81,6 @@ export const useSwipeProfiles = () => {
       }
     } catch (error) {
       console.error('Error fetching profiles:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte hämta profiler.",
-        variant: "destructive"
-      });
     } finally {
       setLoading(false);
     }
@@ -115,29 +108,11 @@ export const useSwipeProfiles = () => {
           status: 'pending'
         });
 
-      if (error) {
-        if (error.code === '23505') {
-          toast({
-            title: "Information",
-            description: "Du har redan skickat en vänförfrågan till denna person."
-          });
-        } else {
-          throw error;
-        }
-      } else {
-        toast({
-          title: "Vänförfrågan skickad!",
-          description: "Din vänförfrågan har skickats.",
-          className: "bg-green-50 border-green-200 text-green-800"
-        });
+      if (error && error.code !== '23505') {
+        throw error;
       }
     } catch (error) {
       console.error('Error sending friend request:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte skicka vänförfrågan.",
-        variant: "destructive"
-      });
     }
 
     setCurrentIndex(prev => prev + 1);
