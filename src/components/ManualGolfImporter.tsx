@@ -36,7 +36,10 @@ export const ManualGolfImporter = () => {
   const [bulkText, setBulkText] = useState('');
 
   const addCourse = () => {
+    console.log('addCourse called with:', currentCourse);
+    
     if (!currentCourse.name.trim() || !currentCourse.location.trim()) {
+      console.log('Validation failed - missing name or location');
       toast({
         title: "Ofullständig data",
         description: "Namn och plats är obligatoriska",
@@ -46,7 +49,11 @@ export const ManualGolfImporter = () => {
       return;
     }
 
-    setCourses([...courses, { ...currentCourse }]);
+    console.log('Adding course to list. Current courses:', courses.length);
+    const newCourse = { ...currentCourse };
+    setCourses([...courses, newCourse]);
+    
+    console.log('Course added, resetting form');
     setCurrentCourse({
       name: '',
       location: '',
@@ -60,9 +67,11 @@ export const ManualGolfImporter = () => {
 
     toast({
       title: "Golfbana tillagd! ⛳",
-      description: `${currentCourse.name} har lagts till`,
+      description: `${newCourse.name} har lagts till`,
       duration: 2000,
     });
+    
+    console.log('addCourse completed successfully');
   };
 
   const removeCourse = (index: number) => {
