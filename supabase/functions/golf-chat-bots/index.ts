@@ -11,10 +11,10 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
 
-// Bot data with Swedish golf-related personalities
+// Bot data with Swedish golf-related personalities (using proper UUIDs)
 const bots = [
   {
-    id: 'bot_erik_golf',
+    id: '550e8400-e29b-41d4-a716-446655440001', // Erik's UUID
     name: 'Erik Nilsson',
     avatar_url: '/placeholder.svg',
     messages: [
@@ -31,7 +31,7 @@ const bots = [
     ]
   },
   {
-    id: 'bot_anna_golf',
+    id: '550e8400-e29b-41d4-a716-446655440002', // Anna's UUID
     name: 'Anna Lindqvist',
     avatar_url: '/placeholder.svg',
     messages: [
