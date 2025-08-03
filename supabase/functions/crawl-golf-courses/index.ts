@@ -32,7 +32,41 @@ serve(async (req) => {
 
     console.log('Starting crawl for URL:', url)
 
-    // Call Firecrawl API v1
+    // Call Firecrawl API v1 - Try scraping first for immediate results
+    console.log('Trying single page scrape first...')
+    const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${firecrawlApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        url: url,
+        formats: ['markdown'],
+        includeTags: ['h1', 'h2', 'h3', 'p', 'a', 'div'],
+        excludeTags: ['nav', 'footer', 'header', 'script', 'style'],
+      })
+    })
+
+    if (scrapeResponse.ok) {
+      const scrapeData = await scrapeResponse.json()
+      console.log('Single page scrape successful')
+      
+      if (scrapeData.data && scrapeData.data.markdown) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: [scrapeData.data],
+            message: `Successfully scraped the main page. Content length: ${scrapeData.data.markdown.length} characters`
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+    }
+
+    console.log('Single page scrape failed, trying full crawl...')
+    
+    // If single page scrape fails, try full crawl
     const firecrawlResponse = await fetch('https://api.firecrawl.dev/v1/crawl', {
       method: 'POST',
       headers: {
@@ -41,12 +75,14 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         url: url,
-        limit: 30,
+        limit: 20,
         scrapeOptions: {
           formats: ['markdown'],
           includeTags: ['h1', 'h2', 'h3', 'p', 'a', 'div'],
           excludeTags: ['nav', 'footer', 'header', 'script', 'style'],
-        }
+        },
+        allowBackwardCrawling: false,
+        allowExternalContentLinks: false
       })
     })
 
