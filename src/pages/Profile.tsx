@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, User, Save, LogOut, MapPin, Star, ArrowLeft, Edit2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,7 +18,8 @@ export const Profile = () => {
     age: "",
     handicap: "",
     avatar_url: "",
-    selected_course: null as any
+    selected_course: null as any,
+    gender: ""
   });
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState("");
@@ -57,7 +59,8 @@ export const Profile = () => {
           age: data.age?.toString() || "",
           handicap: data.handicap?.toString() || "",
           avatar_url: data.avatar_url || "",
-          selected_course: data.selected_course || null
+          selected_course: data.selected_course || null,
+          gender: data.gender || ""
         });
       }
     } catch (error) {
@@ -151,7 +154,8 @@ export const Profile = () => {
         age: profile.age ? parseInt(profile.age) : null,
         handicap: profile.handicap ? parseFloat(profile.handicap) : null,
         avatar_url: profile.avatar_url || null,
-        selected_course: profile.selected_course || null
+        selected_course: profile.selected_course || null,
+        gender: profile.gender || null
       };
 
       const { error } = await supabase
@@ -346,6 +350,21 @@ export const Profile = () => {
                       onChange={(e) => setProfile(prev => ({ ...prev, age: e.target.value }))}
                       className="border-muted focus:border-primary transition-colors"
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="gender" className="text-sm font-semibold text-foreground">Kön</Label>
+                    <Select value={profile.gender} onValueChange={(value) => setProfile(prev => ({ ...prev, gender: value }))}>
+                      <SelectTrigger className="border-muted focus:border-primary transition-colors">
+                        <SelectValue placeholder="Välj kön" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="kvinna">Kvinna</SelectItem>
+                        <SelectItem value="man">Man</SelectItem>
+                        <SelectItem value="annat">Annat</SelectItem>
+                        <SelectItem value="vill_inte_uppge">Vill inte uppge</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
