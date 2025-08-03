@@ -26,6 +26,9 @@ export const Profile = () => {
     gender: "",
     birth_date: null as Date | null
   });
+  const [birthDay, setBirthDay] = useState("");
+  const [birthMonth, setBirthMonth] = useState("");
+  const [birthYear, setBirthYear] = useState("");
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,6 +36,37 @@ export const Profile = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [showCropper, setShowCropper] = useState(false);
   const navigate = useNavigate();
+
+  // Helper function to update birth date from individual components
+  const updateBirthDate = (day: string, month: string, year: string) => {
+    if (day && month && year) {
+      const birthDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      setProfile(prev => ({ ...prev, birth_date: birthDate }));
+    } else {
+      setProfile(prev => ({ ...prev, birth_date: null }));
+    }
+  };
+
+  // Helper function to get days in month
+  const getDaysInMonth = (month: string, year: string) => {
+    if (!month || !year) return 31;
+    return new Date(parseInt(year), parseInt(month), 0).getDate();
+  };
+
+  const months = [
+    { value: "1", label: "Januari" },
+    { value: "2", label: "Februari" },
+    { value: "3", label: "Mars" },
+    { value: "4", label: "April" },
+    { value: "5", label: "Maj" },
+    { value: "6", label: "Juni" },
+    { value: "7", label: "Juli" },
+    { value: "8", label: "Augusti" },
+    { value: "9", label: "September" },
+    { value: "10", label: "Oktober" },
+    { value: "11", label: "November" },
+    { value: "12", label: "December" }
+  ];
 
   useEffect(() => {
     loadProfile();
@@ -59,6 +93,7 @@ export const Profile = () => {
       }
 
       if (data) {
+        const birthDate = data.birth_date ? new Date(data.birth_date) : null;
         setProfile({
           name: data.name || "",
           age: data.age?.toString() || "",
@@ -66,8 +101,15 @@ export const Profile = () => {
           avatar_url: data.avatar_url || "",
           selected_course: data.selected_course || null,
           gender: data.gender || "",
-          birth_date: data.birth_date ? new Date(data.birth_date) : null
+          birth_date: birthDate
         });
+        
+        // Set individual date components
+        if (birthDate) {
+          setBirthDay(birthDate.getDate().toString());
+          setBirthMonth((birthDate.getMonth() + 1).toString());
+          setBirthYear(birthDate.getFullYear().toString());
+        }
       }
     } catch (error) {
       console.error("Error:", error);
@@ -165,7 +207,7 @@ export const Profile = () => {
         avatar_url: profile.avatar_url || null,
         selected_course: profile.selected_course || null,
         gender: profile.gender || null,
-        birth_date: profile.birth_date ? profile.birth_date.getFullYear().toString() + '-01-01' : null
+        birth_date: profile.birth_date ? profile.birth_date.toISOString().split('T')[0] : null
       };
 
       const { error } = await supabase
@@ -351,39 +393,96 @@ export const Profile = () => {
                 {/* Profile Form */}
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="birth_year" className="text-sm font-semibold text-foreground">
-                      Födelseår {profile.birth_date && (
+                    <Label className="text-sm font-semibold text-foreground">
+                      Födelsedatum {profile.birth_date && (
                         <span className="text-muted-foreground">
                           (Ålder: {differenceInYears(new Date(), profile.birth_date)} år)
                         </span>
                       )}
                     </Label>
-                    <Select 
-                      value={profile.birth_date ? profile.birth_date.getFullYear().toString() : ""} 
-                      onValueChange={(year) => {
-                        if (year) {
-                          // Set to January 1st of the selected year
-                          const birthDate = new Date(parseInt(year), 0, 1);
-                          setProfile(prev => ({ ...prev, birth_date: birthDate }));
-                        } else {
-                          setProfile(prev => ({ ...prev, birth_date: null }));
-                        }
-                      }}
-                    >
-                      <SelectTrigger className="border-muted focus:border-primary transition-colors">
-                        <SelectValue placeholder="Välj födelseår" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({ length: new Date().getFullYear() - 1920 + 1 }, (_, i) => {
-                          const year = new Date().getFullYear() - i;
-                          return (
-                            <SelectItem key={year} value={year.toString()}>
-                              {year}
+                    <div className="grid grid-cols-3 gap-2">
+                      {/* Day */}
+                      <Select 
+                        value={birthDay} 
+                        onValueChange={(day) => {
+                          setBirthDay(day);
+                          updateBirthDate(day, birthMonth, birthYear);
+                        }}
+                      >
+                        <SelectTrigger className="border-muted focus:border-primary transition-colors">
+                          <SelectValue placeholder="Dag" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: getDaysInMonth(birthMonth, birthYear) }, (_, i) => {
+                            const day = (i + 1).toString();
+                            return (
+                              <SelectItem key={day} value={day}>
+                                {day}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+
+                      {/* Month */}
+                      <Select 
+                        value={birthMonth} 
+                        onValueChange={(month) => {
+                          setBirthMonth(month);
+                          // Reset day if current day is invalid for new month
+                          const maxDays = getDaysInMonth(month, birthYear);
+                          const currentDay = parseInt(birthDay);
+                          if (currentDay > maxDays) {
+                            setBirthDay("");
+                            updateBirthDate("", month, birthYear);
+                          } else {
+                            updateBirthDate(birthDay, month, birthYear);
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="border-muted focus:border-primary transition-colors">
+                          <SelectValue placeholder="Månad" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {months.map(month => (
+                            <SelectItem key={month.value} value={month.value}>
+                              {month.label}
                             </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      {/* Year */}
+                      <Select 
+                        value={birthYear} 
+                        onValueChange={(year) => {
+                          setBirthYear(year);
+                          // Reset day if current day is invalid for new year (leap year consideration)
+                          const maxDays = getDaysInMonth(birthMonth, year);
+                          const currentDay = parseInt(birthDay);
+                          if (currentDay > maxDays) {
+                            setBirthDay("");
+                            updateBirthDate("", birthMonth, year);
+                          } else {
+                            updateBirthDate(birthDay, birthMonth, year);
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="border-muted focus:border-primary transition-colors">
+                          <SelectValue placeholder="År" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: new Date().getFullYear() - 1920 + 1 }, (_, i) => {
+                            const year = new Date().getFullYear() - i;
+                            return (
+                              <SelectItem key={year} value={year.toString()}>
+                                {year}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
