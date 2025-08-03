@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -24,6 +23,7 @@ serve(async (req) => {
     // Get the Firecrawl API key from Supabase secrets
     const firecrawlApiKey = Deno.env.get('FIRECRAWL_API_KEY')
     if (!firecrawlApiKey) {
+      console.error('FIRECRAWL_API_KEY not found in environment')
       return new Response(
         JSON.stringify({ error: 'Firecrawl API key not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -32,8 +32,8 @@ serve(async (req) => {
 
     console.log('Starting crawl for URL:', url)
 
-    // Call Firecrawl API
-    const firecrawlResponse = await fetch('https://api.firecrawl.dev/v0/crawl', {
+    // Call Firecrawl API v1
+    const firecrawlResponse = await fetch('https://api.firecrawl.dev/v1/crawl', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${firecrawlApiKey}`,
@@ -41,40 +41,51 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         url: url,
-        crawlerOptions: {
-          limit: 50,
-          excludes: ['*/login', '*/admin', '*/cart', '*/checkout']
-        },
-        pageOptions: {
-          includeHtml: false,
-          includeMarkdown: true,
-          includeRawHtml: false,
-          includeTags: ['h1', 'h2', 'h3', 'p', 'a', 'div', 'span'],
-          excludeTags: ['nav', 'footer', 'header', 'script', 'style']
+        limit: 30,
+        scrapeOptions: {
+          formats: ['markdown'],
+          includeTags: ['h1', 'h2', 'h3', 'p', 'a', 'div'],
+          excludeTags: ['nav', 'footer', 'header', 'script', 'style'],
         }
       })
     })
 
     if (!firecrawlResponse.ok) {
       const errorText = await firecrawlResponse.text()
-      console.error('Firecrawl API error:', errorText)
+      console.error('Firecrawl API error:', firecrawlResponse.status, errorText)
       return new Response(
-        JSON.stringify({ error: 'Failed to start crawl', details: errorText }),
+        JSON.stringify({ 
+          success: false,
+          error: `Firecrawl API error: ${firecrawlResponse.status}`,
+          details: errorText 
+        }),
         { status: firecrawlResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
     const crawlData = await firecrawlResponse.json()
-    console.log('Crawl started successfully:', crawlData)
+    console.log('Crawl response:', crawlData)
 
-    // If it's a crawl job, we need to check the status
-    if (crawlData.jobId) {
-      console.log('Crawl job started, checking status...')
+    // Check if we got data directly or need to poll for results
+    if (crawlData.data && Array.isArray(crawlData.data)) {
+      // Direct response with data
+      return new Response(
+        JSON.stringify({
+          success: true,
+          data: crawlData.data,
+          message: `Successfully crawled ${crawlData.data.length} pages`
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    } else if (crawlData.id) {
+      // Got a job ID, need to check status
+      console.log('Got crawl job ID:', crawlData.id)
       
-      // Wait a bit and then check status
-      await new Promise(resolve => setTimeout(resolve, 5000))
+      // Wait a bit for the crawl to start
+      await new Promise(resolve => setTimeout(resolve, 3000))
       
-      const statusResponse = await fetch(`https://api.firecrawl.dev/v0/crawl/status/${crawlData.jobId}`, {
+      // Check status
+      const statusResponse = await fetch(`https://api.firecrawl.dev/v1/crawl/${crawlData.id}`, {
         headers: {
           'Authorization': `Bearer ${firecrawlApiKey}`,
         }
@@ -87,32 +98,44 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({
             success: true,
-            jobId: crawlData.jobId,
+            jobId: crawlData.id,
             status: statusData.status,
             completed: statusData.completed || 0,
             total: statusData.total || 0,
             data: statusData.data || [],
-            message: 'Crawl started successfully'
+            message: `Crawl ${statusData.status}. Found ${statusData.completed || 0} pages.`
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      } else {
+        console.error('Status check failed:', statusResponse.status)
+        return new Response(
+          JSON.stringify({
+            success: true,
+            jobId: crawlData.id,
+            status: 'started',
+            message: 'Crawl started successfully but status check failed'
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
+    } else {
+      console.error('Unexpected response format:', crawlData)
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          error: 'Unexpected response format from Firecrawl',
+          details: crawlData 
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
-
-    // If it's a direct response (single page)
-    return new Response(
-      JSON.stringify({
-        success: true,
-        data: crawlData,
-        message: 'Page crawled successfully'
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
 
   } catch (error) {
     console.error('Error in crawl-golf-courses function:', error)
     return new Response(
       JSON.stringify({ 
+        success: false,
         error: 'Internal server error', 
         details: error.message 
       }),
