@@ -1,84 +1,9 @@
-import { useState } from 'react';
 import { Navigation } from "@/components/Navigation";
-import { SwipeCard } from '@/components/SwipeCard';
-import { SwipeFiltersComponent } from '@/components/SwipeFilters';
-import { useSwipeProfiles } from '@/hooks/useSwipeProfiles';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Users, Heart, RefreshCw, X } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Heart, X } from 'lucide-react';
 
 export const SwipeMatch = () => {
-  const {
-    currentProfile,
-    hasMoreProfiles,
-    loading,
-    filters,
-    setFilters,
-    swipeLeft,
-    swipeRight,
-    refetch,
-    totalProfiles,
-    currentIndex
-  } = useSwipeProfiles();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-subtle">
-        <Navigation />
-        <div className="pb-24 pt-8">
-          <div className="container mx-auto px-4">
-            <Card className="max-w-sm mx-auto">
-              <CardContent className="p-8 text-center">
-                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-                <p>Laddar profiler...</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!hasMoreProfiles) {
-    return (
-      <div className="min-h-screen bg-gradient-subtle">
-        <Navigation />
-        <div className="pb-24 pt-8">
-          <div className="container mx-auto px-4">
-            <div className="max-w-sm mx-auto space-y-6">
-              <div className="text-center mb-6">
-                <h1 className="text-2xl font-bold mb-2">Golf Match</h1>
-                <p className="text-muted-foreground">Hitta din nästa golfpartner</p>
-              </div>
-
-              <SwipeFiltersComponent 
-                filters={filters} 
-                onFiltersChange={setFilters} 
-              />
-
-              <Card>
-                <CardContent className="p-8 text-center space-y-4">
-                  <Users className="h-16 w-16 mx-auto text-muted-foreground" />
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Inga fler profiler</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Du har sett alla tillgängliga profiler med dina nuvarande filter.
-                    </p>
-                    <Button onClick={refetch} className="w-full">
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      Uppdatera
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-subtle">
       <Navigation />
@@ -90,78 +15,44 @@ export const SwipeMatch = () => {
             <div className="text-center mb-6">
               <h1 className="text-2xl font-bold mb-2">Golf Match</h1>
               <p className="text-muted-foreground">Hitta din nästa golfpartner</p>
-              
-              {totalProfiles > 0 && (
-                <div className="flex items-center justify-center gap-2 mt-3">
-                  <Badge variant="outline">
-                    {currentIndex + 1} av {totalProfiles}
-                  </Badge>
+            </div>
+
+            {/* Simple Test Card */}
+            <Card className="h-[400px]">
+              <CardContent className="p-6 h-full flex flex-col justify-between">
+                <div className="text-center space-y-4">
+                  <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-blue-500 rounded-full mx-auto flex items-center justify-center">
+                    <span className="text-white text-2xl font-bold">TU</span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Test Användare</h3>
+                    <p className="text-muted-foreground">25 år</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm">HCP: 15</p>
+                    <p className="text-sm">Hemklubb: Test GK</p>
+                  </div>
                 </div>
-              )}
-            </div>
-
-            {/* Filters */}
-            <SwipeFiltersComponent 
-              filters={filters} 
-              onFiltersChange={setFilters} 
-            />
-
-            {/* Swipe Instructions */}
-            <div className="text-center text-sm text-muted-foreground mb-4 space-y-1">
-              <p>Swipea höger 💚 för att skicka vänförfrågan</p>
-              <p>Swipea vänster 💔 för att hoppa över</p>
-            </div>
-
-            {/* Swipe Card */}
-            {currentProfile ? (
-              <div className="space-y-4">
-                <SwipeCard
-                  key={currentProfile.user_id}
-                  profile={currentProfile}
-                  onSwipeLeft={() => swipeLeft(currentProfile.user_id)}
-                  onSwipeRight={() => swipeRight(currentProfile.user_id)}
-                  onRefresh={refetch}
-                />
                 
-                {/* Preview fallback buttons */}
-                <div className="flex gap-3 md:hidden">
+                <div className="flex gap-3">
                   <Button 
-                    onClick={() => swipeLeft(currentProfile.user_id)}
                     variant="outline" 
                     className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
+                    onClick={() => alert('Swipe left!')}
                   >
                     <X className="h-4 w-4 mr-2" />
                     Hoppa över
                   </Button>
                   <Button 
-                    onClick={() => swipeRight(currentProfile.user_id)}
                     className="flex-1 bg-green-600 hover:bg-green-700"
+                    onClick={() => alert('Swipe right!')}
                   >
                     <Heart className="h-4 w-4 mr-2" />
-                    Skicka förfrågan
+                    Gilla
                   </Button>
                 </div>
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-                  <p>Laddar profil...</p>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Legend */}
-            <div className="flex justify-center gap-6 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                <span>Hoppa över</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span>Skicka förfrågan</span>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
