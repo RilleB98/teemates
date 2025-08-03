@@ -1,6 +1,5 @@
 import { Navigation } from "@/components/Navigation";
 import { ChatRoom } from "@/components/ChatRoom";
-import { GolfChatBots } from "@/components/GolfChatBots";
 import { useState } from "react";
 
 export const Messages = () => {
@@ -19,11 +18,6 @@ export const Messages = () => {
           <h2 className="text-2xl font-bold text-center mb-8">Golf Chat</h2>
           
           <div className="max-w-2xl mx-auto space-y-6">
-            {/* Chat Bot Controls */}
-            <div className="flex justify-center">
-              <GolfChatBots />
-            </div>
-            
             {/* Open Chat Button */}
             <div className="text-center">
               <button
