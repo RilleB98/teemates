@@ -340,14 +340,24 @@ export const Profile = () => {
                       </div>
                     ) : (
                       <div className="group cursor-pointer" onClick={handleNameEdit}>
-                        <h2 className="text-2xl font-bold text-primary group-hover:text-primary/80 transition-colors">
-                          {profile.name || "Min Profil"}
-                          {profile.birth_date && (
-                            <span className="text-lg text-muted-foreground ml-2">
-                              ({differenceInYears(new Date(), profile.birth_date)} år)
-                            </span>
+                        <div className="flex items-center justify-center gap-2">
+                          <h2 className="text-2xl font-bold text-primary group-hover:text-primary/80 transition-colors">
+                            {profile.name || "Förnamn"}
+                            {profile.birth_date && profile.name && (
+                              <span className="text-lg text-muted-foreground ml-2">
+                                ({differenceInYears(new Date(), profile.birth_date)} år)
+                              </span>
+                            )}
+                          </h2>
+                          {!profile.name && (
+                            <Edit2 className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                           )}
-                        </h2>
+                        </div>
+                        {profile.birth_date && !profile.name && (
+                          <span className="text-lg text-muted-foreground">
+                            ({differenceInYears(new Date(), profile.birth_date)} år)
+                          </span>
+                        )}
                         <p className="text-sm text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
                           Klicka för att redigera
                         </p>
