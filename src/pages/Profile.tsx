@@ -221,7 +221,7 @@ export const Profile = () => {
     <div className="min-h-screen bg-gradient-hero pt-24 pb-12">
       <div className="max-w-2xl mx-auto px-6">
         <Card className="bg-white/95 backdrop-blur-sm border-golf-green-light">
-          <CardHeader className="text-center relative pb-16">
+          <CardHeader className="text-center relative">
             <Button 
               variant="ghost" 
               size="sm"
@@ -231,7 +231,7 @@ export const Profile = () => {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Tillbaka
             </Button>
-            <div className="flex items-center gap-2 justify-center mt-24">
+            <div className="flex items-center gap-2 justify-center mt-20">
               {isEditingName ? (
                 <div className="flex items-center gap-2">
                   <Input
