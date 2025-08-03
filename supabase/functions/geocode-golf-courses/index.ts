@@ -155,11 +155,11 @@ Deno.serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch golf courses that need re-geocoding (exact Stockholm coordinates or 0,0)
+    // Fetch golf courses that need re-geocoding (duplicated coordinates or 0,0)
     const { data: courses, error: fetchError } = await supabase
       .from('golf_courses')
       .select('*')
-      .or('latitude.eq.0,longitude.eq.0,and(latitude.eq.59.3293,longitude.eq.18.0686)');
+      .or('latitude.eq.0,longitude.eq.0,latitude.eq.57.7089,latitude.eq.59.3485505,latitude.eq.55.6059,latitude.eq.55.605');
 
     if (fetchError) {
       console.error('Error fetching golf courses:', fetchError);
