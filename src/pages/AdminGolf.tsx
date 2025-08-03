@@ -1,5 +1,6 @@
 import { SimpleGolfImporter } from "@/components/SimpleGolfImporter";
 import { BulkGolfImporter } from "@/components/BulkGolfImporter";
+import { GeocodingManager } from "@/components/GeocodingManager";
 import { Navigation } from "@/components/Navigation";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Card, CardContent } from "@/components/ui/card";
@@ -61,6 +62,7 @@ export const AdminGolf = () => {
           </div>
           
           <div className="space-y-8">
+            <GeocodingManager />
             <BulkGolfImporter />
             <SimpleGolfImporter />
           </div>
