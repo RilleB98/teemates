@@ -58,19 +58,20 @@ export const Courses = () => {
     <div className="min-h-screen bg-gradient-to-br from-golf-green via-background to-golf-green-light">
       <NavComponent />
       
-      <div className="pb-24"> {/* Account for fixed bottom navigation */}
+      <div className="pb-24 pt-4"> {/* Account for fixed bottom navigation */}
         
-        <div className="max-w-4xl mx-auto px-6 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8 animate-fade-in">
+        <div className="flex items-center justify-between mb-6 sm:mb-8 animate-fade-in">
           <Button 
             variant="ghost" 
             size="sm"
             onClick={() => navigate("/")}
-            className="text-white hover:bg-white/20 hover-scale backdrop-blur-sm"
+            className="text-white hover:bg-white/20 hover-scale backdrop-blur-sm touch-manipulation"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Tillbaka
+            <span className="hidden xs:inline">Tillbaka</span>
+            <span className="xs:hidden">←</span>
           </Button>
           
           {!location && (
@@ -79,41 +80,48 @@ export const Courses = () => {
               size="sm"
               onClick={getCurrentPosition}
               disabled={loading}
-              className="bg-white/20 border-white/30 text-white hover:bg-white/30 hover-scale backdrop-blur-sm"
+              className="bg-white/20 border-white/30 text-white hover:bg-white/30 hover-scale backdrop-blur-sm touch-manipulation"
             >
-              <Navigation className="w-4 h-4 mr-2" />
-              {loading ? "Hämtar..." : "Hitta närliggande"}
+              <Navigation className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">{loading ? "Hämtar..." : "Hitta närliggande"}</span>
+              <span className="sm:hidden">📍</span>
             </Button>
           )}
         </div>
 
         {/* Title */}
-        <div className="text-center mb-10 animate-scale-in">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 text-shadow-lg">
+        <div className="text-center mb-8 sm:mb-10 animate-scale-in px-2">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3 sm:mb-4 text-shadow-lg leading-tight">
             Golfbanor i Sverige
           </h1>
-          <p className="text-xl text-white/90 backdrop-blur-sm bg-white/10 rounded-full px-6 py-2 inline-block">
-            {golfCourses.length} golfbanor att upptäcka
-            {location && " • Sorterade efter avstånd"}
+          <p className="text-lg sm:text-xl text-white/90 backdrop-blur-sm bg-white/10 rounded-full px-4 sm:px-6 py-2 inline-block max-w-full">
+            <span className="hidden sm:inline">{golfCourses.length} golfbanor att upptäcka</span>
+            <span className="sm:hidden">{golfCourses.length} banor</span>
+            {location && (
+              <>
+                <span className="hidden sm:inline"> • Sorterade efter avstånd</span>
+                <span className="sm:hidden"> • Närhet</span>
+              </>
+            )}
           </p>
         </div>
 
         {/* Search */}
-        <div className="relative mb-8 animate-slide-up">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+        <div className="relative mb-6 sm:mb-8 animate-slide-up">
+          <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 sm:w-5 h-4 sm:h-5" />
           <Input
             type="text"
-            placeholder="Sök på golfbana, ort eller svårighetsgrad..."
+            placeholder="Sök golfbana, ort eller svårighetsgrad..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-12 pr-12 py-4 bg-white/95 backdrop-blur-sm text-lg shadow-lg border-0 focus:ring-2 focus:ring-golf-green/50"
+            className="pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-4 bg-white/95 backdrop-blur-sm text-base sm:text-lg shadow-lg border-0 focus:ring-2 focus:ring-golf-green/50 touch-manipulation"
           />
           {searchQuery && (
             <Button
               variant="ghost"
               size="sm"
               onClick={clearSearch}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover-scale"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover-scale touch-manipulation"
             >
               <X className="w-4 h-4" />
             </Button>
@@ -140,24 +148,29 @@ export const Courses = () => {
         )}
 
         {/* Results count */}
-        <div className="mb-6 animate-fade-in">
-          <p className="text-white/90 text-lg font-medium backdrop-blur-sm bg-white/10 rounded-full px-4 py-2 inline-block">
-            {searchQuery ? `${filteredAndSortedCourses.length} resultat för "${searchQuery}"` : `Visar alla ${filteredAndSortedCourses.length} golfbanor`}
+        <div className="mb-4 sm:mb-6 animate-fade-in">
+          <p className="text-white/90 text-base sm:text-lg font-medium backdrop-blur-sm bg-white/10 rounded-full px-3 sm:px-4 py-2 inline-block">
+            <span className="hidden sm:inline">
+              {searchQuery ? `${filteredAndSortedCourses.length} resultat för "${searchQuery}"` : `Visar alla ${filteredAndSortedCourses.length} golfbanor`}
+            </span>
+            <span className="sm:hidden">
+              {searchQuery ? `${filteredAndSortedCourses.length} resultat` : `${filteredAndSortedCourses.length} banor`}
+            </span>
           </p>
         </div>
 
         {/* Course List */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {filteredAndSortedCourses.length === 0 ? (
             <Card className="bg-white/95 backdrop-blur-sm shadow-xl border-0 animate-scale-in">
-              <CardContent className="p-12 text-center">
-                <Search className="w-16 h-16 text-muted-foreground mx-auto mb-6 animate-pulse" />
-                <h3 className="text-2xl font-bold text-golf-premium mb-4">Inga resultat</h3>
-                <p className="text-muted-foreground text-lg mb-6">
+              <CardContent className="p-8 sm:p-12 text-center">
+                <Search className="w-12 sm:w-16 h-12 sm:h-16 text-muted-foreground mx-auto mb-4 sm:mb-6 animate-pulse" />
+                <h3 className="text-xl sm:text-2xl font-bold text-golf-premium mb-3 sm:mb-4">Inga resultat</h3>
+                <p className="text-muted-foreground text-base sm:text-lg mb-4 sm:mb-6">
                   Försök med ett annat sökord eller rensa sökningen för att se alla banor.
                 </p>
                 {searchQuery && (
-                  <Button onClick={clearSearch} className="mt-4 hover-scale">
+                  <Button onClick={clearSearch} className="mt-4 hover-scale touch-manipulation">
                     Visa alla banor
                   </Button>
                 )}
@@ -172,60 +185,61 @@ export const Courses = () => {
               return (
                 <Card 
                   key={index} 
-                  className="bg-white/95 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer hover-scale group animate-fade-in"
+                  className="bg-white/95 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer hover-scale group animate-fade-in touch-manipulation active:scale-95"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <CardContent className="p-8">
-                    <div className="flex gap-6">
-                      <div className="relative group-hover:scale-105 transition-transform duration-300">
+                  <CardContent className="p-4 sm:p-6 lg:p-8">
+                    <div className="flex gap-3 sm:gap-4 lg:gap-6">
+                      <div className="relative group-hover:scale-105 transition-transform duration-300 flex-shrink-0">
                         <img 
                           src={course.image} 
                           alt={course.name}
-                          className="w-24 h-24 rounded-xl object-cover flex-shrink-0 shadow-lg"
+                          className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-lg sm:rounded-xl object-cover shadow-lg"
                         />
-                        <div className="absolute inset-0 bg-golf-green/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="absolute inset-0 bg-golf-green/20 rounded-lg sm:rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <h3 className="text-xl font-bold text-golf-premium group-hover:text-golf-green transition-colors duration-300">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between mb-2 sm:mb-3">
+                          <div className="flex-1 min-w-0 mr-2">
+                            <h3 className="text-lg sm:text-xl font-bold text-golf-premium group-hover:text-golf-green transition-colors duration-300 truncate">
                               {course.name}
                             </h3>
-                            <div className="flex items-center gap-3 text-muted-foreground mt-1">
-                              <MapPin className="w-4 h-4 text-golf-green" />
-                              <span className="font-medium">{course.location}</span>
+                            <div className="flex items-center gap-2 sm:gap-3 text-sm text-muted-foreground mt-1">
+                              <MapPin className="w-3 sm:w-4 h-3 sm:h-4 text-golf-green flex-shrink-0" />
+                              <span className="font-medium truncate">{course.location}</span>
                               {distance && (
                                 <>
-                                  <span>•</span>
-                                  <span className="text-golf-green font-bold bg-golf-green/10 px-2 py-1 rounded-full text-sm">
+                                  <span className="hidden sm:inline">•</span>
+                                  <span className="text-golf-green font-bold bg-golf-green/10 px-2 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
                                     {distance.toFixed(1)} km
                                   </span>
                                 </>
                               )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 bg-accent/10 px-3 py-1 rounded-full">
-                            <Star className="w-4 h-4 text-accent fill-current" />
-                            <span className="font-bold text-accent">{course.rating}</span>
+                          <div className="flex items-center gap-1 sm:gap-2 bg-accent/10 px-2 sm:px-3 py-1 rounded-full flex-shrink-0">
+                            <Star className="w-3 sm:w-4 h-3 sm:h-4 text-accent fill-current" />
+                            <span className="font-bold text-accent text-sm">{course.rating}</span>
                           </div>
                         </div>
                         
-                        <div className="flex items-center gap-4 mb-4">
-                          <Badge variant="outline" className={`${getDifficultyColor(course.difficulty)} font-semibold`}>
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 lg:gap-4 mb-3 sm:mb-4">
+                          <Badge variant="outline" className={`${getDifficultyColor(course.difficulty)} font-semibold text-xs sm:text-sm`}>
                             {course.difficulty}
                           </Badge>
-                          <span className="text-muted-foreground font-medium">{course.holes} hål</span>
-                          <span className="text-golf-green font-bold text-lg">{course.price}</span>
+                          <span className="text-muted-foreground font-medium text-sm">{course.holes} hål</span>
+                          <span className="text-golf-green font-bold text-base sm:text-lg">{course.price}</span>
                         </div>
                         
                         <div className="flex items-center justify-between">
-                          <div className="text-sm text-muted-foreground flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <span className="mr-2">👆</span>
-                            Klicka för mer information
+                          <div className="text-xs sm:text-sm text-muted-foreground flex items-center opacity-60 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span className="mr-1 sm:mr-2">👆</span>
+                            <span className="hidden sm:inline">Klicka för mer information</span>
+                            <span className="sm:hidden">Mer info</span>
                           </div>
                           {distance && distance < 10 && (
-                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 animate-pulse">
-                              ⭐ Närliggande
+                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 animate-pulse text-xs whitespace-nowrap">
+                              ⭐ <span className="hidden sm:inline">Närliggande</span><span className="sm:hidden">Nära</span>
                             </Badge>
                           )}
                         </div>
