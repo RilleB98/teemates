@@ -29,7 +29,14 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/friends" element={<Friends />} />
-            <Route path="/swipe" element={<SwipeMatch />} />
+            <Route path="/swipe" element={
+              <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+                <div className="text-center">
+                  <h1 className="text-2xl font-bold mb-4">Golf Match</h1>
+                  <p>Funktionen är temporärt inaktiverad i preview</p>
+                </div>
+              </div>
+            } />
             <Route path="/messages" element={<Messages />} />
             <Route path="/admin/golf" element={<AdminGolf />} />
             <Route path="/profile" element={
