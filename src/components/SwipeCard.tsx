@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Heart, X, RefreshCw, MapPin } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -81,17 +81,45 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
     }
   };
 
-  // Mouse events
+  // Global mouse events for better preview support
+  useEffect(() => {
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        handleMove(e.clientX, e.clientY);
+      }
+    };
+
+    const handleGlobalMouseUp = () => {
+      if (isDragging) {
+        handleEnd();
+      }
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleGlobalMouseMove);
+      document.addEventListener('mouseup', handleGlobalMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, [isDragging, dragOffset.x, startPos.x]);
+
+  // Mouse events - improved for preview
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     handleStart(e.clientX, e.clientY);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    e.preventDefault();
     handleMove(e.clientX, e.clientY);
   };
 
-  const handleMouseUp = () => {
+  const handleMouseUp = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
     handleEnd();
   };
 
@@ -129,9 +157,10 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
         style={{
           transform: `translateX(${dragOffset.x}px) translateY(${dragOffset.y * 0.1}px) rotate(${rotation}deg)`,
           opacity: isDragging ? opacity : 1,
+          willChange: 'transform, opacity'
         }}
       >
-        <Card className="h-full shadow-xl border-2 border-muted overflow-hidden">
+        <Card className="h-full shadow-xl border-2 border-muted overflow-hidden bg-white">
           <CardContent className="p-0 h-full flex flex-col">
             {/* Profile Image */}
             <div className="relative h-2/3 bg-gradient-to-br from-gray-100 to-gray-200">
