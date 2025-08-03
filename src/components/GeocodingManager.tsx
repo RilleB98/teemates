@@ -60,8 +60,13 @@ export const GeocodingManager = () => {
       const initialCourses = coursesWithoutCoordinates.length;
       console.log(`Starting geocoding for ${initialCourses} courses`);
 
-      // Start the edge function (non-blocking)
-      const geocodingPromise = supabase.functions.invoke('geocode-golf-courses');
+      // Start the edge function with increased timeout (non-blocking)
+      const geocodingPromise = supabase.functions.invoke('geocode-golf-courses', {
+        body: {},
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
       // Set up polling to track progress
       const pollProgress = async () => {
