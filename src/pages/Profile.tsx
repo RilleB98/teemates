@@ -165,7 +165,7 @@ export const Profile = () => {
         avatar_url: profile.avatar_url || null,
         selected_course: profile.selected_course || null,
         gender: profile.gender || null,
-        birth_date: profile.birth_date ? profile.birth_date.toISOString().split('T')[0] : null
+        birth_date: profile.birth_date ? profile.birth_date.getFullYear().toString() + '-01-01' : null
       };
 
       const { error } = await supabase
@@ -351,37 +351,39 @@ export const Profile = () => {
                 {/* Profile Form */}
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="birth_date" className="text-sm font-semibold text-foreground">
-                      Födelsedatum {profile.birth_date && (
+                    <Label htmlFor="birth_year" className="text-sm font-semibold text-foreground">
+                      Födelseår {profile.birth_date && (
                         <span className="text-muted-foreground">
                           (Ålder: {differenceInYears(new Date(), profile.birth_date)} år)
                         </span>
                       )}
                     </Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal border-muted focus:border-primary transition-colors",
-                            !profile.birth_date && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {profile.birth_date ? format(profile.birth_date, "dd MMM yyyy") : "Välj födelsedatum"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={profile.birth_date || undefined}
-                          onSelect={(date) => setProfile(prev => ({ ...prev, birth_date: date || null }))}
-                          disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                          initialFocus
-                          className={cn("p-3 pointer-events-auto")}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <Select 
+                      value={profile.birth_date ? profile.birth_date.getFullYear().toString() : ""} 
+                      onValueChange={(year) => {
+                        if (year) {
+                          // Set to January 1st of the selected year
+                          const birthDate = new Date(parseInt(year), 0, 1);
+                          setProfile(prev => ({ ...prev, birth_date: birthDate }));
+                        } else {
+                          setProfile(prev => ({ ...prev, birth_date: null }));
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="border-muted focus:border-primary transition-colors">
+                        <SelectValue placeholder="Välj födelseår" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: new Date().getFullYear() - 1920 + 1 }, (_, i) => {
+                          const year = new Date().getFullYear() - i;
+                          return (
+                            <SelectItem key={year} value={year.toString()}>
+                              {year}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
