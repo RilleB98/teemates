@@ -21,7 +21,7 @@ interface CrawlResult {
 
 export const GolfCrawler = () => {
   const { toast } = useToast();
-  const [url, setUrl] = useState('https://golf.se/golfsallskap');
+  const [url, setUrl] = useState('https://golf.se/spela-golf/hitta-golfklubb');
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [crawlResult, setCrawlResult] = useState<CrawlResult | null>(null);
@@ -89,10 +89,10 @@ export const GolfCrawler = () => {
   };
 
   const suggestedUrls = [
-    'https://golf.se/golfsallskap',
-    'https://www.svenskgolf.se/klubbar/',
+    'https://golf.se/spela-golf/hitta-golfklubb',
+    'https://mingolf.golf.se/',
     'https://golfguiden.com/golfbanor/sverige/',
-    'https://www.golf.se/golfbanor'
+    'https://www.golfamore.com/sv/courses/sweden'
   ];
 
   return (
