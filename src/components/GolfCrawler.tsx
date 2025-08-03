@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useToast } from "@/components/ui/use-toast"; 
+import { useToast } from "@/hooks/use-toast"; 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
