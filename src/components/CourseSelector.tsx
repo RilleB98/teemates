@@ -130,22 +130,19 @@ export const CourseSelector = ({ selectedCourse, onCourseSelect }: CourseSelecto
                       />
                       <div className="flex-1">
                         <div className="flex items-start justify-between">
-                          <div>
+                          <div className="flex-1">
                             <h4 className="font-semibold text-golf-premium">{course.name}</h4>
                             <div className="flex items-center gap-2 mt-1">
                               <MapPin className="w-3 h-3 text-muted-foreground" />
                               <span className="text-sm text-muted-foreground">{course.location}</span>
-                              {distance && (
-                                <>
-                                  <span className="text-xs text-muted-foreground">•</span>
-                                  <span className="text-xs text-golf-green font-medium">{distance.toFixed(1)} km</span>
-                                </>
-                              )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className="text-xs text-muted-foreground">Tillgänglig</span>
-                          </div>
+                          {distance && (
+                            <div className="text-right">
+                              <span className="text-sm text-golf-green font-medium">{distance.toFixed(1)} km</span>
+                              <p className="text-xs text-muted-foreground">avstånd</p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
