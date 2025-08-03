@@ -1,4 +1,4 @@
-import { ManualGolfImporter } from "@/components/ManualGolfImporter";
+import { SimpleGolfImporter } from "@/components/SimpleGolfImporter";
 import { Navigation } from "@/components/Navigation";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Card, CardContent } from "@/components/ui/card";
@@ -55,11 +55,11 @@ export const AdminGolf = () => {
             </h1>
             <p className="text-base sm:text-xl text-white/90 backdrop-blur-sm bg-white/10 rounded-full px-4 py-2 inline-block flex items-center gap-2 justify-center">
               <PlusCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-              Lägg till golfbanor manuellt
+              Enkelt sätt att lägga till golfbanor
             </p>
           </div>
           
-          <ManualGolfImporter />
+          <SimpleGolfImporter />
         </div>
       </div>
     </div>
