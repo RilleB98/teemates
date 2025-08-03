@@ -48,6 +48,9 @@ export const GeocodingManager = () => {
     setProgress(0);
     setResults([]);
 
+    // Clear any previous interval
+    let progressInterval: NodeJS.Timeout;
+
     try {
       console.log('Starting geocoding process...');
       
@@ -57,20 +60,17 @@ export const GeocodingManager = () => {
       });
 
       // Simulate progress while geocoding is running
-      const progressInterval = setInterval(() => {
+      progressInterval = setInterval(() => {
         setProgress(prev => {
-          const newProgress = prev + (100 - prev) * 0.1; // Gradually approach 100%
-          return Math.min(newProgress, 95); // Don't go above 95% until complete
+          const newProgress = prev + (100 - prev) * 0.15; // Gradually approach 100%
+          return Math.min(newProgress, 90); // Don't go above 90% until complete
         });
-      }, 500);
+      }, 1000);
 
       console.log('Calling geocode-golf-courses edge function...');
       
       // Call the edge function to start geocoding
       const { data, error } = await supabase.functions.invoke('geocode-golf-courses');
-
-      // Clear the progress simulation
-      clearInterval(progressInterval);
 
       console.log('Edge function response:', { data, error });
 
@@ -79,25 +79,34 @@ export const GeocodingManager = () => {
         throw error;
       }
 
-      setResults(data.results || []);
-      setProgress(100);
+      if (data) {
+        setResults(data.results || []);
+        setProgress(100);
 
-      // Reload courses to show updated data
-      await loadCourses();
+        // Reload courses to show updated data
+        await loadCourses();
 
-      toast({
-        title: "Geocoding Complete",
-        description: `${data.message}. Successfully geocoded ${data.stats?.successful || 0} courses, ${data.stats?.approximate || 0} used approximate coordinates.`,
-      });
+        toast({
+          title: "Geocoding Complete",
+          description: `${data.message}. Successfully geocoded ${data.stats?.successful || 0} courses, ${data.stats?.approximate || 0} used approximate coordinates.`,
+        });
+      } else {
+        throw new Error('No data returned from geocoding function');
+      }
 
     } catch (error) {
       console.error("Geocoding error:", error);
+      setProgress(0);
       toast({
         title: "Geocoding Error",
         description: error.message || "An error occurred during geocoding. Check console for details.",
         variant: "destructive",
       });
     } finally {
+      // Clear the progress simulation
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
       setIsGeocoding(false);
     }
   };
