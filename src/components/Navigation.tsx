@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Target, Users, MapPin, MessageCircle, User, Menu, LogOut, LogIn, Home } from "lucide-react";
+import { Target, Users, MapPin, MessageCircle, User, Menu, LogOut, LogIn, Home, Settings } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -182,6 +182,12 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
                         </Link>
                       </Button>
                     )}
+                    <Button variant="outline" className="w-full justify-start" asChild>
+                      <Link to="/admin/golf" onClick={() => setIsMobileMenuOpen(false)}>
+                        <Settings className="w-4 h-4 mr-3" />
+                        Admin Golfbanor
+                      </Link>
+                    </Button>
                     <Button variant="premium" className="w-full">
                       Premium
                     </Button>
