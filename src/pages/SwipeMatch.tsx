@@ -169,7 +169,10 @@ export const SwipeMatch = () => {
                 {/* Action Buttons */}
                 <div className="flex gap-3">
                   <Button 
-                    onClick={() => swipeLeft(currentProfile.user_id)}
+                    onClick={() => {
+                      console.log('Left button clicked');
+                      swipeLeft(currentProfile.user_id);
+                    }}
                     variant="outline" 
                     className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
                   >
@@ -177,7 +180,10 @@ export const SwipeMatch = () => {
                     Hoppa över
                   </Button>
                   <Button 
-                    onClick={() => swipeRight(currentProfile.user_id)}
+                    onClick={() => {
+                      console.log('Right button clicked');
+                      swipeRight(currentProfile.user_id);
+                    }}
                     className="flex-1 bg-green-600 hover:bg-green-700"
                   >
                     <Heart className="h-4 w-4 mr-2" />

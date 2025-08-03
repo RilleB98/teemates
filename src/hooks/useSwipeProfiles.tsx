@@ -91,11 +91,13 @@ export const useSwipeProfiles = () => {
   }, [user, filters]);
 
   const swipeLeft = (profileId: string) => {
+    console.log('Swipe left called for profile:', profileId);
     // Just move to next profile - no action needed for left swipe
     setCurrentIndex(prev => prev + 1);
   };
 
   const swipeRight = async (profileId: string) => {
+    console.log('Swipe right called for profile:', profileId);
     if (!user) return;
 
     try {
