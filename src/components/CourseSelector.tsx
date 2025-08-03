@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Star, Check, Navigation } from "lucide-react";
 import { useLocation } from "@/hooks/useLocation";
-import { golfCourses, type Course } from "@/data/golfCourses";
+import { golfCourses, Course } from "@/data/golfCourses";
 
 interface CourseSelectorProps {
   selectedCourse: Course | null;
