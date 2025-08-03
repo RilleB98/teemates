@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
+import { format, differenceInYears } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, User, Save, LogOut, MapPin, Star, ArrowLeft, Edit2 } from "lucide-react";
+import { Camera, User, Save, LogOut, MapPin, Star, ArrowLeft, Edit2, CalendarIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +23,8 @@ export const Profile = () => {
     handicap: "",
     avatar_url: "",
     selected_course: null as any,
-    gender: ""
+    gender: "",
+    birth_date: null as Date | null
   });
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState("");
@@ -60,7 +65,8 @@ export const Profile = () => {
           handicap: data.handicap?.toString() || "",
           avatar_url: data.avatar_url || "",
           selected_course: data.selected_course || null,
-          gender: data.gender || ""
+          gender: data.gender || "",
+          birth_date: data.birth_date ? new Date(data.birth_date) : null
         });
       }
     } catch (error) {
@@ -148,14 +154,18 @@ export const Profile = () => {
         return;
       }
 
+      // Calculate age from birth_date
+      const calculatedAge = profile.birth_date ? differenceInYears(new Date(), profile.birth_date) : null;
+
       const profileData = {
         user_id: user.id,
         name: profile.name || null,
-        age: profile.age ? parseInt(profile.age) : null,
+        age: calculatedAge,
         handicap: profile.handicap ? parseFloat(profile.handicap) : null,
         avatar_url: profile.avatar_url || null,
         selected_course: profile.selected_course || null,
-        gender: profile.gender || null
+        gender: profile.gender || null,
+        birth_date: profile.birth_date ? profile.birth_date.toISOString().split('T')[0] : null
       };
 
       const { error } = await supabase
@@ -341,15 +351,37 @@ export const Profile = () => {
                 {/* Profile Form */}
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="age" className="text-sm font-semibold text-foreground">Ålder</Label>
-                    <Input
-                      id="age"
-                      type="number"
-                      placeholder="Ange din ålder"
-                      value={profile.age}
-                      onChange={(e) => setProfile(prev => ({ ...prev, age: e.target.value }))}
-                      className="border-muted focus:border-primary transition-colors"
-                    />
+                    <Label htmlFor="birth_date" className="text-sm font-semibold text-foreground">
+                      Födelsedatum {profile.birth_date && (
+                        <span className="text-muted-foreground">
+                          (Ålder: {differenceInYears(new Date(), profile.birth_date)} år)
+                        </span>
+                      )}
+                    </Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal border-muted focus:border-primary transition-colors",
+                            !profile.birth_date && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {profile.birth_date ? format(profile.birth_date, "dd MMM yyyy") : "Välj födelsedatum"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={profile.birth_date || undefined}
+                          onSelect={(date) => setProfile(prev => ({ ...prev, birth_date: date || null }))}
+                          disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
 
                   <div className="space-y-2">
