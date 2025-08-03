@@ -205,12 +205,6 @@ export const Courses = () => {
                               )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-1 sm:gap-2 bg-accent/10 px-2 sm:px-3 py-1 rounded-full flex-shrink-0">
-                            <Navigation className="w-3 sm:w-4 h-3 sm:h-4 text-accent" />
-                            <span className="font-bold text-accent text-sm">
-                              {location ? `${calculateDistance(location.latitude, location.longitude, course.latitude, course.longitude).toFixed(1)} km` : 'Okänd distans'}
-                            </span>
-                          </div>
                         </div>
                         
                         <div className="flex flex-wrap items-center gap-2 sm:gap-3 lg:gap-4 mb-3 sm:mb-4">
