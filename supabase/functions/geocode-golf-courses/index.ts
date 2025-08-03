@@ -237,10 +237,12 @@ Deno.serve(async (req) => {
     const results = [];
     let successful = 0;
     let approximate = 0;
+    let processed = 0;
 
     // Process each course that needs geocoding
     for (const course of coursesToGeocode) {
-      console.log(`Processing: ${course.name} in ${course.location}`);
+      processed++;
+      console.log(`Processing ${processed}/${coursesToGeocode.length}: ${course.name} in ${course.location}`);
       
       // Get coordinates
       const geocodeResult = await geocodeGolfClub(course.name, course.location);
@@ -272,12 +274,14 @@ Deno.serve(async (req) => {
         location: course.location,
         old_coordinates: `${course.latitude}, ${course.longitude}`,
         new_coordinates: `${geocodeResult.latitude}, ${geocodeResult.longitude}`,
-        success: geocodeResult.success
+        success: geocodeResult.success,
+        processed_count: processed,
+        total_count: coursesToGeocode.length
       });
 
-      // Progress logging
-      if (results.length % 10 === 0) {
-        console.log(`Progress: ${results.length}/${coursesToGeocode.length} courses processed`);
+      // Progress logging every 5 courses
+      if (processed % 5 === 0 || processed === coursesToGeocode.length) {
+        console.log(`Progress: ${processed}/${coursesToGeocode.length} courses processed (${Math.round((processed/coursesToGeocode.length)*100)}%)`);
       }
     }
 
@@ -286,7 +290,8 @@ Deno.serve(async (req) => {
       duplicates: duplicateCoordinates.size,
       processed: coursesToGeocode.length,
       successful,
-      approximate
+      approximate,
+      progress_percentage: 100
     };
 
     console.log('Comprehensive geocoding completed:', stats);

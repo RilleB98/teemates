@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, MapPin, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
@@ -12,6 +13,7 @@ interface GeocodeStats {
   processed: number;
   successful: number;
   approximate: number;
+  progress_percentage?: number;
 }
 
 interface GeocodeResult {
@@ -20,6 +22,8 @@ interface GeocodeResult {
   old_coordinates: string;
   new_coordinates: string;
   success: boolean;
+  processed_count?: number;
+  total_count?: number;
 }
 
 export const GeocodeManager = () => {
@@ -27,17 +31,41 @@ export const GeocodeManager = () => {
   const [stats, setStats] = useState<GeocodeStats | null>(null);
   const [results, setResults] = useState<GeocodeResult[]>([]);
   const [duplicateCoords, setDuplicateCoords] = useState<string[]>([]);
+  const [currentProgress, setCurrentProgress] = useState(0);
+  const [totalToProcess, setTotalToProcess] = useState(0);
+  const [currentCourse, setCurrentCourse] = useState<string>('');
 
   const runGeocoding = async () => {
     setIsRunning(true);
     setStats(null);
     setResults([]);
     setDuplicateCoords([]);
+    setCurrentProgress(0);
+    setTotalToProcess(0);
+    setCurrentCourse('');
 
     try {
       toast.info('Startar geocoding av alla golfbanor...');
       
+      // Get initial count from edge function logs or estimate
       const { data, error } = await supabase.functions.invoke('geocode-golf-courses');
+
+      if (error) {
+        throw error;
+      }
+
+      // Update progress as we get results
+      if (data.results && data.results.length > 0) {
+        setTotalToProcess(data.stats.processed);
+        
+        // Simulate progress updates based on results
+        data.results.forEach((result: GeocodeResult, index: number) => {
+          setTimeout(() => {
+            setCurrentProgress(index + 1);
+            setCurrentCourse(result.name);
+          }, index * 100); // Stagger the updates
+        });
+      }
 
       if (error) {
         throw error;
@@ -46,6 +74,8 @@ export const GeocodeManager = () => {
       setStats(data.stats);
       setResults(data.results || []);
       setDuplicateCoords(data.duplicate_coordinates || []);
+      setTotalToProcess(data.stats.processed);
+      setCurrentProgress(data.stats.processed);
       
       toast.success(`Geocoding klar! ${data.stats.processed} banor uppdaterade.`);
     } catch (error) {
@@ -87,6 +117,22 @@ export const GeocodeManager = () => {
               </>
             )}
           </Button>
+
+          {/* Progress Bar */}
+          {isRunning && totalToProcess > 0 && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Framsteg: {currentProgress} av {totalToProcess}</span>
+                <span>{Math.round((currentProgress / totalToProcess) * 100)}%</span>
+              </div>
+              <Progress value={(currentProgress / totalToProcess) * 100} className="w-full" />
+              {currentCourse && (
+                <p className="text-sm text-muted-foreground">
+                  Bearbetar: {currentCourse}
+                </p>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 
