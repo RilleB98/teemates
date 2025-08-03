@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Search, MapPin, Star, Navigation, X } from "lucide-react";
+import { Search, MapPin, Star, Navigation, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "@/hooks/useLocation";
 import { golfCourses, Course } from "@/data/golfCourses";
@@ -62,18 +62,7 @@ export const Courses = () => {
         
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6 sm:mb-8 animate-fade-in">
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => navigate("/")}
-            className="text-white hover:bg-white/20 hover-scale backdrop-blur-sm touch-manipulation"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            <span className="hidden xs:inline">Tillbaka</span>
-            <span className="xs:hidden">←</span>
-          </Button>
-          
+        <div className="flex items-center justify-end mb-6 sm:mb-8 animate-fade-in">
           {!location && (
             <Button 
               variant="outline" 
