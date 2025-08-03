@@ -112,11 +112,13 @@ export const GeocodingManager = () => {
   };
 
   const coursesWithCoordinates = courses.filter(course => 
-    course.latitude !== 0 && course.longitude !== 0
+    course.latitude !== 0 && course.longitude !== 0 && 
+    !(course.latitude === 59.3293 && course.longitude === 18.0686) // Exclude duplicate Stockholm coordinates
   );
   
   const coursesWithoutCoordinates = courses.filter(course => 
-    course.latitude === 0 || course.longitude === 0
+    course.latitude === 0 || course.longitude === 0 ||
+    (course.latitude === 59.3293 && course.longitude === 18.0686) // Include duplicate Stockholm coordinates
   );
 
   return (
