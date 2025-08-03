@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, Star, Navigation, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "@/hooks/useLocation";
+import { useGolfClubUsers } from "@/hooks/useGolfClubUsers";
 import { golfCourses, Course } from "@/data/golfCourses";
 import { Navigation as NavComponent } from "@/components/Navigation";
 
@@ -14,6 +15,7 @@ export const Courses = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const { location, loading, error, getCurrentPosition, calculateDistance } = useLocation();
+  const { clubUserCounts, loading: usersLoading } = useGolfClubUsers();
 
   // Filter and sort courses
   const filteredAndSortedCourses = useMemo(() => {
@@ -212,10 +214,9 @@ export const Courses = () => {
                         </div>
                         
                         <div className="flex items-center justify-between">
-                          <div className="text-xs sm:text-sm text-muted-foreground flex items-center opacity-60 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <span className="mr-1 sm:mr-2">👆</span>
-                            <span className="hidden sm:inline">Klicka för mer information</span>
-                            <span className="sm:hidden">Mer info</span>
+                          <div className="text-xs sm:text-sm text-muted-foreground flex items-center">
+                            <span className="mr-1 sm:mr-2">👥</span>
+                            <span>GolfBuddy Användare: {clubUserCounts[course.name] || 0}</span>
                           </div>
                           {distance && distance < 10 && (
                             <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 animate-pulse text-xs whitespace-nowrap">
