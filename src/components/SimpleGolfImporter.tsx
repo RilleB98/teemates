@@ -14,20 +14,6 @@ export const SimpleGolfImporter = () => {
   const [location, setLocation] = useState('');
   const [isAdding, setIsAdding] = useState(false);
 
-  const generateRandomData = () => {
-    const difficulties = ['Easy', 'Medium', 'Hard'];
-    const holes = [9, 18, 27];
-    
-    return {
-      rating: parseFloat((Math.random() * 1.5 + 3.5).toFixed(1)),
-      difficulty: difficulties[Math.floor(Math.random() * difficulties.length)],
-      holes: holes[Math.floor(Math.random() * holes.length)],
-      price: `${Math.floor(Math.random() * 700) + 300} SEK`,
-      latitude: parseFloat((Math.random() * 14 + 55).toFixed(4)),
-      longitude: parseFloat((Math.random() * 14 + 10).toFixed(4))
-    };
-  };
-
   const addGolfClub = async () => {
     if (!golfClubName.trim()) {
       toast({
@@ -55,18 +41,12 @@ export const SimpleGolfImporter = () => {
       // Simulera loading för UX
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      const randomData = generateRandomData();
-      
       const newCourse: Course = {
         name: golfClubName.trim(),
         location: location.trim(),
-        rating: randomData.rating,
-        difficulty: randomData.difficulty,
-        holes: randomData.holes,
-        price: randomData.price,
         image: course1,
-        latitude: randomData.latitude,
-        longitude: randomData.longitude
+        latitude: parseFloat((Math.random() * 14 + 55).toFixed(4)),
+        longitude: parseFloat((Math.random() * 14 + 10).toFixed(4))
       };
 
       // Uppdatera golfCourses-arrayen direkt i minnet

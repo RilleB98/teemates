@@ -14,20 +14,6 @@ export const BulkGolfImporter = () => {
   const [progress, setProgress] = useState(0);
   const [importedCount, setImportedCount] = useState(0);
 
-  const generateRandomData = () => {
-    const difficulties = ['Easy', 'Medium', 'Hard'];
-    const holes = [9, 18, 27];
-    
-    return {
-      rating: parseFloat((Math.random() * 1.5 + 3.5).toFixed(1)),
-      difficulty: difficulties[Math.floor(Math.random() * difficulties.length)],
-      holes: holes[Math.floor(Math.random() * holes.length)],
-      price: `${Math.floor(Math.random() * 700) + 300} SEK`,
-      latitude: parseFloat((Math.random() * 14 + 55).toFixed(4)),
-      longitude: parseFloat((Math.random() * 14 + 10).toFixed(4))
-    };
-  };
-
   const importAllGolfClubs = async () => {
     setIsImporting(true);
     setProgress(0);
@@ -50,18 +36,12 @@ export const BulkGolfImporter = () => {
           );
           
           if (!exists) {
-            const randomData = generateRandomData();
-            
             const newCourse: Course = {
               name: club.name,
               location: club.location,
-              rating: randomData.rating,
-              difficulty: randomData.difficulty,
-              holes: randomData.holes,
-              price: randomData.price,
               image: course1,
-              latitude: randomData.latitude,
-              longitude: randomData.longitude
+              latitude: parseFloat((Math.random() * 14 + 55).toFixed(4)),
+              longitude: parseFloat((Math.random() * 14 + 10).toFixed(4))
             };
 
             golfCourses.push(newCourse);

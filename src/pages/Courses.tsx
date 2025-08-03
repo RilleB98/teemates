@@ -24,8 +24,7 @@ export const Courses = () => {
       const query = searchQuery.toLowerCase().trim();
       courses = courses.filter(course => 
         course.name.toLowerCase().includes(query) ||
-        course.location.toLowerCase().includes(query) ||
-        course.difficulty.toLowerCase().includes(query)
+        course.location.toLowerCase().includes(query)
       );
     }
 
@@ -207,17 +206,13 @@ export const Courses = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-1 sm:gap-2 bg-accent/10 px-2 sm:px-3 py-1 rounded-full flex-shrink-0">
-                            <Star className="w-3 sm:w-4 h-3 sm:h-4 text-accent fill-current" />
-                            <span className="font-bold text-accent text-sm">{course.rating}</span>
+                            <MapPin className="w-3 sm:w-4 h-3 sm:h-4 text-accent" />
+                            <span className="font-bold text-accent text-sm">Tillgänglig</span>
                           </div>
                         </div>
                         
                         <div className="flex flex-wrap items-center gap-2 sm:gap-3 lg:gap-4 mb-3 sm:mb-4">
-                          <Badge variant="outline" className={`${getDifficultyColor(course.difficulty)} font-semibold text-xs sm:text-sm`}>
-                            {course.difficulty}
-                          </Badge>
-                          <span className="text-muted-foreground font-medium text-sm">{course.holes} hål</span>
-                          <span className="text-golf-green font-bold text-base sm:text-lg">{course.price}</span>
+                          <span className="text-muted-foreground font-medium text-sm">Golfbana</span>
                         </div>
                         
                         <div className="flex items-center justify-between">
