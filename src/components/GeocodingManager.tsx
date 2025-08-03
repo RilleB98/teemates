@@ -48,9 +48,6 @@ export const GeocodingManager = () => {
     setProgress(0);
     setResults([]);
 
-    // Clear any previous interval
-    let progressInterval: NodeJS.Timeout;
-
     try {
       console.log('Starting geocoding process...');
       
@@ -59,18 +56,59 @@ export const GeocodingManager = () => {
         description: "Starting automatic geocoding of all golf courses that need coordinates.",
       });
 
-      // Simulate progress while geocoding is running
-      progressInterval = setInterval(() => {
-        setProgress(prev => {
-          const newProgress = prev + (100 - prev) * 0.15; // Gradually approach 100%
-          return Math.min(newProgress, 90); // Don't go above 90% until complete
-        });
-      }, 1000);
+      // Get initial count of courses that need geocoding
+      const initialCourses = coursesWithoutCoordinates.length;
+      console.log(`Starting geocoding for ${initialCourses} courses`);
 
-      console.log('Calling geocode-golf-courses edge function...');
-      
-      // Call the edge function to start geocoding
-      const { data, error } = await supabase.functions.invoke('geocode-golf-courses');
+      // Start the edge function (non-blocking)
+      const geocodingPromise = supabase.functions.invoke('geocode-golf-courses');
+
+      // Set up polling to track progress
+      const pollProgress = async () => {
+        try {
+          const { data: updatedCourses } = await supabase
+            .from('golf_courses')
+            .select('*')
+            .order('name');
+
+          if (updatedCourses) {
+            const stillNeedGeocodingCount = updatedCourses.filter(course => 
+              course.latitude === 0 || course.longitude === 0 ||
+              (course.latitude === 59.3293 && course.longitude === 18.0686)
+            ).length;
+
+            const processedCount = initialCourses - stillNeedGeocodingCount;
+            const progressPercent = Math.round((processedCount / initialCourses) * 100);
+            
+            console.log(`Progress: ${processedCount}/${initialCourses} (${progressPercent}%)`);
+            setProgress(progressPercent);
+
+            // Update courses list
+            setCourses(updatedCourses);
+
+            return stillNeedGeocodingCount;
+          }
+          return initialCourses;
+        } catch (error) {
+          console.error('Error polling progress:', error);
+          return initialCourses;
+        }
+      };
+
+      // Poll every 2 seconds to update progress
+      const pollInterval = setInterval(async () => {
+        const remainingCount = await pollProgress();
+        if (remainingCount === 0) {
+          clearInterval(pollInterval);
+          setProgress(100);
+        }
+      }, 2000);
+
+      // Wait for the geocoding to complete
+      const { data, error } = await geocodingPromise;
+
+      // Clear polling
+      clearInterval(pollInterval);
 
       console.log('Edge function response:', { data, error });
 
@@ -83,7 +121,7 @@ export const GeocodingManager = () => {
         setResults(data.results || []);
         setProgress(100);
 
-        // Reload courses to show updated data
+        // Final reload to ensure UI is up to date
         await loadCourses();
 
         toast({
@@ -103,10 +141,6 @@ export const GeocodingManager = () => {
         variant: "destructive",
       });
     } finally {
-      // Clear the progress simulation
-      if (progressInterval) {
-        clearInterval(progressInterval);
-      }
       setIsGeocoding(false);
     }
   };
