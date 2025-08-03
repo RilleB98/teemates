@@ -196,18 +196,44 @@ export const Profile = () => {
         return;
       }
 
+      // Validate required fields
+      if (!profile.name) {
+        toast.error("Du måste fylla i ditt namn");
+        return;
+      }
+
+      if (!profile.birth_date) {
+        toast.error("Du måste fylla i ditt födelsedatum");
+        return;
+      }
+
+      if (!profile.gender) {
+        toast.error("Du måste välja kön");
+        return;
+      }
+
+      if (!profile.handicap) {
+        toast.error("Du måste fylla i ditt handikapp");
+        return;
+      }
+
+      if (!profile.selected_course) {
+        toast.error("Du måste välja en hemmaklubb");
+        return;
+      }
+
       // Calculate age from birth_date
       const calculatedAge = profile.birth_date ? differenceInYears(new Date(), profile.birth_date) : null;
 
       const profileData = {
         user_id: user.id,
-        name: profile.name || null,
+        name: profile.name,
         age: calculatedAge,
-        handicap: profile.handicap ? parseFloat(profile.handicap) : null,
+        handicap: parseFloat(profile.handicap),
         avatar_url: profile.avatar_url || null,
-        selected_course: profile.selected_course || null,
-        gender: profile.gender || null,
-        birth_date: profile.birth_date ? profile.birth_date.toISOString().split('T')[0] : null
+        selected_course: profile.selected_course,
+        gender: profile.gender,
+        birth_date: profile.birth_date.toISOString().split('T')[0]
       };
 
       const { error } = await supabase
@@ -541,8 +567,8 @@ export const Profile = () => {
                 <div className="flex flex-col sm:flex-row gap-3 pt-4">
                   <Button 
                     onClick={saveProfile} 
-                    disabled={loading || uploading}
-                    className="flex-1 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white shadow-lg"
+                    disabled={loading || uploading || !profile.name || !profile.birth_date || !profile.gender || !profile.handicap || !profile.selected_course}
+                    className="flex-1 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white shadow-lg disabled:opacity-50"
                   >
                     <Save className="w-4 h-4 mr-2" />
                     {loading ? "Sparar..." : "Spara Profil"}
