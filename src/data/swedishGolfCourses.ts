@@ -314,6 +314,7 @@ export const swedishGolfClubs = [
   { name: "Vänersborgs Golfklubb", location: "Vänersborg" },
   
   // Fler golfklubbar - utökad lista
+  { name: "Skepparslövs Golfklubb", location: "Skepparslöv" },
   { name: "Åkersberga Golfklubb", location: "Åkersberga" },
   { name: "Alstermo Golfklubb", location: "Alstermo" },
   { name: "Anderstorp Golfklubb", location: "Anderstorp" },
