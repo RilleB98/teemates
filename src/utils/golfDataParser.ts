@@ -15,33 +15,30 @@ export class GolfDataParser {
    */
   static parseMarkdownData(markdownContent: string): ParsedGolfClub[] {
     const clubs: ParsedGolfClub[] = [];
-    
-    // Split content into lines and process
     const lines = markdownContent.split('\n');
     
-    for (const line of lines) {
-      const trimmedLine = line.trim();
+    console.log('Parsing markdown content, total lines:', lines.length);
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
       
-      // Skip empty lines and common headers/footers
-      if (!trimmedLine || 
-          trimmedLine.includes('Följ våra största ögonblick') ||
-          trimmedLine.includes('För klubbar') ||
-          trimmedLine.includes('Logo') ||
-          trimmedLine.includes('https://') ||
-          trimmedLine.includes('©') ||
-          trimmedLine.length < 3) {
-        continue;
-      }
+      // Skip empty lines and obvious non-club content
+      if (!line || line.length < 5) continue;
       
-      // Look for golf club names - typically contain "Golf", "GK", "Golfklubb"
-      if (this.isLikelyGolfClubName(trimmedLine)) {
-        const parsedClub = this.parseGolfClubLine(trimmedLine);
+      // Skip common website elements and navigation
+      if (this.isWebsiteElement(line)) continue;
+      
+      // Look for actual golf club names
+      if (this.isActualGolfClub(line)) {
+        const parsedClub = this.parseGolfClubLine(line);
         if (parsedClub && !clubs.some(club => club.name === parsedClub.name)) {
           clubs.push(parsedClub);
+          console.log('Found golf club:', parsedClub.name);
         }
       }
     }
     
+    console.log('Total clubs found:', clubs.length);
     return clubs;
   }
   
@@ -67,6 +64,62 @@ export class GolfDataParser {
     });
   }
   
+  
+  private static isWebsiteElement(text: string): boolean {
+    const lowerText = text.toLowerCase();
+    
+    // Common website elements to skip
+    const websiteElements = [
+      'följ våra största ögonblick', 'för klubbar', 'logo', 'https://', '©',
+      'huvudpartners', 'officiella partners', 'kategoripartners',
+      'sök på webbplatsen', 'stäng', 'läs mer', 'tillgänglighetsredogörelse',
+      'personuppgiftshantering', 'till klubb.golf.se', 'till toppen',
+      'hjälpte den här informationen dig', 'sidan publicerades',
+      'gå till sidans innehåll', 'spela golf', 'regler & handicap',
+      'tävling', 'elit & landslag', 'utbildning', 'om golfsverige',
+      'hitta golfklubb', 'golfklubbar i sverige', 'välkommen till nya golf.se',
+      'börja spela golf', 'ta grönt kort', 'sök medlemskap', 'rent spel',
+      'det här är golf', 'golfregler', 'handicapregler', 'golfvett',
+      'min golf', 'start', 'google', 'terms', 'report a map error',
+      'open this area in google maps'
+    ];
+    
+    return websiteElements.some(element => lowerText.includes(element)) ||
+           text.includes('[') || text.includes(']') ||
+           /^\d+$/.test(text) || // Just numbers
+           text.length > 100; // Very long lines are likely not club names
+  }
+  
+  private static isActualGolfClub(text: string): boolean {
+    const lowerText = text.toLowerCase();
+    
+    // Must contain specific golf club indicators
+    const clubIndicators = [
+      'golfklubb', 'golf club', 'gk ', ' gk', 'golf & country club',
+      'country club', 'golfbana', 'golf course'
+    ];
+    
+    const hasClubIndicator = clubIndicators.some(indicator => lowerText.includes(indicator));
+    
+    // OR contain "golf" but with specific patterns that indicate it's a club name
+    const hasGolfWithContext = lowerText.includes('golf') && (
+      lowerText.includes(' golf ') ||
+      lowerText.endsWith(' golf') ||
+      lowerText.startsWith('golf ') ||
+      lowerText.includes('golf ab') ||
+      lowerText.includes('golf resort')
+    );
+    
+    if (!hasClubIndicator && !hasGolfWithContext) return false;
+    
+    // Additional validation
+    const isReasonableLength = text.length >= 8 && text.length <= 60;
+    const hasLetters = /[a-zA-ZåäöÅÄÖ]/.test(text);
+    const notJustGeneric = !/^(golf|golfklubb|golf club)$/i.test(lowerText);
+    
+    return isReasonableLength && hasLetters && notJustGeneric;
+  }
+
   private static isLikelyGolfClubName(text: string): boolean {
     const golfKeywords = [
       'golf', 'gk', 'golfklubb', 'golfbana', 'country club',
