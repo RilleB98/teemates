@@ -49,15 +49,22 @@ export const GeocodingManager = () => {
     setResults([]);
 
     try {
+      console.log('Starting geocoding process...');
+      
       toast({
         title: "Geocoding Started",
         description: "Starting automatic geocoding of all golf courses that need coordinates.",
       });
 
+      console.log('Calling geocode-golf-courses edge function...');
+      
       // Call the edge function to start geocoding
       const { data, error } = await supabase.functions.invoke('geocode-golf-courses');
 
+      console.log('Edge function response:', { data, error });
+
       if (error) {
+        console.error('Edge function error:', error);
         throw error;
       }
 
