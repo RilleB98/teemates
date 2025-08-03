@@ -5,7 +5,7 @@ import { SwipeFiltersComponent } from '@/components/SwipeFilters';
 import { useSwipeProfiles } from '@/hooks/useSwipeProfiles';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Users, Heart, RefreshCw } from 'lucide-react';
+import { Loader2, Users, Heart, RefreshCw, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export const SwipeMatch = () => {
@@ -113,14 +113,42 @@ export const SwipeMatch = () => {
             </div>
 
             {/* Swipe Card */}
-            {currentProfile && (
-              <SwipeCard
-                key={currentProfile.user_id}
-                profile={currentProfile}
-                onSwipeLeft={() => swipeLeft(currentProfile.user_id)}
-                onSwipeRight={() => swipeRight(currentProfile.user_id)}
-                onRefresh={refetch}
-              />
+            {currentProfile ? (
+              <div className="space-y-4">
+                <SwipeCard
+                  key={currentProfile.user_id}
+                  profile={currentProfile}
+                  onSwipeLeft={() => swipeLeft(currentProfile.user_id)}
+                  onSwipeRight={() => swipeRight(currentProfile.user_id)}
+                  onRefresh={refetch}
+                />
+                
+                {/* Preview fallback buttons */}
+                <div className="flex gap-3 md:hidden">
+                  <Button 
+                    onClick={() => swipeLeft(currentProfile.user_id)}
+                    variant="outline" 
+                    className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Hoppa över
+                  </Button>
+                  <Button 
+                    onClick={() => swipeRight(currentProfile.user_id)}
+                    className="flex-1 bg-green-600 hover:bg-green-700"
+                  >
+                    <Heart className="h-4 w-4 mr-2" />
+                    Skicka förfrågan
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                  <p>Laddar profil...</p>
+                </CardContent>
+              </Card>
             )}
 
             {/* Legend */}
