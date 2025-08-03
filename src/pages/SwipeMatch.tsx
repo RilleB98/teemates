@@ -9,8 +9,6 @@ import { Loader2, Users, Heart, RefreshCw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export const SwipeMatch = () => {
-  console.log("SwipeMatch component rendering");
-  
   const {
     currentProfile,
     hasMoreProfiles,
@@ -23,8 +21,6 @@ export const SwipeMatch = () => {
     totalProfiles,
     currentIndex
   } = useSwipeProfiles();
-
-  console.log("SwipeMatch hook data:", { currentProfile, hasMoreProfiles, loading, totalProfiles, currentIndex });
 
   if (loading) {
     return (
