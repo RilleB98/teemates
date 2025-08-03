@@ -1,5 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
-import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { useState, useRef } from 'react';
 import { Heart, X, RefreshCw, MapPin } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -15,61 +14,122 @@ interface SwipeCardProps {
 }
 
 export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: SwipeCardProps) => {
-  const [exitX, setExitX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
-  const x = useMotionValue(0);
-  const rotate = useTransform(x, [-300, 300], [-30, 30]);
-  const opacity = useTransform(x, [-300, -150, 0, 150, 300], [0, 1, 1, 1, 0]);
 
-  // Calculate background color based on swipe direction
-  const backgroundColor = useTransform(
-    x,
-    [-300, -50, 0, 50, 300],
-    ['#ff4757', '#ff4757', '#ffffff', '#2ed573', '#2ed573']
-  );
+  const handleStart = (clientX: number, clientY: number) => {
+    setIsDragging(true);
+    setStartPos({ x: clientX, y: clientY });
+  };
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
-    const threshold = 150;
+  const handleMove = (clientX: number, clientY: number) => {
+    if (!isDragging) return;
     
-    if (info.offset.x > threshold) {
-      setExitX(300);
-      onSwipeRight();
-    } else if (info.offset.x < -threshold) {
-      setExitX(-300);
-      onSwipeLeft();
+    const deltaX = clientX - startPos.x;
+    const deltaY = clientY - startPos.y;
+    setDragOffset({ x: deltaX, y: deltaY });
+  };
+
+  const handleEnd = () => {
+    if (!isDragging) return;
+    
+    const threshold = 100;
+    
+    if (dragOffset.x > threshold) {
+      // Swipe right
+      handleSwipeRight();
+    } else if (dragOffset.x < -threshold) {
+      // Swipe left
+      handleSwipeLeft();
     } else {
-      // Snap back to center
-      x.set(0);
+      // Snap back
+      setDragOffset({ x: 0, y: 0 });
     }
+    
+    setIsDragging(false);
   };
 
   const handleSwipeLeft = () => {
-    setExitX(-300);
-    onSwipeLeft();
+    if (cardRef.current) {
+      cardRef.current.style.transform = 'translateX(-100%) rotate(-30deg)';
+      cardRef.current.style.opacity = '0';
+      setTimeout(() => {
+        onSwipeLeft();
+        resetCard();
+      }, 300);
+    }
   };
 
   const handleSwipeRight = () => {
-    setExitX(300);
-    onSwipeRight();
+    if (cardRef.current) {
+      cardRef.current.style.transform = 'translateX(100%) rotate(30deg)';
+      cardRef.current.style.opacity = '0';
+      setTimeout(() => {
+        onSwipeRight();
+        resetCard();
+      }, 300);
+    }
   };
+
+  const resetCard = () => {
+    setDragOffset({ x: 0, y: 0 });
+    if (cardRef.current) {
+      cardRef.current.style.transform = '';
+      cardRef.current.style.opacity = '1';
+    }
+  };
+
+  // Mouse events
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    handleStart(e.clientX, e.clientY);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    handleMove(e.clientX, e.clientY);
+  };
+
+  const handleMouseUp = () => {
+    handleEnd();
+  };
+
+  // Touch events
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    handleStart(touch.clientX, touch.clientY);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    handleMove(touch.clientX, touch.clientY);
+  };
+
+  const handleTouchEnd = () => {
+    handleEnd();
+  };
+
+  // Calculate rotation and opacity based on drag offset
+  const rotation = Math.min(Math.max(dragOffset.x / 10, -30), 30);
+  const opacity = Math.max(1 - Math.abs(dragOffset.x) / 300, 0);
 
   return (
     <div className="relative w-full max-w-sm mx-auto h-[600px]">
-      <motion.div
+      <div
         ref={cardRef}
-        drag="x"
-        dragConstraints={{ left: 0, right: 0 }}
-        onDragEnd={handleDragEnd}
-        initial={{ scale: 1 }}
-        animate={exitX !== 0 ? { x: exitX, opacity: 0, scale: 0.8 } : { x: 0, opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3 }}
-        style={{ 
-          x, 
-          rotate,
-          opacity: exitX !== 0 ? 0 : opacity,
-          backgroundColor
+        onMouseDown={handleMouseDown}
+        onMouseMove={isDragging ? handleMouseMove : undefined}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className="absolute inset-0 cursor-grab active:cursor-grabbing select-none transition-transform duration-300 ease-out"
+        style={{
+          transform: `translateX(${dragOffset.x}px) translateY(${dragOffset.y * 0.1}px) rotate(${rotation}deg)`,
+          opacity: isDragging ? opacity : 1,
         }}
-        className="absolute inset-0 cursor-grab active:cursor-grabbing select-none"
       >
         <Card className="h-full shadow-xl border-2 border-muted overflow-hidden">
           <CardContent className="p-0 h-full flex flex-col">
@@ -91,7 +151,6 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
                   </Avatar>
                 </div>
               )}
-              {/* Profile image without overlay indicators */}
             </div>
 
             {/* Profile Info */}
@@ -129,7 +188,7 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
 
       {/* Action Buttons */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4 z-10">
