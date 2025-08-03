@@ -35,8 +35,12 @@ export const useSwipeProfiles = () => {
   });
 
   const fetchProfiles = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log("No user, returning early");
+      return;
+    }
 
+    console.log("Setting loading to true");
     setLoading(true);
     try {
       // Get users that are not me and not already friends
@@ -63,31 +67,46 @@ export const useSwipeProfiles = () => {
 
       const { data, error } = await query.limit(20);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching profiles:', error);
+        return; // Don't throw, just return
+      }
 
       // Filter out existing friends
       if (data) {
-        const { data: friendData } = await supabase
-          .from('friends')
-          .select('friend_id')
-          .eq('user_id', user.id)
-          .eq('status', 'accepted');
+        try {
+          const { data: friendData } = await supabase
+            .from('friends')
+            .select('friend_id')
+            .eq('user_id', user.id)
+            .eq('status', 'accepted');
 
-        const friendIds = friendData?.map(f => f.friend_id) || [];
-        const filteredProfiles = data.filter(profile => !friendIds.includes(profile.user_id));
-        
-        setProfiles(filteredProfiles);
-        setCurrentIndex(0);
+          const friendIds = friendData?.map(f => f.friend_id) || [];
+          const filteredProfiles = data.filter(profile => !friendIds.includes(profile.user_id));
+          
+          console.log('Fetched profiles:', filteredProfiles.length);
+          setProfiles(filteredProfiles);
+          setCurrentIndex(0);
+        } catch (friendError) {
+          console.error('Error fetching friends:', friendError);
+          // Still set profiles even if friends query fails
+          setProfiles(data);
+          setCurrentIndex(0);
+        }
       }
     } catch (error) {
-      console.error('Error fetching profiles:', error);
+      console.error('Error in fetchProfiles:', error);
+      // Don't throw, just set empty array to prevent crashes
+      setProfiles([]);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchProfiles();
+    if (user) {
+      fetchProfiles().catch(console.error);
+    }
   }, [user, filters]);
 
   const swipeLeft = (profileId: string) => {

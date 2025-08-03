@@ -10,11 +10,45 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export const SwipeMatch = () => {
   const [isInIframe, setIsInIframe] = useState(false);
+  const [hasError, setHasError] = useState(false);
   
   useEffect(() => {
     // Check if we're in an iframe (preview environment)
-    setIsInIframe(window.self !== window.top);
+    try {
+      setIsInIframe(window.self !== window.top);
+    } catch (error) {
+      console.error('Error checking iframe:', error);
+      setHasError(true);
+    }
   }, []);
+
+  let hookData;
+  try {
+    hookData = useSwipeProfiles();
+  } catch (error) {
+    console.error('Error in useSwipeProfiles:', error);
+    setHasError(true);
+  }
+
+  if (hasError || !hookData) {
+    return (
+      <div className="min-h-screen bg-gradient-subtle">
+        <Navigation />
+        <div className="pb-24 pt-8">
+          <div className="container mx-auto px-4">
+            <Card className="max-w-sm mx-auto">
+              <CardContent className="p-8 text-center">
+                <p className="text-red-600 mb-4">Ett fel uppstod</p>
+                <Button onClick={() => window.location.reload()}>
+                  Ladda om sidan
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const {
     currentProfile,
@@ -27,7 +61,7 @@ export const SwipeMatch = () => {
     refetch,
     totalProfiles,
     currentIndex
-  } = useSwipeProfiles();
+  } = hookData;
 
   // Show iframe-friendly version for preview
   if (isInIframe) {
