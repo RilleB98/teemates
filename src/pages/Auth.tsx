@@ -73,7 +73,7 @@ export const Auth = () => {
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error, data } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -85,7 +85,25 @@ export const Auth = () => {
         toast.error("Inloggning misslyckades: " + error.message);
       }
     } else {
-      toast.success("Välkommen tillbaka!");
+      // Try to get the user's name from their profile
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("name")
+          .eq("user_id", data.user.id)
+          .maybeSingle();
+        
+        const userName = profile?.name;
+        if (userName) {
+          toast.success(`Välkommen tillbaka ${userName}!`);
+        } else {
+          toast.success("Välkommen tillbaka!");
+        }
+      } catch (profileError) {
+        // If we can't get the name, just show the generic message
+        toast.success("Välkommen tillbaka!");
+      }
+      
       navigate("/");
     }
     setLoading(false);
