@@ -729,5 +729,16 @@ export const golfCourses: Course[] = [
     image: course1,
     latitude: 59.3267,
     longitude: 14.5217
+  },
+  {
+    name: "Wittsjö Golfklubb",
+    location: "Skåne",
+    rating: 4.2,
+    difficulty: "Medium",
+    holes: 18,
+    price: "450 SEK",
+    image: course1,
+    latitude: 56.1045,
+    longitude: 13.3333
   }
 ];
