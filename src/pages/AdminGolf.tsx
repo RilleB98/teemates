@@ -1,8 +1,10 @@
 import { GolfCrawler } from "@/components/GolfCrawler";
+import { ManualGolfImporter } from "@/components/ManualGolfImporter";
 import { Navigation } from "@/components/Navigation";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Card, CardContent } from "@/components/ui/card";
-import { AlertTriangle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AlertTriangle, Globe, PlusCircle } from "lucide-react";
 
 export const AdminGolf = () => {
   const { isAdmin, loading } = useUserRole();
@@ -54,11 +56,30 @@ export const AdminGolf = () => {
               Golfbane-administratör
             </h1>
             <p className="text-xl text-white/90 backdrop-blur-sm bg-white/10 rounded-full px-6 py-2 inline-block">
-              Samla alla Sveriges golfbanor automatiskt
+               Hantera golfbanor för appen
             </p>
           </div>
           
-          <GolfCrawler />
+          <Tabs defaultValue="crawler" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="crawler" className="flex items-center gap-2">
+                <Globe className="w-4 h-4" />
+                Web Crawling
+              </TabsTrigger>
+              <TabsTrigger value="manual" className="flex items-center gap-2">
+                <PlusCircle className="w-4 h-4" />
+                Manuell Import
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="crawler">
+              <GolfCrawler />
+            </TabsContent>
+            
+            <TabsContent value="manual">
+              <ManualGolfImporter />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
