@@ -225,7 +225,7 @@ export const Profile = () => {
           variant="outline"
           size="sm"
           onClick={() => navigate("/")}
-          className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 hover:border-white/50 transition-all duration-200 shadow-lg"
+          className="bg-white/90 backdrop-blur-sm border-primary/30 text-primary hover:bg-primary hover:text-white hover:border-primary transition-all duration-200 shadow-lg"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Tillbaka
