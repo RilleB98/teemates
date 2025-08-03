@@ -253,20 +253,9 @@ export const Profile = () => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="home_club">Hemmaklubb</Label>
-                <Input
-                  id="home_club"
-                  type="text"
-                  placeholder="Ange din hemmaklubb"
-                  value={profile.home_club}
-                  onChange={(e) => setProfile(prev => ({ ...prev, home_club: e.target.value }))}
-                />
-              </div>
-
               {/* Course Selector */}
               <div className="space-y-2">
-                <Label>Närliggande golfbanor</Label>
+                <Label>Hemmaklubb</Label>
                 <CourseSelector 
                   selectedCourse={profile.selected_course}
                   onCourseSelect={(course) => setProfile(prev => ({ ...prev, selected_course: course }))}

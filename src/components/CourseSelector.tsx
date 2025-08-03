@@ -217,14 +217,30 @@ export const CourseSelector = ({ selectedCourse, onCourseSelect }: CourseSelecto
     }
   ];
 
-  // Sort courses by distance if user location is available
-  const sortedCourses = location 
-    ? [...nearbyCourses].sort((a, b) => {
+  // Sort courses with selected course first, then by distance if user location is available
+  const sortedCourses = (() => {
+    let courses = [...nearbyCourses];
+    
+    // Sort by distance if location is available
+    if (location) {
+      courses = courses.sort((a, b) => {
         const distanceA = calculateDistance(location.latitude, location.longitude, a.latitude, a.longitude);
         const distanceB = calculateDistance(location.latitude, location.longitude, b.latitude, b.longitude);
         return distanceA - distanceB;
-      })
-    : nearbyCourses;
+      });
+    }
+    
+    // Move selected course to top if it exists
+    if (selectedCourse) {
+      const selectedIndex = courses.findIndex(course => course.name === selectedCourse.name);
+      if (selectedIndex > -1) {
+        const [selected] = courses.splice(selectedIndex, 1);
+        courses.unshift(selected);
+      }
+    }
+    
+    return courses;
+  })();
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
