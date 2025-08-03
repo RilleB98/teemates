@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Target, Users, MapPin, MessageCircle, User, Menu, LogOut, LogIn } from "lucide-react";
+import { Target, Users, MapPin, MessageCircle, User, Menu, LogOut, LogIn, Home } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -155,6 +155,12 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
                   </div>
                   
                   <div className="space-y-3">
+                    <Button variant="outline" className="w-full justify-start" asChild>
+                      <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>
+                        <Home className="w-4 h-4 mr-3" />
+                        Startsidan
+                      </Link>
+                    </Button>
                     {user ? (
                       <>
                         <Button variant="outline" className="w-full justify-start" asChild>
