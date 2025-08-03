@@ -175,12 +175,16 @@ export const CourseSelector = ({ selectedCourse, onCourseSelect }: CourseSelecto
                             <span className="text-sm text-muted-foreground">{course.location}</span>
                           </div>
                         </div>
-                        {distance && (
+                        {distance ? (
                           <div className="text-right">
                             <span className="text-sm text-primary font-medium">{distance.toFixed(1)} km</span>
                             <p className="text-xs text-muted-foreground">avstånd</p>
                           </div>
-                        )}
+                        ) : course.hasCoordinates === false ? (
+                          <div className="text-right">
+                            <span className="text-xs text-muted-foreground">Ingen distansdata</span>
+                          </div>
+                        ) : null}
                       </div>
                     </CardContent>
                   </Card>
