@@ -114,10 +114,12 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
           
           {/* Right Navigation and Hamburger */}
           <div className="flex items-center space-x-4 sm:space-x-6">
-            <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50`}>
-              <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
-              <span className="text-xs font-medium">Courses</span>
-            </button>
+            <Link to="/courses">
+              <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50`}>
+                <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
+                <span className="text-xs font-medium">Courses</span>
+              </button>
+            </Link>
             
             {/* Hamburger Menu - Far right */}
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
