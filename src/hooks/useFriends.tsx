@@ -45,6 +45,27 @@ export const useFriends = () => {
       fetchFriends();
       fetchPendingRequests();
       fetchSentRequests();
+      
+      // Set up real-time subscription for profile updates
+      const profilesChannel = supabase
+        .channel('profiles-updates')
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'profiles'
+          },
+          () => {
+            // Refetch friends when any profile is updated
+            fetchFriends();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(profilesChannel);
+      };
     }
   }, [user]);
 

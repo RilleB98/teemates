@@ -232,6 +232,7 @@ export const Profile = () => {
         handicap: parseFloat(profile.handicap),
         avatar_url: profile.avatar_url || null,
         selected_course: profile.selected_course,
+        home_club: profile.selected_course?.name || null, // Add home_club field
         gender: profile.gender,
         birth_date: profile.birth_date.toISOString().split('T')[0]
       };
