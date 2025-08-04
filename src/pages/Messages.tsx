@@ -18,10 +18,10 @@ export const Messages = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
           {/* Title */}
           <div className="text-center mb-8 sm:mb-10 animate-scale-in px-2">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3 sm:mb-4 text-shadow-lg leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 mb-3 sm:mb-4 text-shadow-lg leading-tight">
               Golf Chat
             </h1>
-            <p className="text-lg sm:text-xl text-white/90 backdrop-blur-sm bg-white/10 rounded-full px-4 sm:px-6 py-2 inline-block max-w-full">
+            <p className="text-lg sm:text-xl text-gray-700 backdrop-blur-sm bg-white/20 rounded-full px-4 sm:px-6 py-2 inline-block max-w-full">
               Chatta med andra golfspelare
             </p>
           </div>

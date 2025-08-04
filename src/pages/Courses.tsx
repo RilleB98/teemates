@@ -120,10 +120,10 @@ export const Courses = () => {
 
         {/* Title */}
         <div className="text-center mb-8 sm:mb-10 animate-scale-in px-2">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3 sm:mb-4 text-shadow-lg leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 mb-3 sm:mb-4 text-shadow-lg leading-tight">
             Golfbanor i Sverige
           </h1>
-          <p className="text-lg sm:text-xl text-white/90 backdrop-blur-sm bg-white/10 rounded-full px-4 sm:px-6 py-2 inline-block max-w-full">
+          <p className="text-lg sm:text-xl text-gray-700 backdrop-blur-sm bg-white/20 rounded-full px-4 sm:px-6 py-2 inline-block max-w-full">
             {coursesLoading ? (
               <span>Laddar golfbanor...</span>
             ) : (
