@@ -35,18 +35,35 @@ export const useUnreadMessages = () => {
           return;
         }
 
-        // Count messages in all chat rooms
-        // For simplicity, we'll count all messages since we don't have a "read" status
-        // In a real app, you'd want to track read status per user
+        // Get messages from others in all chat rooms
         const { data: messages, error: messagesError } = await supabase
           .from('messages')
           .select('id, user_id, chat_room_id')
           .in('chat_room_id', chatRoomIds)
-          .neq('user_id', user.id); // Only count messages from others
+          .neq('user_id', user.id); // Only messages from others
 
         if (messagesError) throw messagesError;
 
-        setUnreadCount(messages?.length || 0);
+        if (!messages || messages.length === 0) {
+          setUnreadCount(0);
+          return;
+        }
+
+        // Get read status for these messages
+        const messageIds = messages.map(m => m.id);
+        const { data: readMessages, error: readError } = await supabase
+          .from('message_reads')
+          .select('message_id')
+          .eq('user_id', user.id)
+          .in('message_id', messageIds);
+
+        if (readError) throw readError;
+
+        // Calculate unread count
+        const readMessageIds = new Set(readMessages?.map(r => r.message_id) || []);
+        const unreadMessages = messages.filter(m => !readMessageIds.has(m.id));
+        
+        setUnreadCount(unreadMessages.length);
       } catch (error) {
         console.error('Error fetching unread message count:', error);
         setUnreadCount(0);

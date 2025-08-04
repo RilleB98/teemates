@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import { markMessagesAsRead } from "@/utils/messageUtils";
 import player1 from "@/assets/player1.jpg";
 
 interface Message {
@@ -63,6 +64,11 @@ export const ChatRoom = ({ friendId, onBack }: ChatRoomProps) => {
         (payload) => {
           const newMessage = payload.new as Message;
           setMessages(prev => [...prev, newMessage]);
+          
+          // Mark new message as read if it's from someone else and this chat is open
+          if (user && newMessage.user_id !== user.id) {
+            markMessagesAsRead([newMessage.id], user.id);
+          }
         }
       )
       .subscribe();
@@ -99,6 +105,15 @@ export const ChatRoom = ({ friendId, onBack }: ChatRoomProps) => {
 
       if (error) throw error;
       setMessages(data || []);
+
+      // Mark messages from others as read when opening the chat
+      if (user && data && data.length > 0) {
+        const messagesFromOthers = data.filter(msg => msg.user_id !== user.id);
+        if (messagesFromOthers.length > 0) {
+          const messageIds = messagesFromOthers.map(msg => msg.id);
+          await markMessagesAsRead(messageIds, user.id);
+        }
+      }
     } catch (error) {
       console.error('Error loading messages:', error);
       toast.error("Kunde inte ladda meddelanden");
