@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { useFriends } from "@/hooks/useFriends";
 import { useUnreadMessagesByFriend } from "@/hooks/useUnreadMessagesByFriend";
+import { useLatestMessages } from "@/hooks/useLatestMessages";
 import { useAuth } from "@/hooks/useAuth";
 import { MessageCircle, Users, ChevronRight } from "lucide-react";
 
@@ -14,6 +15,7 @@ export const Messages = () => {
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
   const { friends, loading } = useFriends();
   const { unreadByFriend, refetchUnreadCounts } = useUnreadMessagesByFriend();
+  const latestMessages = useLatestMessages();
   const { user } = useAuth();
 
   // If a private chat is selected
@@ -72,6 +74,19 @@ export const Messages = () => {
                 {friends.map((friend) => {
                   const unreadCount = unreadByFriend[friend.friend_id] || 0;
                   const hasUnread = unreadCount > 0;
+                  const latestMessage = latestMessages[friend.friend_id];
+                  
+                  // Helper function to format message preview
+                  const getMessagePreview = () => {
+                    if (!latestMessage) return "Inga meddelanden än";
+                    
+                    const isFromMe = latestMessage.user_id === user?.id;
+                    const preview = latestMessage.content.length > 40 
+                      ? latestMessage.content.substring(0, 40) + "..."
+                      : latestMessage.content;
+                    
+                    return isFromMe ? `Du: ${preview}` : preview;
+                  };
                   
                   return (
                     <Card
@@ -104,16 +119,10 @@ export const Messages = () => {
                                 hasUnread ? 'bg-green-600' : 'bg-green-500'
                               }`}></div>
                             </div>
-                            <div className={`flex items-center space-x-2 text-sm ${
-                              hasUnread ? 'text-green-700' : 'text-gray-600'
-                            }`}>
-                              <span>HCP {friend.profile.handicap}</span>
-                              {friend.profile.home_club && (
-                                <>
-                                  <span>•</span>
-                                  <span>{friend.profile.home_club}</span>
-                                </>
-                              )}
+                            <div className={`text-sm ${
+                              hasUnread ? 'text-green-700' : 'text-gray-500'
+                            } truncate`}>
+                              {getMessagePreview()}
                             </div>
                           </div>
                           <div className="flex items-center space-x-2">
