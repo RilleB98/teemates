@@ -13,7 +13,7 @@ import { MessageCircle, Users, ChevronRight } from "lucide-react";
 export const Messages = () => {
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
   const { friends, loading } = useFriends();
-  const unreadByFriend = useUnreadMessagesByFriend();
+  const { unreadByFriend, refetchUnreadCounts } = useUnreadMessagesByFriend();
   const { user } = useAuth();
 
   // If a private chat is selected
@@ -21,7 +21,10 @@ export const Messages = () => {
     return (
       <ChatRoom 
         friendId={selectedFriend}
-        onBack={() => setSelectedFriend(null)} 
+        onBack={() => {
+          setSelectedFriend(null);
+          refetchUnreadCounts(); // Refresh unread counts when coming back
+        }} 
       />
     );
   }
