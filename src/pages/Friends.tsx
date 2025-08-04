@@ -23,6 +23,7 @@ export const Friends = () => {
     acceptFriendRequest,
     rejectFriendRequest,
     removeFriend,
+    refetch,
   } = useFriends();
 
   const handleStartMessage = (friendId: string) => {
@@ -127,7 +128,10 @@ export const Friends = () => {
       {/* Friend Profile Modal */}
       <FriendProfileModal 
         isOpen={profileModalOpen}
-        onClose={() => setProfileModalOpen(false)}
+        onClose={() => {
+          setProfileModalOpen(false);
+          refetch(); // Refresh friends data when modal closes
+        }}
         profile={selectedProfile}
         onMessage={handleMessageFromProfile}
       />

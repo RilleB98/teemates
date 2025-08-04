@@ -109,6 +109,10 @@ export const useFriends = () => {
     }
   };
 
+  const refreshFriends = () => {
+    fetchFriends();
+  };
+
   const fetchPendingRequests = async () => {
     if (!user) return;
 
