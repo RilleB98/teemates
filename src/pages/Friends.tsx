@@ -33,6 +33,7 @@ export const Friends = () => {
   };
 
   const handleProfileClick = (friend: any) => {
+    console.log('Friend profile data:', friend.profile);
     setSelectedProfile(friend.profile);
     setProfileModalOpen(true);
   };
