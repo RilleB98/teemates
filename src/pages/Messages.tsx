@@ -81,8 +81,10 @@ export const Messages = () => {
                     if (!latestMessage) return "Inga meddelanden än";
                     
                     const isFromMe = latestMessage.user_id === user?.id;
-                    const preview = latestMessage.content.length > 40 
-                      ? latestMessage.content.substring(0, 40) + "..."
+                    // Shorter truncation for friend messages to fit with the arrow
+                    const maxLength = isFromMe ? 35 : 30;
+                    const preview = latestMessage.content.length > maxLength 
+                      ? latestMessage.content.substring(0, maxLength) + "..."
                       : latestMessage.content;
                     
                     return isFromMe ? `Du: ${preview}` : preview;
@@ -121,19 +123,19 @@ export const Messages = () => {
                             </div>
                             <div className={`text-sm ${
                               hasUnread ? 'text-green-700' : 'text-gray-500'
-                            } truncate`}>
-                              {getMessagePreview()}
+                            } truncate flex items-center justify-between`}>
+                              <span className="truncate flex-1 mr-2">{getMessagePreview()}</span>
+                              <ChevronRight className={`w-4 h-4 flex-shrink-0 ${
+                                hasUnread ? 'text-green-500' : 'text-gray-400'
+                              }`} />
                             </div>
                           </div>
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center">
                             {hasUnread && (
                               <Badge className="bg-green-600 hover:bg-green-700 text-white">
                                 {unreadCount > 9 ? '9+' : unreadCount}
                               </Badge>
                             )}
-                            <ChevronRight className={`w-5 h-5 ${
-                              hasUnread ? 'text-green-500' : 'text-gray-400'
-                            }`} />
                           </div>
                         </div>
                       </CardContent>
