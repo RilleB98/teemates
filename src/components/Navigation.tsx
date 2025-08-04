@@ -89,9 +89,10 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-golf-green-light">
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4">
-        <div className="flex items-center justify-between">
-          {/* Left Navigation */}
-          <div className="flex items-center space-x-4 sm:space-x-6">
+        <div className="flex items-center justify-center">
+          {/* Navigation items with even spacing */}
+          <div className="flex items-center justify-between w-full max-w-md">
+            {/* Friends */}
             <Link to="/friends">
               <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${
                 location.pathname === '/friends' 
@@ -103,6 +104,7 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
               </button>
             </Link>
             
+            {/* Messages */}
             <Link to="/messages">
               <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${
                 location.pathname === '/messages' 
@@ -118,19 +120,15 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
                 )}
               </button>
             </Link>
-          </div>
-          
-          {/* Centered Logo - Links to SwipeMatch */}
-          <div className="absolute left-1/2 transform -translate-x-1/2">
+
+            {/* Centered Large Swipe Button */}
             <Link to="/swipe">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-gradient-golf rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer">
-                <Target className="w-5 h-5 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white" />
+              <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-18 lg:h-18 bg-gradient-golf rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-lg">
+                <Target className="w-7 h-7 sm:w-8 sm:h-8 lg:w-9 lg:h-9 text-white" />
               </div>
             </Link>
-          </div>
-          
-          {/* Right Navigation and Hamburger */}
-          <div className="flex items-center space-x-4 sm:space-x-6">
+            
+            {/* Courses */}
             <Link to="/courses">
               <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${
                 location.pathname === '/courses' 
@@ -142,7 +140,7 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
               </button>
             </Link>
             
-            {/* Hamburger Menu - Far right */}
+            {/* Hamburger Menu */}
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
                 <button className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-golf-green text-white hover:bg-golf-green/90 transition-smooth">
