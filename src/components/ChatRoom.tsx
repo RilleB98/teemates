@@ -168,14 +168,21 @@ export const ChatRoom = ({ friendId, onBack }: ChatRoomProps) => {
     });
   };
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToBottom = (instant = false) => {
+    messagesEndRef.current?.scrollIntoView({ behavior: instant ? "auto" : "smooth" });
   };
 
   // Scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Scroll to bottom immediately when chat opens (after loading)
+  useEffect(() => {
+    if (!loading && messages.length > 0) {
+      scrollToBottom(true); // Instant scroll when chat first opens
+    }
+  }, [loading]);
 
   const getUserDisplayName = (message: Message) => {
     if (message.user_id === user?.id) return "Du";
