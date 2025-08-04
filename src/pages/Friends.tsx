@@ -2,14 +2,18 @@ import { Navigation } from "@/components/Navigation";
 import { UserSearch } from "@/components/UserSearch";
 import { FriendRequests } from "@/components/FriendRequests";
 import { FriendsList } from "@/components/FriendsList";
+import { FriendProfileModal } from "@/components/FriendProfileModal";
 import { useFriends } from "@/hooks/useFriends";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 export const Friends = () => {
   const { toast } = useToast();
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState<any>(null);
   const {
     friends,
     pendingRequests,
@@ -26,6 +30,22 @@ export const Friends = () => {
       title: "Meddelanden",
       description: "Meddelandefunktionen kommer snart! Gå till Messages-fliken för gruppchatt."
     });
+  };
+
+  const handleProfileClick = (friend: any) => {
+    setSelectedProfile(friend.profile);
+    setProfileModalOpen(true);
+  };
+
+  const handleMessageFromProfile = () => {
+    if (selectedProfile) {
+      // Find the friend object that matches the selected profile
+      const friend = friends.find(f => f.profile.name === selectedProfile.name);
+      if (friend) {
+        handleStartMessage(friend.friend_id);
+        setProfileModalOpen(false);
+      }
+    }
   };
 
   if (loading) {
@@ -96,11 +116,20 @@ export const Friends = () => {
                 friends={friends}
                 onRemoveFriend={removeFriend}
                 onStartMessage={handleStartMessage}
+                onProfileClick={handleProfileClick}
               />
             </TabsContent>
           </Tabs>
         </div>
       </div>
+      
+      {/* Friend Profile Modal */}
+      <FriendProfileModal 
+        isOpen={profileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+        profile={selectedProfile}
+        onMessage={handleMessageFromProfile}
+      />
     </div>
   );
 };

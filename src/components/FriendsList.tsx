@@ -30,9 +30,10 @@ interface FriendsListProps {
   friends: Friend[];
   onRemoveFriend: (friendshipId: string) => void;
   onStartMessage: (friendId: string) => void;
+  onProfileClick: (friend: Friend) => void;
 }
 
-export const FriendsList = ({ friends, onRemoveFriend, onStartMessage }: FriendsListProps) => {
+export const FriendsList = ({ friends, onRemoveFriend, onStartMessage, onProfileClick }: FriendsListProps) => {
   if (friends.length === 0) {
     return (
       <Card>
@@ -57,7 +58,11 @@ export const FriendsList = ({ friends, onRemoveFriend, onStartMessage }: Friends
       </CardHeader>
       <CardContent className="space-y-3">
         {friends.map((friend) => (
-          <div key={friend.id} className="flex items-center justify-between p-3 border rounded-lg">
+          <div 
+            key={friend.id} 
+            className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={() => onProfileClick(friend)}
+          >
             <div className="flex items-center gap-3">
               <Avatar>
                 <AvatarImage src={friend.profile.avatar_url || ''} />
@@ -80,7 +85,7 @@ export const FriendsList = ({ friends, onRemoveFriend, onStartMessage }: Friends
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
               <Button
                 size="sm"
                 variant="outline"

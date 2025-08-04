@@ -1,6 +1,5 @@
 import { Navigation } from "@/components/Navigation";
 import { ChatRoom } from "@/components/ChatRoom";
-import { FriendProfileModal } from "@/components/FriendProfileModal";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -14,31 +13,10 @@ import { MessageCircle, Users, ChevronRight } from "lucide-react";
 
 export const Messages = () => {
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
-  const [profileModalOpen, setProfileModalOpen] = useState(false);
-  const [selectedProfile, setSelectedProfile] = useState<any>(null);
   const { friends, loading } = useFriends();
   const { unreadByFriend, refetchUnreadCounts } = useUnreadMessagesByFriend();
   const latestMessages = useLatestMessages();
   const { user } = useAuth();
-
-  const handleProfileClick = (friend: any, e: React.MouseEvent) => {
-    console.log('Profile clicked:', friend.profile.name);
-    e.stopPropagation(); // Prevent triggering the message click
-    setSelectedProfile(friend.profile);
-    setProfileModalOpen(true);
-    console.log('Modal should be open:', true);
-  };
-
-  const handleMessageFromProfile = () => {
-    if (selectedProfile) {
-      // Find the friend object that matches the selected profile
-      const friend = friends.find(f => f.profile.name === selectedProfile.name);
-      if (friend) {
-        setSelectedFriend(friend.friend_id);
-        setProfileModalOpen(false);
-      }
-    }
-  };
 
   // If a private chat is selected
   if (selectedFriend) {
@@ -120,7 +98,7 @@ export const Messages = () => {
                           ? 'bg-green-50 border-green-200 hover:bg-green-100 hover:shadow-md' 
                           : 'bg-white border-gray-200 hover:shadow-md'
                       }`}
-                      onClick={(e) => handleProfileClick(friend, e)}
+                      onClick={() => setSelectedFriend(friend.friend_id)}
                     >
                       <CardContent className="p-4">
                         <div className="flex items-center space-x-4">
@@ -169,14 +147,6 @@ export const Messages = () => {
           </div>
         </div>
       </div>
-      
-      {/* Friend Profile Modal */}
-      <FriendProfileModal 
-        isOpen={profileModalOpen}
-        onClose={() => setProfileModalOpen(false)}
-        profile={selectedProfile}
-        onMessage={handleMessageFromProfile}
-      />
     </div>
   );
 };
