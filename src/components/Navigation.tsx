@@ -157,8 +157,12 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <h2 className="text-lg font-bold text-golf-premium">GolfConnect</h2>
-                      <p className="text-sm text-muted-foreground">Find Your Match</p>
+                      <h2 className="text-lg font-bold text-golf-premium">
+                        {profile?.name || 'Användare'}
+                      </h2>
+                      <p className="text-sm text-muted-foreground">
+                        {profile?.home_club || 'Ingen hemmaklubb'}
+                      </p>
                     </div>
                   </div>
                   
