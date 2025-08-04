@@ -6,12 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { useFriends } from "@/hooks/useFriends";
+import { useUnreadMessagesByFriend } from "@/hooks/useUnreadMessagesByFriend";
 import { useAuth } from "@/hooks/useAuth";
 import { MessageCircle, Users, ChevronRight } from "lucide-react";
 
 export const Messages = () => {
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
   const { friends, loading } = useFriends();
+  const unreadByFriend = useUnreadMessagesByFriend();
   const { user } = useAuth();
 
   // If a private chat is selected
@@ -64,42 +66,68 @@ export const Messages = () => {
             ) : (
               <div className="space-y-2">
                 <h2 className="text-lg font-semibold text-gray-900 mb-3">Dina vänner</h2>
-                {friends.map((friend) => (
-                  <Card
-                    key={friend.id}
-                    className="bg-white shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 cursor-pointer"
-                    onClick={() => setSelectedFriend(friend.friend_id)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center space-x-4">
-                        <Avatar className="w-12 h-12 ring-2 ring-primary/20">
-                          <AvatarImage src={friend.profile.avatar_url} />
-                          <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
-                            {friend.profile.name?.[0]?.toUpperCase() || 'V'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2">
-                            <h3 className="font-semibold text-gray-900">
-                              {friend.profile.name || 'Okänd vän'}
-                            </h3>
-                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                {friends.map((friend) => {
+                  const unreadCount = unreadByFriend[friend.friend_id] || 0;
+                  const hasUnread = unreadCount > 0;
+                  
+                  return (
+                    <Card
+                      key={friend.id}
+                      className={`shadow-sm border transition-all duration-200 cursor-pointer ${
+                        hasUnread 
+                          ? 'bg-green-50 border-green-200 hover:bg-green-100 hover:shadow-md' 
+                          : 'bg-white border-gray-200 hover:shadow-md'
+                      }`}
+                      onClick={() => setSelectedFriend(friend.friend_id)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-4">
+                          <Avatar className={`w-12 h-12 ring-2 ${
+                            hasUnread ? 'ring-green-300' : 'ring-primary/20'
+                          }`}>
+                            <AvatarImage src={friend.profile.avatar_url} />
+                            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
+                              {friend.profile.name?.[0]?.toUpperCase() || 'V'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2">
+                              <h3 className={`font-semibold ${
+                                hasUnread ? 'text-green-900' : 'text-gray-900'
+                              }`}>
+                                {friend.profile.name || 'Okänd vän'}
+                              </h3>
+                              <div className={`w-2 h-2 rounded-full ${
+                                hasUnread ? 'bg-green-600' : 'bg-green-500'
+                              }`}></div>
+                            </div>
+                            <div className={`flex items-center space-x-2 text-sm ${
+                              hasUnread ? 'text-green-700' : 'text-gray-600'
+                            }`}>
+                              <span>HCP {friend.profile.handicap}</span>
+                              {friend.profile.home_club && (
+                                <>
+                                  <span>•</span>
+                                  <span>{friend.profile.home_club}</span>
+                                </>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex items-center space-x-2 text-sm text-gray-600">
-                            <span>HCP {friend.profile.handicap}</span>
-                            {friend.profile.home_club && (
-                              <>
-                                <span>•</span>
-                                <span>{friend.profile.home_club}</span>
-                              </>
+                          <div className="flex items-center space-x-2">
+                            {hasUnread && (
+                              <Badge className="bg-green-600 hover:bg-green-700 text-white">
+                                {unreadCount > 9 ? '9+' : unreadCount}
+                              </Badge>
                             )}
+                            <ChevronRight className={`w-5 h-5 ${
+                              hasUnread ? 'text-green-500' : 'text-gray-400'
+                            }`} />
                           </div>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-gray-400" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </div>
