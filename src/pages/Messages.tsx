@@ -1,54 +1,130 @@
 import { Navigation } from "@/components/Navigation";
 import { ChatRoom } from "@/components/ChatRoom";
 import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
+import { useFriends } from "@/hooks/useFriends";
+import { useAuth } from "@/hooks/useAuth";
+import { MessageCircle, Users, ChevronRight } from "lucide-react";
 
 export const Messages = () => {
-  const [showChat, setShowChat] = useState(false);
+  const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
+  const [showGroupChat, setShowGroupChat] = useState(false);
+  const { friends, loading } = useFriends();
+  const { user } = useAuth();
 
-  if (showChat) {
-    return <ChatRoom onBack={() => setShowChat(false)} />;
+  // If a private chat is selected
+  if (selectedFriend) {
+    return (
+      <ChatRoom 
+        friendId={selectedFriend}
+        onBack={() => setSelectedFriend(null)} 
+      />
+    );
+  }
+
+  // If group chat is selected
+  if (showGroupChat) {
+    return <ChatRoom onBack={() => setShowGroupChat(false)} />;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-golf-green via-background to-golf-green-light">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <Navigation />
       
       <div className="pb-24 pt-4">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
-          {/* Title */}
-          <div className="text-center mb-8 sm:mb-10 animate-scale-in px-2">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 mb-3 sm:mb-4 text-shadow-lg leading-tight">
-              Golf Chat
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+          {/* Header */}
+          <div className="text-center mb-8 animate-fade-in">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+              Meddelanden
             </h1>
-            <p className="text-lg sm:text-xl text-gray-700 backdrop-blur-sm bg-white/20 rounded-full px-4 sm:px-6 py-2 inline-block max-w-full">
-              Chatta med andra golfspelare
+            <p className="text-gray-600">
+              Chatta med dina vänner eller gå med i gruppchatt
             </p>
           </div>
-          
-          <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
-            {/* Open Chat Button */}
-            <div className="text-center">
-              <Card className="bg-white/95 backdrop-blur-sm shadow-xl border-0">
-                <CardContent className="p-8 sm:p-12 text-center">
-                  <div className="mb-6">
-                    <div className="w-16 h-16 bg-golf-green/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <span className="text-2xl">💬</span>
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-golf-premium mb-3">Gå med i chatten</h3>
-                    <p className="text-muted-foreground text-base sm:text-lg mb-6">
-                      Chatta med andra golfspelare och våra virtuella vänner!
-                    </p>
+
+          <div className="space-y-4">
+            {/* Group Chat Option */}
+            <Card className="bg-white shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 cursor-pointer" 
+                  onClick={() => setShowGroupChat(true)}>
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center">
+                    <Users className="w-6 h-6 text-white" />
                   </div>
-                  <button
-                    onClick={() => setShowChat(true)}
-                    className="bg-golf-green hover:bg-golf-green/90 text-white px-8 py-4 rounded-xl font-medium transition-all duration-300 hover-scale shadow-lg text-lg"
-                  >
-                    Öppna Chattrum
-                  </button>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900">Golf Gruppen</h3>
+                    <p className="text-sm text-gray-600">Ahmed, Emma, Johan och du</p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-gray-400" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Friends List */}
+            {loading ? (
+              <div className="text-center py-8">
+                <div className="text-gray-500">Laddar vänner...</div>
+              </div>
+            ) : friends.length === 0 ? (
+              <Card className="bg-white shadow-sm border border-gray-200">
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <MessageCircle className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Inga vänner än</h3>
+                  <p className="text-gray-600 mb-4">
+                    Lägg till vänner för att kunna chatta privat med dem
+                  </p>
+                  <Button asChild variant="outline">
+                    <a href="/friends">Hitta vänner</a>
+                  </Button>
                 </CardContent>
               </Card>
-            </div>
+            ) : (
+              <div className="space-y-2">
+                <h2 className="text-lg font-semibold text-gray-900 mb-3">Dina vänner</h2>
+                {friends.map((friend) => (
+                  <Card
+                    key={friend.id}
+                    className="bg-white shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 cursor-pointer"
+                    onClick={() => setSelectedFriend(friend.friend_id)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center space-x-4">
+                        <Avatar className="w-12 h-12 ring-2 ring-primary/20">
+                          <AvatarImage src={friend.profile.avatar_url} />
+                          <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
+                            {friend.profile.name?.[0]?.toUpperCase() || 'V'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2">
+                            <h3 className="font-semibold text-gray-900">
+                              {friend.profile.name || 'Okänd vän'}
+                            </h3>
+                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          </div>
+                          <div className="flex items-center space-x-2 text-sm text-gray-600">
+                            <span>HCP {friend.profile.handicap}</span>
+                            {friend.profile.home_club && (
+                              <>
+                                <span>•</span>
+                                <span>{friend.profile.home_club}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-gray-400" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -18,19 +18,35 @@ interface Message {
 }
 
 interface ChatRoomProps {
+  friendId?: string; // If provided, creates a private chat
   onBack: () => void;
 }
 
-export const ChatRoom = ({ onBack }: ChatRoomProps) => {
+export const ChatRoom = ({ friendId, onBack }: ChatRoomProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [friendProfile, setFriendProfile] = useState<any>(null);
   const { user } = useAuth();
 
-  // Load messages on component mount
+  // Generate chat room ID for private chats
+  const chatRoomId = friendId ? 
+    (user && friendId ? 
+      user.id < friendId ? `${user.id}_${friendId}` : `${friendId}_${user.id}` 
+      : 'golf-group') 
+    : 'golf-group';
+
+  // Load friend profile if this is a private chat
+  useEffect(() => {
+    if (friendId) {
+      loadFriendProfile();
+    }
+  }, [friendId]);
+
+  // Load messages on component mount  
   useEffect(() => {
     loadMessages();
-  }, []);
+  }, [chatRoomId]);
 
   // Set up real-time subscription
   useEffect(() => {
@@ -42,7 +58,7 @@ export const ChatRoom = ({ onBack }: ChatRoomProps) => {
           event: 'INSERT',
           schema: 'public',
           table: 'messages',
-          filter: 'chat_room_id=eq.golf-group'
+          filter: `chat_room_id=eq.${chatRoomId}`
         },
         (payload) => {
           const newMessage = payload.new as Message;
@@ -54,14 +70,31 @@ export const ChatRoom = ({ onBack }: ChatRoomProps) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [chatRoomId]);
+
+  const loadFriendProfile = async () => {
+    if (!friendId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('name, avatar_url, handicap, home_club')
+        .eq('user_id', friendId)
+        .single();
+
+      if (error) throw error;
+      setFriendProfile(data);
+    } catch (error) {
+      console.error('Error loading friend profile:', error);
+    }
+  };
 
   const loadMessages = async () => {
     try {
       const { data, error } = await supabase
         .from('messages')
         .select('id, user_id, content, created_at')
-        .eq('chat_room_id', 'golf-group')
+        .eq('chat_room_id', chatRoomId)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -91,7 +124,7 @@ export const ChatRoom = ({ onBack }: ChatRoomProps) => {
         .insert({
           user_id: user.id,
           content: newMessage.trim(),
-          chat_room_id: 'golf-group'
+          chat_room_id: chatRoomId
         });
 
       if (error) {
@@ -162,12 +195,21 @@ export const ChatRoom = ({ onBack }: ChatRoomProps) => {
         </Button>
         <div className="flex items-center space-x-3">
           <Avatar className="w-10 h-10 ring-2 ring-primary/20">
-            <AvatarImage src={player1} />
-            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary">GG</AvatarFallback>
+            <AvatarImage src={friendId ? friendProfile?.avatar_url : player1} />
+            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
+              {friendId ? (friendProfile?.name?.[0]?.toUpperCase() || 'V') : 'GG'}
+            </AvatarFallback>
           </Avatar>
           <div>
-            <h2 className="font-semibold text-gray-900">Golf Gruppen</h2>
-            <p className="text-sm text-gray-500">Ahmed, Emma, Johan och du</p>
+            <h2 className="font-semibold text-gray-900">
+              {friendId ? (friendProfile?.name || 'Okänd vän') : 'Golf Gruppen'}
+            </h2>
+            <p className="text-sm text-gray-500">
+              {friendId ? 
+                (friendProfile?.home_club ? `HCP ${friendProfile.handicap} • ${friendProfile.home_club}` : `HCP ${friendProfile?.handicap || 0}`) :
+                'Ahmed, Emma, Johan och du'
+              }
+            </p>
           </div>
         </div>
       </div>
