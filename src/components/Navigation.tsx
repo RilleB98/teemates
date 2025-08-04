@@ -1,10 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Target, Users, MapPin, MessageCircle, User, Menu, LogOut, LogIn, Home, Settings } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -66,6 +68,7 @@ interface NavigationProps {
 export const Navigation = ({ onMessagesClick }: NavigationProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, loading } = useAuth();
+  const { profile } = useProfile();
   const { isAdmin } = useUserRole();
   const location = useLocation();
 
@@ -149,9 +152,12 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
               <SheetContent side="right" className="w-80">
                 <div className="flex flex-col space-y-6 mt-8">
                   <div className="flex items-center space-x-3 pb-4 border-b border-golf-green-light">
-                    <div className="w-12 h-12 bg-gradient-golf rounded-full flex items-center justify-center">
-                      <Target className="w-7 h-7 text-white" />
-                    </div>
+                    <Avatar className="w-12 h-12">
+                      <AvatarImage src={profile?.avatar_url || ''} alt="Profilbild" />
+                      <AvatarFallback className="bg-gradient-golf text-white">
+                        <User className="w-7 h-7" />
+                      </AvatarFallback>
+                    </Avatar>
                     <div>
                       <h2 className="text-lg font-bold text-golf-premium">GolfConnect</h2>
                       <p className="text-sm text-muted-foreground">Find Your Match</p>
