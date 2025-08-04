@@ -22,9 +22,11 @@ export const Messages = () => {
   const { user } = useAuth();
 
   const handleProfileClick = (friend: any, e: React.MouseEvent) => {
+    console.log('Profile clicked:', friend.profile.name);
     e.stopPropagation(); // Prevent triggering the message click
     setSelectedProfile(friend.profile);
     setProfileModalOpen(true);
+    console.log('Modal should be open:', true);
   };
 
   const handleMessageFromProfile = () => {
