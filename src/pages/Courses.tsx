@@ -9,6 +9,7 @@ import { useGolfClubUsers } from "@/hooks/useGolfClubUsers";
 import { useFavoriteGolfCourses } from "@/hooks/useFavoriteGolfCourses";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation as NavComponent } from "@/components/Navigation";
+import { getGolfCourseImage } from "@/components/CourseImageManager";
 
 interface Course {
   id: string;
@@ -191,7 +192,7 @@ export const Courses = () => {
                       <div className="flex gap-3 sm:gap-4 lg:gap-6">
                         <div className="relative group-hover:scale-105 transition-transform duration-300 flex-shrink-0">
                           <img 
-                            src={course.image} 
+                            src={getGolfCourseImage(course.image)} 
                             alt={course.name}
                             className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-lg sm:rounded-xl object-cover shadow-lg"
                           />
