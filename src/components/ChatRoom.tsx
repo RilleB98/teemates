@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -29,6 +29,7 @@ export const ChatRoom = ({ friendId, onBack }: ChatRoomProps) => {
   const [loading, setLoading] = useState(true);
   const [friendProfile, setFriendProfile] = useState<any>(null);
   const { user } = useAuth();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Generate chat room ID for private chats
   const chatRoomId = friendId ? 
@@ -166,6 +167,15 @@ export const ChatRoom = ({ friendId, onBack }: ChatRoomProps) => {
       minute: "2-digit" 
     });
   };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const getUserDisplayName = (message: Message) => {
     if (message.user_id === user?.id) return "Du";
@@ -316,6 +326,7 @@ export const ChatRoom = ({ friendId, onBack }: ChatRoomProps) => {
             </div>
             );
           })}
+          <div ref={messagesEndRef} />
         </div>
         )}
       </ScrollArea>
