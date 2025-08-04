@@ -28,6 +28,7 @@ export interface Friend {
     avatar_url: string;
     handicap: number;
     home_club: string;
+    age: number | null;
   };
 }
 
@@ -83,7 +84,7 @@ export const useFriends = () => {
       // Get profiles for all friends
       const { data: profiles, error: profileError } = await supabase
         .from('profiles')
-        .select('user_id, name, avatar_url, handicap, home_club')
+        .select('user_id, name, avatar_url, handicap, home_club, age')
         .in('user_id', friendIds);
 
       if (profileError) throw profileError;
@@ -97,7 +98,8 @@ export const useFriends = () => {
           name: profile.name || 'Okänd användare',
           avatar_url: profile.avatar_url || '',
           handicap: profile.handicap || 0,
-          home_club: profile.home_club || ''
+          home_club: profile.home_club || '',
+          age: profile.age || null
         }
       })) || [];
 

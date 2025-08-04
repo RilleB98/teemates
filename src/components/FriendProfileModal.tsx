@@ -7,7 +7,7 @@ interface FriendProfile {
   name: string;
   avatar_url?: string;
   home_club?: string;
-  age?: number;
+  age?: number | null;
   handicap?: number;
 }
 

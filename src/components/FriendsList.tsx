@@ -23,6 +23,7 @@ interface Friend {
     avatar_url: string;
     handicap: number;
     home_club: string;
+    age: number | null;
   };
 }
 
