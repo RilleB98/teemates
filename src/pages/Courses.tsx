@@ -111,6 +111,9 @@ export const Courses = () => {
                 </>
               )}
             </p>
+            <p className="text-sm sm:text-base text-gray-600 backdrop-blur-sm bg-white/10 rounded-full px-3 sm:px-4 py-2 inline-block mt-2 max-w-full">
+              Favorisera dina närliggande golfbanor för att hitta fler spelare i närområdet!
+            </p>
           </div>
 
           {/* Search */}
