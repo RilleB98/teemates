@@ -18,36 +18,60 @@ export const useProfile = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
+  const fetchProfile = async () => {
     if (!user) {
       setProfile(null);
       return;
     }
 
-    const fetchProfile = async () => {
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('user_id, name, avatar_url, age, handicap, gender, home_club, birth_date')
-          .eq('user_id', user.id)
-          .single();
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('user_id, name, avatar_url, age, handicap, gender, home_club, birth_date')
+        .eq('user_id', user.id)
+        .single();
 
-        if (error) {
-          console.error('Error fetching profile:', error);
-          return;
-        }
-
-        setProfile(data);
-      } catch (error) {
-        console.error('Error in fetchProfile:', error);
-      } finally {
-        setLoading(false);
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return;
       }
-    };
 
+      setProfile(data);
+    } catch (error) {
+      console.error('Error in fetchProfile:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchProfile();
+
+    // Set up real-time subscription for profile updates
+    if (user) {
+      const subscription = supabase
+        .channel('profile-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'profiles',
+            filter: `user_id=eq.${user.id}`,
+          },
+          (payload) => {
+            console.log('Profile updated:', payload);
+            setProfile(payload.new as UserProfile);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
   }, [user]);
 
-  return { profile, loading };
+  return { profile, loading, refetch: fetchProfile };
 };
