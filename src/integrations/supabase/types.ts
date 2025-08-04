@@ -135,6 +135,7 @@ export type Database = {
           last_location: Json | null
           location_enabled: boolean | null
           name: string | null
+          push_token: string | null
           selected_course: Json | null
           updated_at: string
           user_id: string
@@ -151,6 +152,7 @@ export type Database = {
           last_location?: Json | null
           location_enabled?: boolean | null
           name?: string | null
+          push_token?: string | null
           selected_course?: Json | null
           updated_at?: string
           user_id: string
@@ -167,6 +169,7 @@ export type Database = {
           last_location?: Json | null
           location_enabled?: boolean | null
           name?: string | null
+          push_token?: string | null
           selected_course?: Json | null
           updated_at?: string
           user_id?: string
