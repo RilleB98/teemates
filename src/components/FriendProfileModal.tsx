@@ -37,22 +37,15 @@ export const FriendProfileModal = ({ isOpen, onClose, profile, onMessage }: Frie
             </AvatarFallback>
           </Avatar>
 
-          {/* Name */}
+          {/* Name with Age */}
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900">{profile.name || 'Okänd vän'}</h2>
+            <h2 className="text-2xl font-bold text-gray-900">
+              {profile.name || 'Okänd vän'}{profile.age ? `, ${profile.age} år` : ''}
+            </h2>
           </div>
 
           {/* Profile Details */}
           <div className="w-full space-y-4">
-            {profile.age && (
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                <Calendar className="w-5 h-5 text-primary" />
-                <div>
-                  <p className="text-sm text-gray-600">Ålder</p>
-                  <p className="font-semibold text-gray-900">{profile.age} år</p>
-                </div>
-              </div>
-            )}
 
             {profile.home_club && (
               <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
