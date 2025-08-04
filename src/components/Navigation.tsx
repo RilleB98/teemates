@@ -8,6 +8,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -70,10 +71,8 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
   const { user, loading } = useAuth();
   const { profile } = useProfile();
   const { isAdmin } = useUserRole();
+  const messageCount = useUnreadMessages();
   const location = useLocation();
-
-  // Mock message count - replace with real data from your chat system
-  const messageCount = 7; // Change this to your actual message count
 
   const formatBadgeCount = (count: number) => {
     if (count === 0) return undefined;
