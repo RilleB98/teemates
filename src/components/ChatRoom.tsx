@@ -154,62 +154,108 @@ export const ChatRoom = ({ onBack }: ChatRoomProps) => {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-background">
-      {/* Header */}
-      <div className="flex items-center p-4 border-b border-golf-green-light bg-white/95 backdrop-blur-sm">
-        <Button variant="ghost" size="sm" onClick={onBack} className="mr-3">
+    <div className="flex flex-col h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* Header - Instagram style */}
+      <div className="flex items-center p-4 bg-white border-b border-gray-200 shadow-sm">
+        <Button variant="ghost" size="sm" onClick={onBack} className="mr-3 hover:bg-gray-100">
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div className="flex items-center space-x-3">
-          <Avatar className="w-10 h-10">
+          <Avatar className="w-10 h-10 ring-2 ring-primary/20">
             <AvatarImage src={player1} />
-            <AvatarFallback>GG</AvatarFallback>
+            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary">GG</AvatarFallback>
           </Avatar>
           <div>
-            <h2 className="font-semibold text-golf-premium">Golf Gruppen</h2>
-            <p className="text-sm text-muted-foreground">Ahmed, Emma, Johan och du</p>
+            <h2 className="font-semibold text-gray-900">Golf Gruppen</h2>
+            <p className="text-sm text-gray-500">Ahmed, Emma, Johan och du</p>
           </div>
         </div>
       </div>
 
-      {/* Messages */}
-      <ScrollArea className="flex-1 p-4">
+      {/* Messages - Instagram style with better spacing */}
+      <ScrollArea className="flex-1 px-4 py-2">
         {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-32">
-            <p className="text-muted-foreground">Inga meddelanden än. Skriv det första!</p>
+          <div className="flex flex-col items-center justify-center h-full py-12">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <Send className="w-8 h-8 text-gray-400" />
+            </div>
+            <p className="text-gray-500 text-center">Inga meddelanden än.<br />Säg hej för att starta konversationen!</p>
           </div>
         ) : (
-        <div className="space-y-4">
-          {messages.map((message) => {
+        <div className="space-y-1 py-4">
+          {messages.map((message, index) => {
             const isOwn = message.user_id === user?.id;
+            const nextMessage = messages[index + 1];
+            const isLastInGroup = !nextMessage || nextMessage.user_id !== message.user_id;
+            const prevMessage = messages[index - 1];
+            const isFirstInGroup = !prevMessage || prevMessage.user_id !== message.user_id;
+            
             return (
             <div
               key={message.id}
-              className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
+              className={`flex items-end space-x-2 ${isOwn ? "justify-end" : "justify-start"} ${isLastInGroup ? "mb-3" : "mb-1"}`}
             >
-              <div className={`flex items-end space-x-2 max-w-xs lg:max-w-md ${isOwn ? "flex-row-reverse space-x-reverse" : ""}`}>
-                {!isOwn && (
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={player1} />
-                    <AvatarFallback>{getUserDisplayName(message)[0]}</AvatarFallback>
-                  </Avatar>
+              {!isOwn && isLastInGroup && (
+                <Avatar className="w-7 h-7 mb-1">
+                  <AvatarImage src={player1} />
+                  <AvatarFallback className="text-xs bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
+                    {getUserDisplayName(message)[0]}
+                  </AvatarFallback>
+                </Avatar>
+              )}
+              {!isOwn && !isLastInGroup && (
+                <div className="w-7 h-7 mb-1" />
+              )}
+              
+              <div className="flex flex-col max-w-[70%]">
+                {!isOwn && isFirstInGroup && (
+                  <p className="text-xs font-medium text-gray-600 mb-1 ml-3">{getUserDisplayName(message)}</p>
                 )}
+                
                 <div
-                  className={`px-3 py-2 rounded-lg ${
+                  className={`px-4 py-2 relative ${
                     isOwn
-                      ? "bg-golf-green text-white rounded-br-none"
-                      : "bg-muted text-foreground rounded-bl-none"
-                  }`}
+                      ? `bg-gradient-to-br from-primary to-primary/90 text-white ${
+                          isFirstInGroup && isLastInGroup 
+                            ? "rounded-2xl" 
+                            : isFirstInGroup 
+                              ? "rounded-2xl rounded-br-md" 
+                              : isLastInGroup 
+                                ? "rounded-2xl rounded-tr-md" 
+                                : "rounded-l-2xl rounded-r-md"
+                        }`
+                      : `bg-gray-100 text-gray-900 ${
+                          isFirstInGroup && isLastInGroup 
+                            ? "rounded-2xl" 
+                            : isFirstInGroup 
+                              ? "rounded-2xl rounded-bl-md" 
+                              : isLastInGroup 
+                                ? "rounded-2xl rounded-tl-md" 
+                                : "rounded-r-2xl rounded-l-md"
+                        }`
+                  } animate-fade-in`}
                 >
-                  {!isOwn && (
-                    <p className="text-xs font-medium text-golf-green mb-1">{getUserDisplayName(message)}</p>
-                  )}
-                  <p className="text-sm">{message.content}</p>
-                  <p className={`text-xs mt-1 ${isOwn ? "text-white/70" : "text-muted-foreground"}`}>
+                  <p className="text-sm leading-relaxed">{message.content}</p>
+                </div>
+                
+                {isLastInGroup && (
+                  <p className={`text-xs mt-1 ${isOwn ? "text-right text-gray-500" : "text-left text-gray-500 ml-3"}`}>
                     {formatTime(message.created_at)}
                   </p>
-                </div>
+                )}
               </div>
+              
+              {isOwn && isLastInGroup && (
+                <Avatar className="w-7 h-7 mb-1">
+                  <AvatarImage src={user?.user_metadata?.avatar_url} />
+                  <AvatarFallback className="text-xs bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
+                    {user?.email?.[0]?.toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              )}
+              {isOwn && !isLastInGroup && (
+                <div className="w-7 h-7 mb-1" />
+              )}
             </div>
             );
           })}
@@ -217,19 +263,30 @@ export const ChatRoom = ({ onBack }: ChatRoomProps) => {
         )}
       </ScrollArea>
 
-      {/* Input */}
-      <div className="p-4 border-t border-golf-green-light bg-white/95 backdrop-blur-sm">
-        <div className="flex items-center space-x-2">
-          <Input
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Skriv ett meddelande..."
-            className="flex-1"
-          />
-          <Button onClick={handleSendMessage} size="sm" className="bg-golf-green hover:bg-golf-green/90">
-            <Send className="w-4 h-4" />
-          </Button>
+      {/* Input - Instagram style */}
+      <div className="p-4 bg-white border-t border-gray-200">
+        <div className="flex items-center space-x-3">
+          <div className="flex-1 relative">
+            <Input
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Meddelande..."
+              className="rounded-full border-gray-300 bg-gray-50 pr-12 py-2 focus:bg-white focus:border-primary transition-all duration-200"
+            />
+            <Button 
+              onClick={handleSendMessage} 
+              size="sm" 
+              disabled={!newMessage.trim()}
+              className={`absolute right-1 top-1/2 -translate-y-1/2 rounded-full w-8 h-8 p-0 transition-all duration-200 ${
+                newMessage.trim() 
+                  ? "bg-primary hover:bg-primary/90 text-white shadow-md" 
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
