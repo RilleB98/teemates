@@ -13,6 +13,9 @@ const config: CapacitorConfig = {
       permissions: {
         location: "always"
       }
+    },
+    PushNotifications: {
+      presentationOptions: ["badge", "sound", "alert"]
     }
   }
 };
