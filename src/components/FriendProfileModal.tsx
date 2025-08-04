@@ -42,20 +42,13 @@ export const FriendProfileModal = ({ isOpen, onClose, profile, onMessage }: Frie
             <h2 className="text-2xl font-bold text-gray-900">
               {profile.name || 'Okänd vän'}{profile.age ? `, ${profile.age} år` : ''}
             </h2>
+            {profile.home_club && (
+              <p className="text-lg text-gray-600 mt-1">{profile.home_club}</p>
+            )}
           </div>
 
           {/* Profile Details */}
           <div className="w-full space-y-4">
-
-            {profile.home_club && (
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                <MapPin className="w-5 h-5 text-primary" />
-                <div>
-                  <p className="text-sm text-gray-600">Hemmaklubb</p>
-                  <p className="font-semibold text-gray-900">{profile.home_club}</p>
-                </div>
-              </div>
-            )}
 
             {profile.handicap !== null && profile.handicap !== undefined && (
               <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
