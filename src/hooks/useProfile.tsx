@@ -11,6 +11,11 @@ export interface UserProfile {
   gender: string | null;
   home_club: string | null;
   birth_date: string | null;
+  selected_course: {
+    id: string;
+    name: string;
+    location: string;
+  } | null;
 }
 
 export const useProfile = () => {
@@ -28,7 +33,7 @@ export const useProfile = () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('user_id, name, avatar_url, age, handicap, gender, home_club, birth_date')
+        .select('user_id, name, avatar_url, age, handicap, gender, home_club, birth_date, selected_course')
         .eq('user_id', user.id)
         .single();
 
@@ -36,8 +41,11 @@ export const useProfile = () => {
         console.error('Error fetching profile:', error);
         return;
       }
-
-      setProfile(data);
+      
+      setProfile({
+        ...data,
+        selected_course: data.selected_course as UserProfile['selected_course']
+      });
     } catch (error) {
       console.error('Error in fetchProfile:', error);
     } finally {
@@ -62,7 +70,10 @@ export const useProfile = () => {
           },
           (payload) => {
             console.log('Profile updated:', payload);
-            setProfile(payload.new as UserProfile);
+            setProfile({
+              ...payload.new,
+              selected_course: payload.new.selected_course as UserProfile['selected_course']
+            } as UserProfile);
           }
         )
         .subscribe();

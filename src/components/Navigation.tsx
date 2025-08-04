@@ -161,7 +161,7 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
                         {profile?.name || 'Användare'}
                       </h2>
                       <p className="text-sm text-muted-foreground">
-                        {profile?.home_club || 'Ingen hemmaklubb'}
+                        {profile?.selected_course?.name || 'Ingen hemmaklubb'}
                       </p>
                     </div>
                   </div>
