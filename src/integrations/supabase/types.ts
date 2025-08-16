@@ -234,6 +234,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_chat_room: {
+        Args: { _chat_room_id: string; _user_id: string }
+        Returns: boolean
+      }
       generate_chat_room_id: {
         Args: { user1_id: string; user2_id: string }
         Returns: string
