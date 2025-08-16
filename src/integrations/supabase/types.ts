@@ -162,6 +162,7 @@ export type Database = {
           created_at: string
           gender: string | null
           handicap: number | null
+          home_city: string | null
           home_club: string | null
           id: string
           last_location: Json | null
@@ -179,6 +180,7 @@ export type Database = {
           created_at?: string
           gender?: string | null
           handicap?: number | null
+          home_city?: string | null
           home_club?: string | null
           id?: string
           last_location?: Json | null
@@ -196,6 +198,7 @@ export type Database = {
           created_at?: string
           gender?: string | null
           handicap?: number | null
+          home_city?: string | null
           home_club?: string | null
           id?: string
           last_location?: Json | null

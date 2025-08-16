@@ -24,7 +24,8 @@ export const Profile = () => {
     avatar_url: "",
     selected_course: null as any,
     gender: "",
-    birth_date: null as Date | null
+    birth_date: null as Date | null,
+    home_city: ""
   });
   const [birthDay, setBirthDay] = useState("");
   const [birthMonth, setBirthMonth] = useState("");
@@ -68,6 +69,35 @@ export const Profile = () => {
     { value: "12", label: "December" }
   ];
 
+  const stockholmCities = [
+    "Stockholm",
+    "Nacka",
+    "Sollentuna",
+    "Huddinge",
+    "Botkyrka",
+    "Salem",
+    "Haninge",
+    "Tyresö",
+    "Upplands Väsby",
+    "Vallentuna",
+    "Täby",
+    "Danderyd",
+    "Solna",
+    "Sundbyberg",
+    "Lidingö",
+    "Vaxholm",
+    "Norrtälje",
+    "Sigtuna",
+    "Nynäshamn",
+    "Södertälje",
+    "Järfälla",
+    "Ekerö",
+    "Nykvarn",
+    "Bålsta",
+    "Märsta",
+    "Åkersberga"
+  ];
+
   useEffect(() => {
     loadProfile();
   }, []);
@@ -101,7 +131,8 @@ export const Profile = () => {
           avatar_url: data.avatar_url || "",
           selected_course: data.selected_course || null,
           gender: data.gender || "",
-          birth_date: birthDate
+          birth_date: birthDate,
+          home_city: data.home_city || ""
         });
         
         // Set individual date components
@@ -222,6 +253,11 @@ export const Profile = () => {
         return;
       }
 
+      if (!profile.home_city) {
+        toast.error("Du måste välja hemmastad");
+        return;
+      }
+
       // Calculate age from birth_date
       const calculatedAge = profile.birth_date ? differenceInYears(new Date(), profile.birth_date) : null;
 
@@ -234,7 +270,8 @@ export const Profile = () => {
         selected_course: profile.selected_course,
         home_club: profile.selected_course?.name || null, // Add home_club field
         gender: profile.gender,
-        birth_date: profile.birth_date.toISOString().split('T')[0]
+        birth_date: profile.birth_date.toISOString().split('T')[0],
+        home_city: profile.home_city
       };
 
       const { error } = await supabase
@@ -555,6 +592,26 @@ export const Profile = () => {
                   </div>
                 </div>
 
+                {/* Home City Selector */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-foreground">Hemmastad</Label>
+                  <Select 
+                    value={profile.home_city} 
+                    onValueChange={(value) => setProfile(prev => ({ ...prev, home_city: value }))}
+                  >
+                    <SelectTrigger className="border-muted focus:border-primary transition-colors bg-white/90">
+                      <SelectValue placeholder="Välj din hemmastad" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white/95 backdrop-blur-sm border-white/20 max-h-48 overflow-y-auto z-50">
+                      {stockholmCities.map((city) => (
+                        <SelectItem key={city} value={city} className="hover:bg-primary/10">
+                          {city}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 {/* Course Selector */}
                 <div className="space-y-2">
                   <Label className="text-sm font-semibold text-foreground">Hemmaklubb</Label>
@@ -565,7 +622,7 @@ export const Profile = () => {
                 </div>
 
                 {/* Missing fields indicator */}
-                {(!profile.name || !profile.birth_date || !profile.gender || !profile.handicap || !profile.selected_course) && (
+                {(!profile.name || !profile.birth_date || !profile.gender || !profile.handicap || !profile.selected_course || !profile.home_city) && (
                   <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
                     <h4 className="text-sm font-semibold text-orange-800 mb-2">Du behöver fylla i följande fält:</h4>
                     <ul className="text-sm text-orange-700 space-y-1">
@@ -574,6 +631,7 @@ export const Profile = () => {
                       {!profile.gender && <li>• Kön</li>}
                       {!profile.handicap && <li>• Handikapp</li>}
                       {!profile.selected_course && <li>• Hemmaklubb</li>}
+                      {!profile.home_city && <li>• Hemmastad</li>}
                     </ul>
                   </div>
                 )}
@@ -582,7 +640,7 @@ export const Profile = () => {
                 <div className="flex flex-col sm:flex-row gap-3 pt-4">
                   <Button 
                     onClick={saveProfile} 
-                    disabled={loading || uploading || !profile.name || !profile.birth_date || !profile.gender || !profile.handicap || !profile.selected_course}
+                    disabled={loading || uploading || !profile.name || !profile.birth_date || !profile.gender || !profile.handicap || !profile.selected_course || !profile.home_city}
                     className="flex-1 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white shadow-lg disabled:opacity-50"
                   >
                     <Save className="w-4 h-4 mr-2" />

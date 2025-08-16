@@ -4,11 +4,15 @@ import { CourseCard } from "@/components/CourseCard";
 import { ChatRoom } from "@/components/ChatRoom";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { useNearbyProfiles } from "@/hooks/useNearbyProfiles";
+import { useAuth } from "@/hooks/useAuth";
 import player1 from "@/assets/player1.jpg";
 import course1 from "@/assets/course1.jpg";
 
 const Index = () => {
   const [showChat, setShowChat] = useState(false);
+  const { user } = useAuth();
+  const { profiles, loading, userCity } = useNearbyProfiles();
 
   const samplePlayers = [
     {
@@ -89,20 +93,67 @@ const Index = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16 animate-slide-up">
             <h2 className="text-4xl md:text-5xl font-bold text-golf-premium mb-6">
-              Meet Fellow Golfers
+              {user && userCity ? `Golfare från ${userCity}` : 'Meet Fellow Golfers'}
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Connect with passionate golfers in your area and discover your perfect playing partners
+              {user && userCity 
+                ? `Träffa andra golfare som också bor i ${userCity}` 
+                : 'Connect with passionate golfers in your area and discover your perfect playing partners'}
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {samplePlayers.map((player, index) => (
-              <div key={index} className="animate-slide-up" style={{ animationDelay: `${index * 200}ms` }}>
-                <PlayerCard {...player} />
+          {user ? (
+            loading ? (
+              <div className="text-center py-12">
+                <div className="inline-flex items-center gap-2 text-lg text-muted-foreground">
+                  <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent"></div>
+                  Laddar profiler...
+                </div>
               </div>
-            ))}
-          </div>
+            ) : profiles.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {profiles.map((profile, index) => (
+                  <div key={profile.user_id} className="animate-slide-up" style={{ animationDelay: `${index * 200}ms` }}>
+                    <PlayerCard 
+                      name={profile.name}
+                      age={profile.age}
+                      handicap={profile.handicap}
+                      location={profile.home_city}
+                      favoritesCourse={profile.home_club || 'Ingen klubb vald'}
+                      profileImage={profile.avatar_url || player1}
+                      rating={4.5}
+                      achievements={['Medlem']}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : userCity ? (
+              <div className="text-center py-12">
+                <p className="text-lg text-muted-foreground">
+                  Inga andra golfare från {userCity} hittades än. 
+                </p>
+                <p className="text-muted-foreground mt-2">
+                  Kom tillbaka senare för att se nya medlemmar!
+                </p>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-lg text-muted-foreground">
+                  <Link to="/profile" className="text-primary hover:underline">
+                    Välj din hemmastad i profilen
+                  </Link> för att se golfare från din stad!
+                </p>
+              </div>
+            )
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {samplePlayers.map((player, index) => (
+                <div key={index} className="animate-slide-up" style={{ animationDelay: `${index * 200}ms` }}>
+                  <PlayerCard {...player} />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
       
