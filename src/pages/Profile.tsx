@@ -69,33 +69,37 @@ export const Profile = () => {
     { value: "12", label: "December" }
   ];
 
-  const stockholmCities = [
+  const svenskaStorstader = [
     "Stockholm",
-    "Nacka",
-    "Sollentuna",
-    "Huddinge",
-    "Botkyrka",
-    "Salem",
-    "Haninge",
-    "Tyresö",
-    "Upplands Väsby",
-    "Vallentuna",
-    "Täby",
-    "Danderyd",
-    "Solna",
-    "Sundbyberg",
-    "Lidingö",
-    "Vaxholm",
-    "Norrtälje",
-    "Sigtuna",
-    "Nynäshamn",
+    "Göteborg", 
+    "Malmö",
+    "Uppsala",
+    "Västerås",
+    "Örebro",
+    "Linköping",
+    "Helsingborg",
+    "Jönköping",
+    "Norrköping",
+    "Lund",
+    "Umeå",
+    "Gävle",
+    "Borås",
+    "Eskilstuna",
     "Södertälje",
-    "Järfälla",
-    "Ekerö",
-    "Nykvarn",
-    "Bålsta",
-    "Märsta",
-    "Åkersberga"
+    "Karlstad",
+    "Täby",
+    "Växjö",
+    "Halmstad",
+    "Sundsvall",
+    "Luleå",
+    "Trollhättan",
+    "Östersund",
+    "Borlänge",
+    "Falun",
+    "Skövde",
+    "Karlskrona",
+    "Kristianstad",
+    "Kalmar"
   ];
 
   useEffect(() => {
@@ -253,8 +257,8 @@ export const Profile = () => {
         return;
       }
 
-      if (!profile.home_city) {
-        toast.error("Du måste välja hemmastad");
+                      if (!profile.home_city) {
+        toast.error("Du måste välja närliggande storstad");
         return;
       }
 
@@ -594,16 +598,16 @@ export const Profile = () => {
 
                 {/* Home City Selector */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-foreground">Hemmastad</Label>
+                  <Label className="text-sm font-semibold text-foreground">Närliggande storstad</Label>
                   <Select 
                     value={profile.home_city} 
                     onValueChange={(value) => setProfile(prev => ({ ...prev, home_city: value }))}
                   >
                     <SelectTrigger className="border-muted focus:border-primary transition-colors bg-white/90">
-                      <SelectValue placeholder="Välj din hemmastad" />
+                      <SelectValue placeholder="Välj din närliggande storstad" />
                     </SelectTrigger>
                     <SelectContent className="bg-white/95 backdrop-blur-sm border-white/20 max-h-48 overflow-y-auto z-50">
-                      {stockholmCities.map((city) => (
+                      {svenskaStorstader.map((city) => (
                         <SelectItem key={city} value={city} className="hover:bg-primary/10">
                           {city}
                         </SelectItem>
@@ -631,7 +635,7 @@ export const Profile = () => {
                       {!profile.gender && <li>• Kön</li>}
                       {!profile.handicap && <li>• Handikapp</li>}
                       {!profile.selected_course && <li>• Hemmaklubb</li>}
-                      {!profile.home_city && <li>• Hemmastad</li>}
+                      {!profile.home_city && <li>• Närliggande storstad</li>}
                     </ul>
                   </div>
                 )}
