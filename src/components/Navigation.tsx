@@ -197,7 +197,7 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
                        <Button variant="outline" className="w-full justify-start" asChild>
                          <Link to="/admin/golf" onClick={() => setIsMobileMenuOpen(false)}>
                            <Settings className="w-4 h-4 mr-3" />
-                           Admin Golfbanor
+                           Admin
                          </Link>
                        </Button>
                      )}
