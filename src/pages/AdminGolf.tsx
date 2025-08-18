@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, Users, UserCheck, UserX } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { AdminUserManagement } from "@/components/AdminUserManagement";
 
 export const AdminGolf = () => {
   const { isAdmin, loading } = useUserRole();
@@ -187,6 +188,11 @@ export const AdminGolf = () => {
               </div>
             </CardContent>
           </Card>
+          
+          {/* User Management Section */}
+          <div className="mt-8">
+            <AdminUserManagement />
+          </div>
         </div>
       </div>
     </div>
