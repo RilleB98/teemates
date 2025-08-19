@@ -16,24 +16,24 @@ export const Hero = () => {
       <div className="relative z-10 text-center text-white px-6 max-w-4xl mx-auto animate-slide-up">
         <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
           <span className="inline-block animate-fade-in" style={{ animationDelay: "0.2s" }}>
-            Find Your Perfect
+            Hitta din perfekta
           </span>
           <span className="block text-accent animate-scale-in" style={{ animationDelay: "0.6s" }}>
-            Golf Partner
+            Golfpartner
           </span>
         </h1>
         
         <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-2xl mx-auto leading-relaxed">
-          Connect with fellow golfers, discover new courses, and create lasting friendships 
-          through your shared passion for the game.
+          Träffa andra golfare, upptäck nya banor och skapa varaktiga vänskaper 
+          genom din gemensamma passion för spelet.
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Button variant="premium" size="lg" className="text-lg px-8 py-4 h-auto">
-            Start Connecting
+            Börja matcha
           </Button>
           <Button variant="outline" size="lg" className="text-lg px-8 py-4 h-auto bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20">
-            Learn More
+            Läs mer
           </Button>
         </div>
       </div>

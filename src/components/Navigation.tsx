@@ -111,7 +111,7 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
                   : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
               }`}>
                 <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-                <span className="text-xs font-medium">Messages</span>
+                <span className="text-xs font-medium">Meddelanden</span>
                 {formatBadgeCount(messageCount) && (
                   <Badge variant="destructive" className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 text-xs p-0 flex items-center justify-center">
                     {formatBadgeCount(messageCount)}
@@ -135,7 +135,7 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
                   : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
               }`}>
                 <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
-                <span className="text-xs font-medium">Courses</span>
+                <span className="text-xs font-medium">Banor</span>
               </button>
             </Link>
             

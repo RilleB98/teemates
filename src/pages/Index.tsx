@@ -23,7 +23,7 @@ const Index = () => {
       favoritesCourse: "Bro Hof Slott Golf Club",
       profileImage: player1,
       rating: 4.8,
-      achievements: ["Club Champion", "Eagles Club"]
+      achievements: ["Klubbmästare", "Eagles Club"]
     },
     {
       name: "Emma",
@@ -33,7 +33,7 @@ const Index = () => {
       favoritesCourse: "Hills Golf Club",
       profileImage: player1,
       rating: 4.9,
-      achievements: ["Tournament Winner", "Hole in One"]
+      achievements: ["Turneringsvinnare", "Hole in One"]
     },
     {
       name: "Johan",
@@ -43,7 +43,7 @@ const Index = () => {
       favoritesCourse: "Malmö Burlöv Golf Club", 
       profileImage: player1,
       rating: 4.7,
-      achievements: ["Beginner's Luck", "Most Improved"]
+      achievements: ["Nybörjartur", "Mest förbättrad"]
     }
   ];
 
@@ -52,7 +52,7 @@ const Index = () => {
       name: "Bro Hof Slott Golf Club",
       location: "Stockholm",
       rating: 4.9,
-      difficulty: "Hard",
+      difficulty: "Svår",
       holes: 18,
       price: "950 SEK",
       image: course1,
@@ -62,7 +62,7 @@ const Index = () => {
       name: "Hills Golf Club", 
       location: "Göteborg",
       rating: 4.7,
-      difficulty: "Medium",
+      difficulty: "Medel",
       holes: 18,
       price: "750 SEK",
       image: course1,
@@ -72,7 +72,7 @@ const Index = () => {
       name: "Malmö Burlöv Golf Club",
       location: "Malmö", 
       rating: 4.6,
-      difficulty: "Easy",
+      difficulty: "Lätt",
       holes: 18,
       price: "650 SEK",
       image: course1,
@@ -93,12 +93,12 @@ const Index = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16 animate-slide-up">
             <h2 className="text-4xl md:text-5xl font-bold text-golf-premium mb-6">
-              {user && userCity ? `Golfare från ${userCity}` : 'Meet Fellow Golfers'}
+              {user && userCity ? `Golfare från ${userCity}` : 'Träffa andra golfare'}
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               {user && userCity 
                 ? `Träffa andra golfare som också bor i ${userCity}` 
-                : 'Connect with passionate golfers in your area and discover your perfect playing partners'}
+                : 'Träffa passionerade golfare i ditt område och hitta dina perfekta spelpartners'}
             </p>
           </div>
           
@@ -162,10 +162,10 @@ const Index = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16 animate-slide-up">
             <h2 className="text-4xl md:text-5xl font-bold text-golf-premium mb-6">
-              Discover Amazing Courses
+              Upptäck fantastiska golfbanor
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Explore the best golf courses and book your next round with fellow players
+              Utforska de bästa golfbanorna och boka din nästa runda med andra spelare
             </p>
           </div>
           
@@ -183,10 +183,10 @@ const Index = () => {
       <section className="py-20 px-6 bg-gradient-golf">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 animate-slide-up">
-            Ready to Tee Off?
+            Redo att slå av?
           </h2>
           <p className="text-xl text-white/90 mb-8 animate-slide-up">
-            Join thousands of golfers already making connections and improving their game
+            Gå med tusentals golfare som redan knyter kontakter och förbättrar sitt spel
           </p>
           <div className="animate-slide-up">
             <Link to="/auth">
