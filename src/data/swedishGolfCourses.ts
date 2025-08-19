@@ -210,6 +210,7 @@ export const swedishGolfClubs = [
   { name: "Vidbynäs Golf", location: "Vidbynäs" },
   { name: "Waxholms Golfklubb", location: "Waxholm" },
   { name: "Wermdö Golfklubb", location: "Wermdö" },
+  { name: "Happy Golfer Stockholm", location: "Grödinge" },
   
   // Sörmland GDF
   { name: "Eskilstuna Golfklubb", location: "Eskilstuna" },
