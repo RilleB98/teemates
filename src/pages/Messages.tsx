@@ -32,7 +32,7 @@ export const Messages = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-golf-green via-background to-golf-green-light">
       <Navigation />
       
       <div className="pb-24 pt-4">
