@@ -9,6 +9,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { markMessagesAsRead } from "@/utils/messageUtils";
+import { useGroupChats } from "@/hooks/useGroupChats";
+import { ProfilePopover } from "@/components/ProfilePopover";
 import player1 from "@/assets/player1.jpg";
 
 interface Message {
@@ -20,30 +22,37 @@ interface Message {
 
 interface ChatRoomProps {
   friendId?: string; // If provided, creates a private chat
+  groupChatId?: string; // If provided, creates a group chat
   onBack: () => void;
 }
 
-export const ChatRoom = ({ friendId, onBack }: ChatRoomProps) => {
+export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [friendProfile, setFriendProfile] = useState<any>(null);
+  const [groupChat, setGroupChat] = useState<any>(null);
+  const [groupMembers, setGroupMembers] = useState<any[]>([]);
   const { user } = useAuth();
+  const { getGroupMembers } = useGroupChats();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Generate chat room ID for private chats
-  const chatRoomId = friendId ? 
-    (user && friendId ? 
-      user.id < friendId ? `${user.id}_${friendId}` : `${friendId}_${user.id}` 
-      : 'golf-group') 
-    : 'golf-group';
+  // Generate chat room ID 
+  const chatRoomId = groupChatId 
+    ? `group_${groupChatId}`
+    : friendId && user 
+      ? user.id < friendId ? `${user.id}_${friendId}` : `${friendId}_${user.id}` 
+      : 'golf-group';
 
   // Load friend profile if this is a private chat
   useEffect(() => {
     if (friendId) {
       loadFriendProfile();
+    } else if (groupChatId) {
+      loadGroupChat();
+      loadGroupMembers();
     }
-  }, [friendId]);
+  }, [friendId, groupChatId]);
 
   // Load messages on component mount  
   useEffect(() => {
@@ -93,6 +102,34 @@ export const ChatRoom = ({ friendId, onBack }: ChatRoomProps) => {
       setFriendProfile(data);
     } catch (error) {
       console.error('Error loading friend profile:', error);
+    }
+  };
+
+  const loadGroupChat = async () => {
+    if (!groupChatId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('group_chats')
+        .select('*')
+        .eq('id', groupChatId)
+        .single();
+
+      if (error) throw error;
+      setGroupChat(data);
+    } catch (error) {
+      console.error('Error loading group chat:', error);
+    }
+  };
+
+  const loadGroupMembers = async () => {
+    if (!groupChatId) return;
+    
+    try {
+      const members = await getGroupMembers(groupChatId);
+      setGroupMembers(members);
+    } catch (error) {
+      console.error('Error loading group members:', error);
     }
   };
 
@@ -186,7 +223,22 @@ export const ChatRoom = ({ friendId, onBack }: ChatRoomProps) => {
 
   const getUserDisplayName = (message: Message) => {
     if (message.user_id === user?.id) return "Du";
+    
+    // For group chats, find the member's name
+    if (groupChatId && groupMembers.length > 0) {
+      const member = groupMembers.find(m => m.user_id === message.user_id);
+      return member?.profile?.name || "Okänd medlem";
+    }
+    
     return "Golfkompis";
+  };
+
+  const getUserProfile = (userId: string) => {
+    if (groupChatId && groupMembers.length > 0) {
+      const member = groupMembers.find(m => m.user_id === userId);
+      return member?.profile;
+    }
+    return null;
   };
 
   if (loading) {
@@ -227,19 +279,28 @@ export const ChatRoom = ({ friendId, onBack }: ChatRoomProps) => {
         </Button>
         <div className="flex items-center space-x-3">
           <Avatar className="w-10 h-10 ring-2 ring-primary/20">
-            <AvatarImage src={friendId ? friendProfile?.avatar_url : player1} />
+            <AvatarImage src={
+              friendId ? friendProfile?.avatar_url 
+              : groupChatId ? undefined
+              : player1
+            } />
             <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
-              {friendId ? (friendProfile?.name?.[0]?.toUpperCase() || 'V') : 'GG'}
+              {friendId ? (friendProfile?.name?.[0]?.toUpperCase() || 'V') 
+               : groupChatId ? 'G'
+               : 'GG'}
             </AvatarFallback>
           </Avatar>
           <div>
             <h2 className="font-semibold text-gray-900">
-              {friendId ? (friendProfile?.name || 'Okänd vän') : 'Golf Gruppen'}
+              {friendId ? (friendProfile?.name || 'Okänd vän') 
+               : groupChatId ? (groupChat?.name || 'Gruppchatt')
+               : 'Golf Gruppen'}
             </h2>
             <p className="text-sm text-gray-500">
               {friendId ? 
-                (friendProfile?.home_club ? `HCP ${friendProfile.handicap} • ${friendProfile.home_club}` : `HCP ${friendProfile?.handicap || 0}`) :
-                'Ahmed, Emma, Johan och du'
+                (friendProfile?.home_club ? `HCP ${friendProfile.handicap} • ${friendProfile.home_club}` : `HCP ${friendProfile?.handicap || 0}`) 
+                : groupChatId ? `${groupMembers.length} medlemmar`
+                : 'Ahmed, Emma, Johan och du'
               }
             </p>
           </div>

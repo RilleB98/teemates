@@ -1,11 +1,14 @@
 import { Navigation } from "@/components/Navigation";
 import { ChatRoom } from "@/components/ChatRoom";
+import { CreateGroupChatDialog } from "@/components/CreateGroupChatDialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import { useFriends } from "@/hooks/useFriends";
+import { useGroupChats } from "@/hooks/useGroupChats";
 import { useUnreadMessagesByFriend } from "@/hooks/useUnreadMessagesByFriend";
 import { useLatestMessages } from "@/hooks/useLatestMessages";
 import { useAuth } from "@/hooks/useAuth";
@@ -13,7 +16,9 @@ import { MessageCircle, Users, ChevronRight } from "lucide-react";
 
 export const Messages = () => {
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
+  const [selectedGroupChat, setSelectedGroupChat] = useState<string | null>(null);
   const { friends, loading } = useFriends();
+  const { groupChats, loading: groupLoading } = useGroupChats();
   const { unreadByFriend, refetchUnreadCounts } = useUnreadMessagesByFriend();
   const latestMessages = useLatestMessages();
   const { user } = useAuth();
@@ -25,7 +30,20 @@ export const Messages = () => {
         friendId={selectedFriend}
         onBack={() => {
           setSelectedFriend(null);
-          refetchUnreadCounts(); // Refresh unread counts when coming back
+          refetchUnreadCounts();
+        }} 
+      />
+    );
+  }
+
+  // If a group chat is selected
+  if (selectedGroupChat) {
+    return (
+      <ChatRoom 
+        groupChatId={selectedGroupChat}
+        onBack={() => {
+          setSelectedGroupChat(null);
+          refetchUnreadCounts();
         }} 
       />
     );
@@ -47,9 +65,16 @@ export const Messages = () => {
             </p>
           </div>
 
-          <div className="space-y-4">
-            {/* Friends List */}
-            {loading ? (
+          <CreateGroupChatDialog onGroupCreated={(groupId) => setSelectedGroupChat(groupId)} />
+
+          <Tabs defaultValue="friends" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="friends">Privata chatter</TabsTrigger>
+              <TabsTrigger value="groups">Gruppchatter</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="friends" className="space-y-4 mt-6">
+              {loading ? (
               <div className="text-center py-8">
                 <div className="text-gray-500">Laddar vänner...</div>
               </div>
@@ -144,7 +169,53 @@ export const Messages = () => {
                 })}
               </div>
             )}
-          </div>
+            </TabsContent>
+
+            <TabsContent value="groups" className="space-y-4 mt-6">
+              {groupLoading ? (
+                <div className="text-center py-8">
+                  <div className="text-gray-500">Laddar gruppchatter...</div>
+                </div>
+              ) : groupChats.length === 0 ? (
+                <Card className="bg-white shadow-sm border border-gray-200">
+                  <CardContent className="p-8 text-center">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Users className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Inga gruppchatter än</h3>
+                    <p className="text-gray-600 mb-4">
+                      Skapa en gruppchatt för att chatta med flera vänner samtidigt
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-2">
+                  {groupChats.map((group) => (
+                    <Card
+                      key={group.id}
+                      className="shadow-sm border bg-white border-gray-200 hover:shadow-md transition-all duration-200 cursor-pointer"
+                      onClick={() => setSelectedGroupChat(group.id)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-4">
+                          <Avatar className="w-12 h-12 ring-2 ring-primary/20">
+                            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
+                              {group.name.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-900">{group.name}</h3>
+                            <p className="text-sm text-gray-500">Gruppchatt</p>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-gray-400" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
