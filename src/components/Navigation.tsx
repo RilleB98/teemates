@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Target, Users, MapPin, MessageCircle, User, Menu, LogOut, LogIn, Home, Settings } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -74,16 +74,18 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
   const messageCount = useUnreadMessages();
   const location = useLocation();
 
-  const formatBadgeCount = (count: number) => {
+  const formatBadgeCount = useCallback((count: number) => {
     if (count === 0) return undefined;
     return count > 9 ? "9+" : count.toString();
-  };
+  }, []);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     await supabase.auth.signOut();
     toast.success("Du är nu utloggad");
     setIsMobileMenuOpen(false);
-  };
+  }, []);
+
+  const badgeCount = useMemo(() => formatBadgeCount(messageCount), [messageCount, formatBadgeCount]);
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-golf-green-light">
@@ -112,9 +114,9 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
               }`}>
                 <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
                 <span className="text-xs font-medium">Meddelanden</span>
-                {formatBadgeCount(messageCount) && (
+                {badgeCount && (
                   <Badge variant="destructive" className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 text-xs p-0 flex items-center justify-center">
-                    {formatBadgeCount(messageCount)}
+                    {badgeCount}
                   </Badge>
                 )}
               </button>
@@ -147,6 +149,8 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
                 </button>
               </SheetTrigger>
               <SheetContent side="right" className="w-80">
+                <SheetTitle className="sr-only">Navigeringsmeny</SheetTitle>
+                <SheetDescription className="sr-only">Menyalternativ och användarinformation</SheetDescription>
                 <div className="flex flex-col space-y-6 mt-8">
                   <div className="flex items-center space-x-3 pb-4 border-b border-golf-green-light">
                     <Avatar className="w-12 h-12">
