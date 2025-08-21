@@ -104,8 +104,8 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
                   ? 'text-golf-green bg-golf-green-light' 
                   : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
               }`}>
-                <Users className={isMobile ? "w-4 h-4" : "w-5 h-5 sm:w-6 sm:h-6"} />
-                {!isMobile && <span className="text-xs font-medium">Vänner</span>}
+                <Users className="w-5 h-5 sm:w-6 sm:h-6" />
+                <span className="text-xs font-medium">Vänner</span>
               </button>
             </Link>
             
@@ -118,12 +118,10 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
                   ? 'text-golf-green bg-golf-green-light' 
                   : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
               }`}>
-                <MessageCircle className={isMobile ? "w-4 h-4" : "w-5 h-5 sm:w-6 sm:h-6"} />
-                {!isMobile && <span className="text-xs font-medium">Meddelanden</span>}
+                <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+                <span className="text-xs font-medium">Meddelanden</span>
                 {badgeCount && (
-                  <Badge variant="destructive" className={`absolute -top-1 -right-1 text-xs p-0 flex items-center justify-center ${
-                    isMobile ? 'w-3.5 h-3.5 text-[10px]' : 'w-4 h-4 sm:w-5 sm:h-5'
-                  }`}>
+                  <Badge variant="destructive" className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 text-xs p-0 flex items-center justify-center">
                     {badgeCount}
                   </Badge>
                 )}
@@ -132,10 +130,8 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
 
             {/* Centered Large Swipe Button */}
             <Link to="/swipe">
-              <div className={`bg-gradient-golf rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-lg ${
-                isMobile ? 'w-12 h-12' : 'w-14 h-14 sm:w-16 sm:h-16 lg:w-18 lg:h-18'
-              }`}>
-                <Target className={isMobile ? "w-6 h-6 text-white" : "w-7 h-7 sm:w-8 sm:h-8 lg:w-9 lg:h-9 text-white"} />
+              <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-18 lg:h-18 bg-gradient-golf rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-lg">
+                <Target className="w-7 h-7 sm:w-8 sm:h-8 lg:w-9 lg:h-9 text-white" />
               </div>
             </Link>
             
@@ -148,18 +144,16 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
                   ? 'text-golf-green bg-golf-green-light' 
                   : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
               }`}>
-                <MapPin className={isMobile ? "w-4 h-4" : "w-5 h-5 sm:w-6 sm:h-6"} />
-                {!isMobile && <span className="text-xs font-medium">Banor</span>}
+                <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
+                <span className="text-xs font-medium">Banor</span>
               </button>
             </Link>
             
             {/* Hamburger Menu */}
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
-                <button className={`relative flex items-center justify-center rounded-full bg-golf-green text-white hover:bg-golf-green/90 transition-smooth ${
-                  isMobile ? 'w-8 h-8' : 'w-10 h-10 sm:w-12 sm:h-12'
-                }`}>
-                  <Menu className={isMobile ? "w-4 h-4" : "w-5 h-5 sm:w-6 sm:h-6"} />
+                <button className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-golf-green text-white hover:bg-golf-green/90 transition-smooth">
+                  <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
               </SheetTrigger>
               <SheetContent side="right" className="w-80">
