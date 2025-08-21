@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -73,6 +74,7 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
   const { isAdmin } = useUserRole();
   const messageCount = useUnreadMessages();
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   const formatBadgeCount = useCallback((count: number) => {
     if (count === 0) return undefined;
@@ -89,33 +91,39 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-golf-green-light">
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4">
+      <div className={`max-w-7xl mx-auto py-1 ${isMobile ? 'px-1' : 'px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4'}`}>
         <div className="flex items-center justify-center">
-          {/* Navigation items with even spacing */}
-          <div className="flex items-center justify-between w-full max-w-md">
+          {/* Navigation items with optimized mobile spacing */}
+          <div className={`flex items-center justify-between w-full ${isMobile ? 'max-w-sm px-1' : 'max-w-md'}`}>
             {/* Friends */}
             <Link to="/friends">
-              <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${
+              <button className={`relative flex flex-col items-center transition-smooth ${
+                isMobile ? 'space-y-0.5 px-1 py-1' : 'space-y-1 px-2 py-1'
+              } rounded-lg ${
                 location.pathname === '/friends' 
                   ? 'text-golf-green bg-golf-green-light' 
                   : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
               }`}>
-                <Users className="w-5 h-5 sm:w-6 sm:h-6" />
-                <span className="text-xs font-medium">Vänner</span>
+                <Users className={isMobile ? "w-4 h-4" : "w-5 h-5 sm:w-6 sm:h-6"} />
+                {!isMobile && <span className="text-xs font-medium">Vänner</span>}
               </button>
             </Link>
             
             {/* Messages */}
             <Link to="/messages">
-              <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${
+              <button className={`relative flex flex-col items-center transition-smooth ${
+                isMobile ? 'space-y-0.5 px-1 py-1' : 'space-y-1 px-2 py-1'
+              } rounded-lg ${
                 location.pathname === '/messages' 
                   ? 'text-golf-green bg-golf-green-light' 
                   : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
               }`}>
-                <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-                <span className="text-xs font-medium">Meddelanden</span>
+                <MessageCircle className={isMobile ? "w-4 h-4" : "w-5 h-5 sm:w-6 sm:h-6"} />
+                {!isMobile && <span className="text-xs font-medium">Meddelanden</span>}
                 {badgeCount && (
-                  <Badge variant="destructive" className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 text-xs p-0 flex items-center justify-center">
+                  <Badge variant="destructive" className={`absolute -top-1 -right-1 text-xs p-0 flex items-center justify-center ${
+                    isMobile ? 'w-3.5 h-3.5 text-[10px]' : 'w-4 h-4 sm:w-5 sm:h-5'
+                  }`}>
                     {badgeCount}
                   </Badge>
                 )}
@@ -124,28 +132,34 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
 
             {/* Centered Large Swipe Button */}
             <Link to="/swipe">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-18 lg:h-18 bg-gradient-golf rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-lg">
-                <Target className="w-7 h-7 sm:w-8 sm:h-8 lg:w-9 lg:h-9 text-white" />
+              <div className={`bg-gradient-golf rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-lg ${
+                isMobile ? 'w-12 h-12' : 'w-14 h-14 sm:w-16 sm:h-16 lg:w-18 lg:h-18'
+              }`}>
+                <Target className={isMobile ? "w-6 h-6 text-white" : "w-7 h-7 sm:w-8 sm:h-8 lg:w-9 lg:h-9 text-white"} />
               </div>
             </Link>
             
             {/* Courses */}
             <Link to="/courses">
-              <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${
+              <button className={`relative flex flex-col items-center transition-smooth ${
+                isMobile ? 'space-y-0.5 px-1 py-1' : 'space-y-1 px-2 py-1'
+              } rounded-lg ${
                 location.pathname === '/courses' 
                   ? 'text-golf-green bg-golf-green-light' 
                   : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
               }`}>
-                <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
-                <span className="text-xs font-medium">Banor</span>
+                <MapPin className={isMobile ? "w-4 h-4" : "w-5 h-5 sm:w-6 sm:h-6"} />
+                {!isMobile && <span className="text-xs font-medium">Banor</span>}
               </button>
             </Link>
             
             {/* Hamburger Menu */}
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
-                <button className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-golf-green text-white hover:bg-golf-green/90 transition-smooth">
-                  <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
+                <button className={`relative flex items-center justify-center rounded-full bg-golf-green text-white hover:bg-golf-green/90 transition-smooth ${
+                  isMobile ? 'w-8 h-8' : 'w-10 h-10 sm:w-12 sm:h-12'
+                }`}>
+                  <Menu className={isMobile ? "w-4 h-4" : "w-5 h-5 sm:w-6 sm:h-6"} />
                 </button>
               </SheetTrigger>
               <SheetContent side="right" className="w-80">
