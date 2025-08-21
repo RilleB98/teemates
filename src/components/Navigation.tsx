@@ -92,9 +92,9 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-golf-green-light">
       <div className={`max-w-7xl mx-auto py-1 ${isMobile ? 'px-1' : 'px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4'}`}>
-        <div className="flex items-center justify-center">
-          {/* Navigation items with optimized mobile spacing */}
-          <div className={`flex items-center justify-between w-full ${isMobile ? 'max-w-sm px-1' : 'max-w-md'}`}>
+        <div className="flex items-center justify-center relative">
+          {/* Left side items */}
+          <div className="flex items-center space-x-4 absolute left-0">
             {/* Friends */}
             <Link to="/friends">
               <button className={`relative flex flex-col items-center transition-smooth ${
@@ -127,14 +127,17 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
                 )}
               </button>
             </Link>
+          </div>
 
-            {/* Centered Large Swipe Button */}
-            <Link to="/swipe">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-18 lg:h-18 bg-gradient-golf rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-lg">
-                <Target className="w-7 h-7 sm:w-8 sm:h-8 lg:w-9 lg:h-9 text-white" />
-              </div>
-            </Link>
-            
+          {/* Centered Large Swipe Button */}
+          <Link to="/swipe">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-18 lg:h-18 bg-gradient-golf rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-lg">
+              <Target className="w-7 h-7 sm:w-8 sm:h-8 lg:w-9 lg:h-9 text-white" />
+            </div>
+          </Link>
+          
+          {/* Right side items */}
+          <div className="flex items-center space-x-4 absolute right-0">
             {/* Courses */}
             <Link to="/courses">
               <button className={`relative flex flex-col items-center transition-smooth ${
