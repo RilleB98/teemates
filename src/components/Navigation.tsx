@@ -9,7 +9,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -74,7 +73,6 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
   const { isAdmin } = useUserRole();
   const messageCount = useUnreadMessages();
   const location = useLocation();
-  const isMobile = useIsMobile();
 
   const formatBadgeCount = useCallback((count: number) => {
     if (count === 0) return undefined;
@@ -91,15 +89,13 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-golf-green-light">
-      <div className={`max-w-7xl mx-auto py-1 ${isMobile ? 'px-1' : 'px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4'}`}>
-        <div className="flex items-center justify-center relative w-full">
-          {/* Left side items */}
-          <div className={`flex items-center absolute left-0 ${isMobile ? 'space-x-2' : 'space-x-4'}`}>
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4">
+        <div className="flex items-center justify-center">
+          {/* Navigation items with even spacing */}
+          <div className="flex items-center justify-between w-full max-w-md">
             {/* Friends */}
             <Link to="/friends">
-              <button className={`relative flex flex-col items-center transition-smooth ${
-                isMobile ? 'space-y-0.5 px-1 py-1' : 'space-y-1 px-2 py-1'
-              } rounded-lg ${
+              <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${
                 location.pathname === '/friends' 
                   ? 'text-golf-green bg-golf-green-light' 
                   : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
@@ -111,9 +107,7 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
             
             {/* Messages */}
             <Link to="/messages">
-              <button className={`relative flex flex-col items-center transition-smooth ${
-                isMobile ? 'space-y-0.5 px-1 py-1' : 'space-y-1 px-2 py-1'
-              } rounded-lg ${
+              <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${
                 location.pathname === '/messages' 
                   ? 'text-golf-green bg-golf-green-light' 
                   : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
@@ -127,22 +121,17 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
                 )}
               </button>
             </Link>
-          </div>
 
-          {/* Centered Large Swipe Button - positioned absolutely center */}
-          <Link to="/swipe" className="absolute left-1/2 transform -translate-x-1/2">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-18 lg:h-18 bg-gradient-golf rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-lg">
-              <Target className="w-7 h-7 sm:w-8 sm:h-8 lg:w-9 lg:h-9 text-white" />
-            </div>
-          </Link>
-          
-          {/* Right side items */}
-          <div className={`flex items-center absolute right-0 ${isMobile ? 'space-x-2' : 'space-x-4'}`}>
+            {/* Centered Large Swipe Button */}
+            <Link to="/swipe">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-18 lg:h-18 bg-gradient-golf rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-lg">
+                <Target className="w-7 h-7 sm:w-8 sm:h-8 lg:w-9 lg:h-9 text-white" />
+              </div>
+            </Link>
+            
             {/* Courses */}
             <Link to="/courses">
-              <button className={`relative flex flex-col items-center transition-smooth ${
-                isMobile ? 'space-y-0.5 px-1 py-1' : 'space-y-1 px-2 py-1'
-              } rounded-lg ${
+              <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${
                 location.pathname === '/courses' 
                   ? 'text-golf-green bg-golf-green-light' 
                   : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
