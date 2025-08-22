@@ -10,6 +10,7 @@ import { useFavoriteGolfCourses } from "@/hooks/useFavoriteGolfCourses";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation as NavComponent } from "@/components/Navigation";
 import { getGolfCourseImage } from "@/components/CourseImageManager";
+import { CourseSwipeModal } from "@/components/CourseSwipeModal";
 
 interface Course {
   id: string;
@@ -24,6 +25,8 @@ export const Courses = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [courses, setCourses] = useState<Course[]>([]);
   const [coursesLoading, setCoursesLoading] = useState(true);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [swipeModalOpen, setSwipeModalOpen] = useState(false);
   const navigate = useNavigate();
   const { clubUserCounts, loading: usersLoading } = useGolfClubUsers();
   const { favorites, loading: favoritesLoading, toggleFavorite, isFavorite } = useFavoriteGolfCourses();
@@ -81,6 +84,16 @@ export const Courses = () => {
 
   const clearSearch = () => {
     setSearchQuery("");
+  };
+
+  const handleCourseClick = (course: Course) => {
+    setSelectedCourse(course);
+    setSwipeModalOpen(true);
+  };
+
+  const handleCloseSwipeModal = () => {
+    setSwipeModalOpen(false);
+    setSelectedCourse(null);
   };
 
   const favoriteCount = favorites.length;
@@ -187,6 +200,7 @@ export const Courses = () => {
                     key={course.id} 
                     className="bg-white/95 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer hover-scale group animate-fade-in touch-manipulation active:scale-95"
                     style={{ animationDelay: `${index * 100}ms` }}
+                    onClick={() => handleCourseClick(course)}
                   >
                     <CardContent className="p-4 sm:p-6 lg:p-8">
                       <div className="flex gap-3 sm:gap-4 lg:gap-6">
@@ -253,6 +267,16 @@ export const Courses = () => {
           </div>
         </div>
       </div>
+
+      {/* Course Swipe Modal */}
+      {selectedCourse && (
+        <CourseSwipeModal
+          isOpen={swipeModalOpen}
+          onClose={handleCloseSwipeModal}
+          courseName={selectedCourse.name}
+          courseLocation={selectedCourse.location}
+        />
+      )}
     </div>
   );
 };
