@@ -133,10 +133,21 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
             <Link to="/courses">
               <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${
                 location.pathname === '/courses' 
-                  ? 'text-golf-green bg-golf-green-light' 
-                  : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'
+                  ? 'text-white bg-gradient-to-r from-blue-600 to-blue-800 shadow-lg' 
+                  : 'text-muted-foreground hover:text-blue-600 hover:bg-blue-50 border border-blue-200/50'
               }`}>
-                <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
+                <div className="relative">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                    location.pathname === '/courses' ? 'bg-white/20' : 'bg-blue-100'
+                  }`}>
+                    <span className={`text-lg font-bold ${
+                      location.pathname === '/courses' ? 'text-white' : 'text-blue-600'
+                    }`}>TM</span>
+                  </div>
+                  <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${
+                    location.pathname === '/courses' ? 'bg-yellow-400' : 'bg-blue-200'
+                  }`}></div>
+                </div>
                 <span className="text-xs font-medium">Banor</span>
               </button>
             </Link>
