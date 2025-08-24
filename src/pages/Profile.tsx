@@ -226,31 +226,123 @@ export const Profile = () => {
 
   const handleCameraCapture = async () => {
     try {
-      const image = await CapacitorCamera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.Base64,
-        source: CameraSource.Camera,
-      });
+      // Check if we're on a native platform
+      const { Capacitor } = await import('@capacitor/core');
+      
+      if (Capacitor.isNativePlatform()) {
+        // Use Capacitor Camera for native platforms
+        const image = await CapacitorCamera.getPhoto({
+          quality: 90,
+          allowEditing: false,
+          resultType: CameraResultType.Base64,
+          source: CameraSource.Camera,
+        });
 
-      if (image.base64String) {
-        // Convert base64 to blob
-        const byteCharacters = atob(image.base64String);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        if (image.base64String) {
+          const byteCharacters = atob(image.base64String);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: 'image/jpeg' });
+          const file = new File([blob], 'camera-photo.jpg', { type: 'image/jpeg' });
+          
+          setSelectedImage(file);
+          setShowCropper(true);
+          setShowImageOptions(false);
         }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'image/jpeg' });
-        const file = new File([blob], 'camera-photo.jpg', { type: 'image/jpeg' });
+      } else {
+        // Use Web Camera API for web
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: 'user' } 
+        });
         
-        setSelectedImage(file);
-        setShowCropper(true);
-        setShowImageOptions(false);
+        // Create video element to show camera feed
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        video.autoplay = true;
+        video.playsInline = true;
+        
+        // Create a simple camera modal
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: black;
+          z-index: 9999;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+        `;
+        
+        video.style.cssText = `
+          max-width: 90%;
+          max-height: 70%;
+          border-radius: 8px;
+        `;
+        
+        const captureBtn = document.createElement('button');
+        captureBtn.textContent = 'Ta bild';
+        captureBtn.style.cssText = `
+          margin-top: 20px;
+          padding: 12px 24px;
+          background: #fff;
+          border: none;
+          border-radius: 8px;
+          font-size: 16px;
+          cursor: pointer;
+        `;
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = 'Stäng';
+        closeBtn.style.cssText = `
+          margin-top: 10px;
+          padding: 8px 16px;
+          background: transparent;
+          border: 1px solid #fff;
+          color: #fff;
+          border-radius: 8px;
+          cursor: pointer;
+        `;
+        
+        modal.appendChild(video);
+        modal.appendChild(captureBtn);
+        modal.appendChild(closeBtn);
+        document.body.appendChild(modal);
+        
+        const cleanup = () => {
+          stream.getTracks().forEach(track => track.stop());
+          document.body.removeChild(modal);
+        };
+        
+        captureBtn.onclick = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(video, 0, 0);
+          
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const file = new File([blob], 'camera-photo.jpg', { type: 'image/jpeg' });
+              setSelectedImage(file);
+              setShowCropper(true);
+              setShowImageOptions(false);
+              cleanup();
+            }
+          }, 'image/jpeg', 0.9);
+        };
+        
+        closeBtn.onclick = cleanup;
       }
     } catch (error) {
       console.error('Error taking photo:', error);
-      toast.error('Kunde inte ta bild');
+      toast.error('Kunde inte komma åt kameran');
     }
   };
 
