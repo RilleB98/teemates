@@ -254,7 +254,7 @@ export const Courses = () => {
                           <div className="flex items-center justify-between">
                             <div className="text-xs sm:text-sm text-muted-foreground flex items-center">
                               <span className="mr-1 sm:mr-2">👥</span>
-                              <span>GolfBuddy Användare: {clubUserCounts[course.name] || 0}</span>
+                              <span>TeeMates Användare: {clubUserCounts[course.name] || 0}</span>
                             </div>
                           </div>
                         </div>
