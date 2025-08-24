@@ -9,12 +9,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, User, Save, LogOut, MapPin, Star, ArrowLeft, Edit2, CalendarIcon } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Camera, User, Save, LogOut, MapPin, Star, ArrowLeft, Edit2, CalendarIcon, Image } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { CourseSelector } from "@/components/CourseSelector";
 import { ImageCropper } from "@/components/ImageCropper";
+import { Camera as CapacitorCamera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 export const Profile = () => {
   const [profile, setProfile] = useState({
@@ -36,6 +38,7 @@ export const Profile = () => {
   const [uploading, setUploading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [showCropper, setShowCropper] = useState(false);
+  const [showImageOptions, setShowImageOptions] = useState(false);
   const navigate = useNavigate();
 
   // Helper function to update birth date from individual components
@@ -221,6 +224,66 @@ export const Profile = () => {
     }
   };
 
+  const handleCameraCapture = async () => {
+    try {
+      const image = await CapacitorCamera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Camera,
+      });
+
+      if (image.base64String) {
+        // Convert base64 to blob
+        const byteCharacters = atob(image.base64String);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'image/jpeg' });
+        const file = new File([blob], 'camera-photo.jpg', { type: 'image/jpeg' });
+        
+        setSelectedImage(file);
+        setShowCropper(true);
+        setShowImageOptions(false);
+      }
+    } catch (error) {
+      console.error('Error taking photo:', error);
+      toast.error('Kunde inte ta bild');
+    }
+  };
+
+  const handleLibrarySelect = async () => {
+    try {
+      const image = await CapacitorCamera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Photos,
+      });
+
+      if (image.base64String) {
+        // Convert base64 to blob
+        const byteCharacters = atob(image.base64String);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'image/jpeg' });
+        const file = new File([blob], 'library-photo.jpg', { type: 'image/jpeg' });
+        
+        setSelectedImage(file);
+        setShowCropper(true);
+        setShowImageOptions(false);
+      }
+    } catch (error) {
+      console.error('Error selecting from library:', error);
+      toast.error('Kunde inte välja bild');
+    }
+  };
+
   const saveProfile = async () => {
     try {
       setLoading(true);
@@ -373,17 +436,21 @@ export const Profile = () => {
                         <User className="w-16 h-16" />
                       </AvatarFallback>
                     </Avatar>
-                    <label htmlFor="avatar-upload" className="absolute bottom-2 right-2 p-2 bg-primary rounded-full cursor-pointer hover:bg-primary/90 transition-all duration-200 shadow-lg group-hover:scale-110">
-                      <Camera className="w-4 h-4 text-white" />
-                      <input
-                        id="avatar-upload"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageSelect}
-                        disabled={uploading}
-                        className="hidden"
-                      />
-                    </label>
+                     <button 
+                       onClick={() => setShowImageOptions(true)}
+                       className="absolute bottom-2 right-2 p-2 bg-primary rounded-full cursor-pointer hover:bg-primary/90 transition-all duration-200 shadow-lg group-hover:scale-110"
+                       disabled={uploading}
+                     >
+                       <Camera className="w-4 h-4 text-white" />
+                     </button>
+                     <input
+                       id="avatar-upload"
+                       type="file"
+                       accept="image/*"
+                       onChange={handleImageSelect}
+                       disabled={uploading}
+                       className="hidden"
+                     />
                   </div>
 
                   {/* Name Section */}
@@ -676,6 +743,53 @@ export const Profile = () => {
             onCrop={handleCroppedImage}
           />
         )}
+
+        {/* Image Options Dialog */}
+        <Dialog open={showImageOptions} onOpenChange={setShowImageOptions}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Välj profilbild</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-4 pt-4">
+              <Button 
+                onClick={handleCameraCapture}
+                className="w-full flex items-center gap-3 justify-start p-4 h-auto"
+                variant="outline"
+              >
+                <Camera className="w-6 h-6" />
+                <div className="text-left">
+                  <div className="font-medium">Ta ny bild</div>
+                  <div className="text-sm text-muted-foreground">Använd kameran</div>
+                </div>
+              </Button>
+              <Button 
+                onClick={handleLibrarySelect}
+                className="w-full flex items-center gap-3 justify-start p-4 h-auto"
+                variant="outline"
+              >
+                <Image className="w-6 h-6" />
+                <div className="text-left">
+                  <div className="font-medium">Välj befintlig bild</div>
+                  <div className="text-sm text-muted-foreground">Från bildbibliotek</div>
+                </div>
+              </Button>
+              <Button 
+                onClick={() => {
+                  document.getElementById('avatar-upload')?.click();
+                  setShowImageOptions(false);
+                }}
+                className="w-full flex items-center gap-3 justify-start p-4 h-auto"
+                variant="outline"
+              >
+                <User className="w-6 h-6" />
+                <div className="text-left">
+                  <div className="font-medium">Bläddra filer</div>
+                  <div className="text-sm text-muted-foreground">Välj från dator</div>
+                </div>
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
