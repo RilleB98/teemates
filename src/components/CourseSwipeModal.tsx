@@ -64,24 +64,14 @@ export const CourseSwipeModal = ({
       <DialogContent className="max-w-md mx-auto p-0 bg-gradient-to-br from-golf-green via-background to-golf-green-light">
         <div className="p-6">
           <DialogHeader className="mb-4">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <DialogTitle className="text-xl font-bold text-golf-premium mb-1">
-                  {courseName}
-                </DialogTitle>
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <MapPin className="w-4 h-4 mr-1" />
-                  {courseLocation}
-                </div>
+            <div>
+              <DialogTitle className="text-xl font-bold text-golf-premium mb-1">
+                {courseName}
+              </DialogTitle>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <MapPin className="w-4 h-4 mr-1" />
+                {courseLocation}
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClose}
-                className="h-8 w-8 p-0"
-              >
-                <X className="w-4 h-4" />
-              </Button>
             </div>
             
             {totalProfiles > 0 && (
