@@ -89,13 +89,13 @@ const Index = () => {
       <Navigation onMessagesClick={() => setShowChat(true)} />
       
       {/* Players Section */}
-      <section className="py-20 px-6 bg-gradient-hero">
+      <section className="py-8 px-4 sm:py-12 md:py-16 lg:py-20 sm:px-6 bg-gradient-hero">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16 animate-slide-up">
-            <h2 className="text-4xl md:text-5xl font-bold text-golf-premium mb-6">
+          <div className="text-center mb-8 sm:mb-12 md:mb-16 animate-slide-up">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-golf-premium mb-4 sm:mb-6">
               {user && userCity ? `Golfare från ${userCity}` : 'Träffa andra golfare'}
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
               {user && userCity 
                 ? `Träffa andra golfare som också bor i ${userCity}` 
                 : 'Träffa passionerade golfare i ditt område och hitta dina perfekta spelpartners'}
@@ -104,14 +104,14 @@ const Index = () => {
           
           {user ? (
             loading ? (
-              <div className="text-center py-12">
-                <div className="inline-flex items-center gap-2 text-lg text-muted-foreground">
-                  <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent"></div>
+              <div className="text-center py-8 sm:py-12">
+                <div className="inline-flex items-center gap-2 text-base sm:text-lg text-muted-foreground">
+                  <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-2 border-primary border-t-transparent"></div>
                   Laddar profiler...
                 </div>
               </div>
             ) : profiles.length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
                 {profiles.map((profile, index) => (
                   <div key={profile.user_id} className="animate-slide-up" style={{ animationDelay: `${index * 200}ms` }}>
                     <PlayerCard 
@@ -128,17 +128,17 @@ const Index = () => {
                 ))}
               </div>
             ) : userCity ? (
-              <div className="text-center py-12">
-                <p className="text-lg text-muted-foreground">
+              <div className="text-center py-8 sm:py-12 px-4">
+                <p className="text-base sm:text-lg text-muted-foreground">
                   Inga andra golfare från {userCity} hittades än. 
                 </p>
-                <p className="text-muted-foreground mt-2">
+                <p className="text-sm sm:text-base text-muted-foreground mt-2">
                   Kom tillbaka senare för att se nya medlemmar!
                 </p>
               </div>
             ) : (
-              <div className="text-center py-12">
-                <p className="text-lg text-muted-foreground">
+              <div className="text-center py-8 sm:py-12 px-4">
+                <p className="text-base sm:text-lg text-muted-foreground">
                   <Link to="/profile" className="text-primary hover:underline">
                     Välj din hemmastad i profilen
                   </Link> för att se golfare från din stad!
@@ -146,7 +146,7 @@ const Index = () => {
               </div>
             )
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
               {samplePlayers.map((player, index) => (
                 <div key={index} className="animate-slide-up" style={{ animationDelay: `${index * 200}ms` }}>
                   <PlayerCard {...player} />
@@ -158,18 +158,18 @@ const Index = () => {
       </section>
       
       {/* Courses Section */}
-      <section className="py-20 px-6">
+      <section className="py-8 px-4 sm:py-12 md:py-16 lg:py-20 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16 animate-slide-up">
-            <h2 className="text-4xl md:text-5xl font-bold text-golf-premium mb-6">
+          <div className="text-center mb-8 sm:mb-12 md:mb-16 animate-slide-up">.
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-golf-premium mb-4 sm:mb-6">
               Upptäck fantastiska golfbanor
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
               Utforska de bästa golfbanorna och boka din nästa runda med andra spelare
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {sampleCourses.map((course, index) => (
               <div key={index} className="animate-slide-up" style={{ animationDelay: `${index * 200}ms` }}>
                 <CourseCard {...course} />
@@ -180,17 +180,17 @@ const Index = () => {
       </section>
       
       {/* CTA Section */}
-      <section className="py-20 px-6 bg-gradient-golf">
+      <section className="py-8 px-4 sm:py-12 md:py-16 lg:py-20 sm:px-6 bg-gradient-golf">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 animate-slide-up">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6 animate-slide-up">
             Redo att slå av?
           </h2>
-          <p className="text-xl text-white/90 mb-8 animate-slide-up">
+          <p className="text-base sm:text-lg md:text-xl text-white/90 mb-6 sm:mb-8 animate-slide-up px-4">
             Gå med tusentals golfare som redan knyter kontakter och förbättrar sitt spel
           </p>
           <div className="animate-slide-up">
             <Link to="/auth">
-              <button className="bg-white text-golf-green px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white/90 transition-smooth shadow-premium">
+              <button className="bg-white text-golf-green px-6 py-3 sm:px-8 sm:py-4 rounded-lg text-base sm:text-lg font-semibold hover:bg-white/90 transition-smooth shadow-premium touch-target">
                 Kom igång idag
               </button>
             </Link>

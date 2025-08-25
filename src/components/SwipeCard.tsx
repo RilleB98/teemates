@@ -147,26 +147,28 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
   const opacity = Math.max(1 - Math.abs(dragOffset.x) / 300, 0);
 
   return (
-    <div className="relative w-full max-w-sm mx-auto h-[600px]">
-      {/* Preview-friendly action buttons at top */}
-      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex gap-4 z-20 md:hidden">
+    <div className="relative w-full max-w-sm mx-auto h-[500px] sm:h-[600px]">
+      {/* Mobile action buttons at top */}
+      <div className="absolute top-2 sm:top-4 left-1/2 transform -translate-x-1/2 flex gap-2 sm:gap-4 z-20 md:hidden">
         <Button
           variant="outline"
           size="sm"
-          className="bg-white/90 border-red-200 hover:bg-red-50 text-red-600"
+          className="bg-white/90 border-red-200 hover:bg-red-50 text-red-600 text-xs sm:text-sm touch-target"
           onClick={handleSwipeLeft}
         >
-          <X className="h-4 w-4 mr-1" />
-          Hoppa över
+          <X className="h-3 sm:h-4 w-3 sm:w-4 mr-1" />
+          <span className="hidden xs:inline">Hoppa över</span>
+          <span className="xs:hidden">Nej</span>
         </Button>
         <Button
           variant="outline"
           size="sm"
-          className="bg-white/90 border-green-200 hover:bg-green-50 text-green-600"
+          className="bg-white/90 border-green-200 hover:bg-green-50 text-green-600 text-xs sm:text-sm touch-target"
           onClick={handleSwipeRight}
         >
-          <Heart className="h-4 w-4 mr-1" />
-          Gilla
+          <Heart className="h-3 sm:h-4 w-3 sm:w-4 mr-1" />
+          <span className="hidden xs:inline">Gilla</span>
+          <span className="xs:hidden">Ja</span>
         </Button>
       </div>
 
@@ -187,7 +189,7 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
           userSelect: 'none',
           touchAction: 'none'
         }}
-      >
+        >
         <Card className="h-full shadow-xl border-2 border-muted overflow-hidden bg-white">
           <CardContent className="p-0 h-full flex flex-col">
             {/* Profile Image */}
@@ -201,8 +203,8 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gradient-subtle">
-                  <Avatar className="w-32 h-32">
-                    <AvatarFallback className="text-4xl">
+                  <Avatar className="w-24 sm:w-32 h-24 sm:h-32">
+                    <AvatarFallback className="text-2xl sm:text-4xl">
                       {profile.name?.charAt(0) || '?'}
                     </AvatarFallback>
                   </Avatar>
@@ -211,18 +213,18 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
             </div>
 
             {/* Profile Info */}
-            <div className="h-1/3 p-4 bg-white flex flex-col justify-between">
-              <div className="space-y-2">
+            <div className="h-1/3 p-3 sm:p-4 bg-white flex flex-col justify-between">
+              <div className="space-y-1 sm:space-y-2">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-bold text-foreground">
+                  <h3 className="text-lg sm:text-xl font-bold text-foreground truncate">
                     {profile.name || 'Okänd användare'}
                   </h3>
                   {profile.age && (
-                    <span className="text-lg text-muted-foreground">{profile.age}</span>
+                    <span className="text-base sm:text-lg text-muted-foreground">{profile.age}</span>
                   )}
                 </div>
                 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1 sm:gap-2">
                   {profile.handicap !== null && profile.handicap !== undefined && (
                     <Badge variant="outline" className="text-xs">
                       HCP {profile.handicap}
@@ -236,9 +238,9 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
                 </div>
                 
                 {profile.home_club && (
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <MapPin className="h-3 w-3 mr-1" />
-                    {profile.home_club}
+                  <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
+                    <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+                    <span className="truncate">{profile.home_club}</span>
                   </div>
                 )}
               </div>
@@ -247,35 +249,35 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
         </Card>
       </div>
 
-      {/* Bottom Action Buttons - Hidden on mobile, shown on desktop */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 hidden md:flex gap-4 z-10">
+      {/* Desktop action buttons - Hidden on mobile */}
+      <div className="absolute bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2 hidden md:flex gap-4 z-10">
         <Button
           variant="outline"
           size="icon"
-          className="w-12 h-12 rounded-full bg-white border-2 border-red-200 hover:bg-red-50 hover:border-red-300"
+          className="w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-white border-2 border-red-200 hover:bg-red-50 hover:border-red-300"
           onClick={handleSwipeLeft}
         >
-          <X className="h-5 w-5 text-red-500" />
+          <X className="h-4 sm:h-5 w-4 sm:w-5 text-red-500" />
         </Button>
         
         {onRefresh && (
           <Button
             variant="outline"
             size="icon"
-            className="w-10 h-10 rounded-full bg-white border-2 border-blue-200 hover:bg-blue-50 hover:border-blue-300"
+            className="w-8 sm:w-10 h-8 sm:h-10 rounded-full bg-white border-2 border-blue-200 hover:bg-blue-50 hover:border-blue-300"
             onClick={onRefresh}
           >
-            <RefreshCw className="h-4 w-4 text-blue-500" />
+            <RefreshCw className="h-3 sm:h-4 w-3 sm:w-4 text-blue-500" />
           </Button>
         )}
         
         <Button
           variant="outline"
           size="icon"
-          className="w-12 h-12 rounded-full bg-white border-2 border-green-200 hover:bg-green-50 hover:border-green-300"
+          className="w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-white border-2 border-green-200 hover:bg-green-50 hover:border-green-300"
           onClick={handleSwipeRight}
         >
-          <Heart className="h-5 w-5 text-green-500" />
+          <Heart className="h-4 sm:h-5 w-4 sm:w-5 text-green-500" />
         </Button>
       </div>
     </div>
