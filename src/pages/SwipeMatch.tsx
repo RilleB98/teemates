@@ -99,17 +99,6 @@ export const SwipeMatch = () => {
                 <h1 className="text-xl xs:text-2xl md:text-3xl font-bold text-golf-premium">Golf Match</h1>
               </div>
               <p className="text-muted-foreground text-sm xs:text-base mb-3">Hitta din nästa golfpartner</p>
-              
-              {totalProfiles > 0 && (
-                <div className="flex items-center justify-center gap-2">
-                  <Badge 
-                    variant="outline" 
-                    className="bg-golf-green/10 border-golf-green text-golf-green text-xs xs:text-sm px-2 xs:px-3 py-1"
-                  >
-                    {currentIndex + 1} av {totalProfiles}
-                  </Badge>
-                </div>
-              )}
             </div>
 
             {/* Filters */}
