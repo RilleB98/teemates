@@ -110,46 +110,46 @@ export const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-6">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-hero flex flex-col items-center justify-center p-4 xs:p-6">
+      <div className="w-full max-w-sm xs:max-w-md animate-slide-up">
         {/* Header */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center text-golf-green hover:text-golf-green/80 transition-smooth mb-6">
+        <div className="text-center mb-6 xs:mb-8">
+          <Link to="/" className="inline-flex items-center text-golf-green hover:text-golf-green/80 transition-spring mb-4 xs:mb-6 text-sm xs:text-base">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Tillbaka till startsidan
           </Link>
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-golf rounded-full flex items-center justify-center">
-              <Target className="w-7 h-7 text-white" />
+          <div className="flex items-center justify-center space-x-2 xs:space-x-3 mb-3 xs:mb-4">
+            <div className="w-10 h-10 xs:w-12 xs:h-12 bg-gradient-golf rounded-full flex items-center justify-center shadow-golf animate-float">
+              <Target className="w-6 h-6 xs:w-7 xs:h-7 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-golf-premium">GolfConnect</h1>
+            <h1 className="text-xl xs:text-2xl md:text-3xl font-bold text-golf-premium">GolfConnect</h1>
           </div>
-          <p className="text-muted-foreground">Välkommen till golfgemenskapen</p>
+          <p className="text-muted-foreground text-sm xs:text-base">Välkommen till golfgemenskapen</p>
         </div>
 
         {/* Auth Card */}
-        <Card className="bg-white/95 backdrop-blur-sm border-golf-green-light shadow-golf">
-          <CardHeader>
-            <CardTitle className="text-center text-golf-premium">Kom igång</CardTitle>
+        <Card className="bg-card/95 backdrop-blur-sm border-golf-green-light shadow-golf hover:shadow-premium transition-all duration-300">
+          <CardHeader className="pb-4 xs:pb-6">
+            <CardTitle className="text-center text-golf-premium text-lg xs:text-xl">Kom igång</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 xs:p-6 pt-0">
             <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="signin">Logga in</TabsTrigger>
-                <TabsTrigger value="signup">Registrera</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 mb-4 xs:mb-6 bg-muted/50 p-1 rounded-lg">
+                <TabsTrigger value="signin" className="text-xs xs:text-sm font-medium rounded-md">Logga in</TabsTrigger>
+                <TabsTrigger value="signup" className="text-xs xs:text-sm font-medium rounded-md">Registrera</TabsTrigger>
               </TabsList>
               
-              <TabsContent value="signin">
-                <form onSubmit={handleSignIn} className="space-y-4">
+              <TabsContent value="signin" className="space-y-4 xs:space-y-6">
+                <form onSubmit={handleSignIn} className="space-y-3 xs:space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signin-email">E-postadress</Label>
+                    <Label htmlFor="signin-email" className="text-sm xs:text-base font-medium">E-postadress</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="signin-email"
                         type="email"
                         placeholder="din@email.se"
-                        className="pl-10"
+                        className="pl-10 h-10 xs:h-11 bg-background/50 border-muted-foreground/20 focus:border-golf-green transition-all duration-200"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
@@ -158,14 +158,14 @@ export const Auth = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="signin-password">Lösenord</Label>
+                    <Label htmlFor="signin-password" className="text-sm xs:text-base font-medium">Lösenord</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="signin-password"
                         type="password"
                         placeholder="Ditt lösenord"
-                        className="pl-10"
+                        className="pl-10 h-10 xs:h-11 bg-background/50 border-muted-foreground/20 focus:border-golf-green transition-all duration-200"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
@@ -173,23 +173,27 @@ export const Auth = () => {
                     </div>
                   </div>
                   
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-10 xs:h-11 bg-gradient-golf hover:shadow-golf transition-all duration-300 text-sm xs:text-base font-medium" 
+                    disabled={loading}
+                  >
                     {loading ? "Loggar in..." : "Logga in"}
                   </Button>
                 </form>
               </TabsContent>
               
-              <TabsContent value="signup">
-                <form onSubmit={handleSignUp} className="space-y-4">
+              <TabsContent value="signup" className="space-y-4 xs:space-y-6">
+                <form onSubmit={handleSignUp} className="space-y-3 xs:space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">E-postadress</Label>
+                    <Label htmlFor="signup-email" className="text-sm xs:text-base font-medium">E-postadress</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="signup-email"
                         type="email"
                         placeholder="din@email.se"
-                        className="pl-10"
+                        className="pl-10 h-10 xs:h-11 bg-background/50 border-muted-foreground/20 focus:border-golf-green transition-all duration-200"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
@@ -198,14 +202,14 @@ export const Auth = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Lösenord</Label>
+                    <Label htmlFor="signup-password" className="text-sm xs:text-base font-medium">Lösenord</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="signup-password"
                         type="password"
                         placeholder="Välj ett säkert lösenord"
-                        className="pl-10"
+                        className="pl-10 h-10 xs:h-11 bg-background/50 border-muted-foreground/20 focus:border-golf-green transition-all duration-200"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
@@ -215,7 +219,11 @@ export const Auth = () => {
                     <p className="text-xs text-muted-foreground">Minst 6 tecken</p>
                   </div>
                   
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-10 xs:h-11 bg-gradient-golf hover:shadow-golf transition-all duration-300 text-sm xs:text-base font-medium" 
+                    disabled={loading}
+                  >
                     <User className="w-4 h-4 mr-2" />
                     {loading ? "Skapar konto..." : "Skapa konto"}
                   </Button>

@@ -56,21 +56,26 @@ export const SwipeMatch = () => {
                 onFiltersChange={setFilters} 
               />
 
-              <Card>
-                <CardContent className="p-8 text-center space-y-4">
-                  <Users className="h-16 w-16 mx-auto text-muted-foreground" />
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Inga fler profiler</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Du har sett alla tillgängliga profiler med dina nuvarande filter.
-                    </p>
-                    <Button onClick={refetch} className="w-full">
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      Uppdatera
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                <Card className="bg-card/95 backdrop-blur-sm border-golf-green-light shadow-golf">
+                  <CardContent className="p-6 xs:p-8 text-center space-y-4 xs:space-y-6">
+                    <div className="w-16 h-16 xs:w-20 xs:h-20 mx-auto bg-gradient-golf rounded-full flex items-center justify-center animate-float">
+                      <Users className="h-8 w-8 xs:h-10 xs:w-10 text-white" />
+                    </div>
+                    <div className="space-y-3 xs:space-y-4">
+                      <h3 className="text-lg xs:text-xl font-semibold text-golf-premium">Inga fler profiler</h3>
+                      <p className="text-muted-foreground text-sm xs:text-base leading-relaxed">
+                        Du har sett alla tillgängliga profiler med dina nuvarande filter.
+                      </p>
+                      <Button 
+                        onClick={refetch} 
+                        className="w-full bg-gradient-golf hover:shadow-golf transition-all duration-300 text-sm xs:text-base font-medium h-10 xs:h-11"
+                      >
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Uppdatera
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
             </div>
           </div>
         </div>
@@ -86,13 +91,21 @@ export const SwipeMatch = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-sm mx-auto space-y-6">
             {/* Header */}
-            <div className="text-center mb-6">
-              <h1 className="text-2xl font-bold mb-2">Golf Match</h1>
-              <p className="text-muted-foreground">Hitta din nästa golfpartner</p>
+            <div className="text-center mb-4 xs:mb-6 animate-slide-up">
+              <div className="flex items-center justify-center space-x-2 mb-2 xs:mb-3">
+                <div className="w-8 h-8 xs:w-10 xs:h-10 bg-gradient-golf rounded-full flex items-center justify-center shadow-golf animate-float">
+                  <Users className="w-4 h-4 xs:w-5 xs:h-5 text-white" />
+                </div>
+                <h1 className="text-xl xs:text-2xl md:text-3xl font-bold text-golf-premium">Golf Match</h1>
+              </div>
+              <p className="text-muted-foreground text-sm xs:text-base mb-3">Hitta din nästa golfpartner</p>
               
               {totalProfiles > 0 && (
-                <div className="flex items-center justify-center gap-2 mt-3">
-                  <Badge variant="outline">
+                <div className="flex items-center justify-center gap-2">
+                  <Badge 
+                    variant="outline" 
+                    className="bg-golf-green/10 border-golf-green text-golf-green text-xs xs:text-sm px-2 xs:px-3 py-1"
+                  >
                     {currentIndex + 1} av {totalProfiles}
                   </Badge>
                 </div>
@@ -114,10 +127,12 @@ export const SwipeMatch = () => {
                 onRefresh={refetch}
               />
             ) : (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-                  <p>Laddar profil...</p>
+              <Card className="bg-card/95 backdrop-blur-sm border-golf-green-light shadow-golf">
+                <CardContent className="p-6 xs:p-8 text-center">
+                  <div className="w-12 h-12 xs:w-16 xs:h-16 mx-auto bg-gradient-golf rounded-full flex items-center justify-center mb-4">
+                    <Loader2 className="h-6 w-6 xs:h-8 xs:w-8 animate-spin text-white" />
+                  </div>
+                  <p className="text-muted-foreground text-sm xs:text-base">Laddar profil...</p>
                 </CardContent>
               </Card>
             )}
