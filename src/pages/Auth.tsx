@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Target, Mail, Lock, User, ArrowLeft } from "lucide-react";
+import { Target, Mail, Lock, User, ArrowLeft, Apple } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate, Link } from "react-router-dom";
@@ -109,6 +109,21 @@ export const Auth = () => {
     setLoading(false);
   };
 
+  const handleAppleSignIn = async () => {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'apple',
+      options: {
+        redirectTo: `${window.location.origin}/`
+      }
+    });
+
+    if (error) {
+      toast.error("Apple-inloggning misslyckades: " + error.message);
+    }
+    setLoading(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-hero flex flex-col items-center justify-center p-4 xs:p-6">
       <div className="w-full max-w-sm xs:max-w-md animate-slide-up">
@@ -181,6 +196,25 @@ export const Auth = () => {
                     {loading ? "Loggar in..." : "Logga in"}
                   </Button>
                 </form>
+
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-muted-foreground/20" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">eller</span>
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={handleAppleSignIn}
+                  variant="outline"
+                  className="w-full h-10 xs:h-11 border-muted-foreground/20 bg-black text-white hover:bg-black/90 transition-all duration-300 text-sm xs:text-base font-medium" 
+                  disabled={loading}
+                >
+                  <Apple className="w-4 h-4 mr-2" />
+                  Logga in med Apple
+                </Button>
               </TabsContent>
               
               <TabsContent value="signup" className="space-y-4 xs:space-y-6">
