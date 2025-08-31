@@ -11,8 +11,10 @@ import course1 from "@/assets/course1.jpg";
 
 const Index = () => {
   const [showChat, setShowChat] = useState(false);
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { profiles, loading, userCity } = useNearbyProfiles();
+  
+  console.log('Index page render:', { user, authLoading, profiles, loading, userCity });
 
   const samplePlayers = [
     {
@@ -82,6 +84,18 @@ const Index = () => {
 
   if (showChat) {
     return <ChatRoom onBack={() => setShowChat(false)} />;
+  }
+
+  // Add error boundary for authentication loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-golf-green via-background to-golf-green-light flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Laddar...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -160,7 +174,7 @@ const Index = () => {
       {/* Courses Section */}
       <section className="py-8 px-4 sm:py-12 md:py-16 lg:py-20 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-8 sm:mb-12 md:mb-16 animate-slide-up">.
+          <div className="text-center mb-8 sm:mb-12 md:mb-16 animate-slide-up">
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-golf-premium mb-4 sm:mb-6">
               Upptäck fantastiska golfbanor
             </h2>
