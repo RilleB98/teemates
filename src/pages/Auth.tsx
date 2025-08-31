@@ -111,15 +111,24 @@ export const Auth = () => {
 
   const handleAppleSignIn = async () => {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'apple',
-      options: {
-        redirectTo: `${window.location.origin}/`
-      }
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+        options: {
+          redirectTo: `${window.location.origin}/`
+        }
+      });
 
-    if (error) {
-      toast.error("Apple-inloggning misslyckades: " + error.message);
+      if (error) {
+        console.error('Apple sign-in error:', error);
+        toast.error("Apple-inloggning misslyckades: " + error.message);
+      } else {
+        console.log('Apple sign-in initiated:', data);
+        // OAuth will redirect, so we don't need to handle success here
+      }
+    } catch (err) {
+      console.error('Unexpected error during Apple sign-in:', err);
+      toast.error("Ett oväntat fel uppstod vid Apple-inloggning");
     }
     setLoading(false);
   };
