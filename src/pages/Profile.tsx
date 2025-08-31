@@ -497,7 +497,7 @@ export const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-to-br from-golf-green via-background to-golf-green-light">
       {/* Elegant Back Button */}
       <div className="fixed top-6 left-6 z-10">
         <Button 

@@ -23,7 +23,7 @@ export const SwipeMatch = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-subtle">
+      <div className="min-h-screen bg-gradient-to-br from-golf-green via-background to-golf-green-light">
         <Navigation />
         <div className="pb-24 pt-8">
           <div className="container mx-auto px-4">
@@ -41,7 +41,7 @@ export const SwipeMatch = () => {
 
   if (!hasMoreProfiles) {
     return (
-      <div className="min-h-screen bg-gradient-subtle">
+      <div className="min-h-screen bg-gradient-to-br from-golf-green via-background to-golf-green-light">
         <Navigation />
         <div className="pb-24 pt-8">
           <div className="container mx-auto px-4">
@@ -84,7 +84,7 @@ export const SwipeMatch = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
+    <div className="min-h-screen bg-gradient-to-br from-golf-green via-background to-golf-green-light">
       <Navigation />
       
       <div className="pb-24 pt-8">

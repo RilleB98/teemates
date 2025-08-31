@@ -85,7 +85,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-golf-green via-background to-golf-green-light">
       <Navigation onMessagesClick={() => setShowChat(true)} />
       
       {/* Players Section */}
