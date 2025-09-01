@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { sv } from "date-fns/locale";
-import { CalendarIcon, Clock, MapPin, Users, MessageSquare, Plus } from "lucide-react";
+import { CalendarIcon, Clock, MapPin, Users, MessageSquare, Plus, MoreHorizontal, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -182,6 +183,42 @@ export const GameSuggestionsList = () => {
     }
   };
 
+  const deleteSuggestion = async (suggestionId: string) => {
+    if (!currentUserId) return;
+
+    try {
+      const { error } = await supabase
+        .from('round_suggestions')
+        .delete()
+        .eq('id', suggestionId)
+        .eq('user_id', currentUserId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Borttaget",
+        description: "Spelförslaget har tagits bort.",
+      });
+
+      fetchGameSuggestions();
+    } catch (error) {
+      console.error('Error deleting suggestion:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte ta bort spelförslaget.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const editSuggestion = (suggestionId: string) => {
+    // TODO: Implement edit functionality - could open a modal with the form
+    toast({
+      title: "Redigera",
+      description: "Redigeringsfunktionen kommer snart.",
+    });
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -239,15 +276,41 @@ export const GameSuggestionsList = () => {
                     </p>
                   </div>
                 </div>
-                {spotsLeft > 0 ? (
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">
-                    {spotsLeft} platser kvar
-                  </Badge>
-                ) : (
-                  <Badge variant="secondary" className="bg-red-100 text-red-800">
-                    Fullbokad
-                  </Badge>
-                )}
+                <div className="flex items-center gap-2">
+                  {spotsLeft > 0 ? (
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      {spotsLeft} platser kvar
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary" className="bg-red-100 text-red-800">
+                      Fullbokad
+                    </Badge>
+                  )}
+                  
+                  {/* Three-dot menu for owners */}
+                  {isOwner && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => editSuggestion(suggestion.id)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Redigera
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => deleteSuggestion(suggestion.id)}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Ta bort
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
               </div>
             </CardHeader>
             
