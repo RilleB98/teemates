@@ -36,6 +36,7 @@ export const Courses = () => {
     return location
       .replace(/ss\s+GDF$/i, 's GDF') // Convert "ss GDF" to "s GDF"
       .replace(/\s+GDF$/i, '') // Remove " GDF" from the end
+      .replace(/ss$/i, 's') // Convert trailing "ss" to "s"
       .replace(/s$/i, ''); // Remove trailing "s"
   };
 
