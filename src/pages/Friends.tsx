@@ -8,6 +8,7 @@ import { GameSuggestionsList } from "@/components/GameSuggestionsList";
 import { useFriends } from "@/hooks/useFriends";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Loader2, Users, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
@@ -17,7 +18,7 @@ export const Friends = () => {
   const { toast } = useToast();
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<any>(null);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  
   const {
     friends,
     pendingRequests,
@@ -147,27 +148,28 @@ export const Friends = () => {
                       <Users className="w-5 h-5" />
                       Spelförslag från vänner
                     </h3>
-                    <Button
-                      onClick={() => setShowCreateForm(!showCreateForm)}
-                      className="bg-golf-green hover:bg-golf-green-light text-white"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      {showCreateForm ? "Dölj" : "Skapa spelförslag"}
-                    </Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button className="bg-golf-green hover:bg-golf-green-light text-white">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Skapa spelförslag
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>Skapa nytt spelförslag</DialogTitle>
+                        </DialogHeader>
+                        <CreateGameSuggestion 
+                          onSuccess={() => {
+                            // Refresh the list after creating a suggestion
+                            window.location.reload();
+                          }} 
+                        />
+                      </DialogContent>
+                    </Dialog>
                   </div>
                   <GameSuggestionsList />
                 </div>
-
-                {/* Create Game Suggestion - Hidden behind button */}
-                {showCreateForm && (
-                  <CreateGameSuggestion 
-                    onSuccess={() => {
-                      setShowCreateForm(false);
-                      // Refresh the list after creating a suggestion
-                      window.location.reload();
-                    }} 
-                  />
-                )}
               </div>
             </TabsContent>
           </Tabs>
