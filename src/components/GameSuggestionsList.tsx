@@ -143,6 +143,14 @@ export const GameSuggestionsList = () => {
     if (!currentUserId) return;
 
     try {
+      // Get the suggestion with group chat info
+      const { data: suggestion } = await supabase
+        .from('round_suggestions')
+        .select('group_chat_id')
+        .eq('id', suggestionId)
+        .single();
+
+      // Join the game
       const { error } = await supabase
         .from('round_suggestion_participants')
         .insert({
@@ -153,9 +161,25 @@ export const GameSuggestionsList = () => {
 
       if (error) throw error;
 
+      // Join the group chat if it exists
+      if (suggestion?.group_chat_id) {
+        const { error: chatError } = await supabase
+          .from('group_chat_members')
+          .insert({
+            group_chat_id: suggestion.group_chat_id,
+            user_id: currentUserId,
+            added_by: currentUserId
+          });
+
+        if (chatError) {
+          console.error('Error joining group chat:', chatError);
+          // Don't fail the whole operation if chat join fails
+        }
+      }
+
       toast({
         title: "Anmäld!",
-        description: "Du har anmält dig till rundan.",
+        description: "Du har anmält dig till rundan och gruppchatten.",
       });
 
       fetchGameSuggestions();
@@ -173,6 +197,14 @@ export const GameSuggestionsList = () => {
     if (!currentUserId) return;
 
     try {
+      // Get the suggestion with group chat info
+      const { data: suggestion } = await supabase
+        .from('round_suggestions')
+        .select('group_chat_id')
+        .eq('id', suggestionId)
+        .single();
+
+      // Leave the game
       const { error } = await supabase
         .from('round_suggestion_participants')
         .delete()
@@ -181,9 +213,23 @@ export const GameSuggestionsList = () => {
 
       if (error) throw error;
 
+      // Leave the group chat if it exists
+      if (suggestion?.group_chat_id) {
+        const { error: chatError } = await supabase
+          .from('group_chat_members')
+          .delete()
+          .eq('group_chat_id', suggestion.group_chat_id)
+          .eq('user_id', currentUserId);
+
+        if (chatError) {
+          console.error('Error leaving group chat:', chatError);
+          // Don't fail the whole operation if chat leave fails
+        }
+      }
+
       toast({
         title: "Avanmäld",
-        description: "Du har avanmält dig från rundan.",
+        description: "Du har avanmält dig från rundan och gruppchatten.",
       });
 
       fetchGameSuggestions();
@@ -201,6 +247,14 @@ export const GameSuggestionsList = () => {
     if (!currentUserId) return;
 
     try {
+      // Get the suggestion with group chat info before deleting
+      const { data: suggestion } = await supabase
+        .from('round_suggestions')
+        .select('group_chat_id')
+        .eq('id', suggestionId)
+        .single();
+
+      // Delete the suggestion (this will cascade to participants)
       const { error } = await supabase
         .from('round_suggestions')
         .delete()
@@ -209,9 +263,22 @@ export const GameSuggestionsList = () => {
 
       if (error) throw error;
 
+      // Delete the associated group chat if it exists
+      if (suggestion?.group_chat_id) {
+        const { error: chatError } = await supabase
+          .from('group_chats')
+          .delete()
+          .eq('id', suggestion.group_chat_id);
+
+        if (chatError) {
+          console.error('Error deleting group chat:', chatError);
+          // Don't fail the whole operation if chat deletion fails
+        }
+      }
+
       toast({
         title: "Borttaget",
-        description: "Spelförslaget har tagits bort.",
+        description: "Spelförslaget och gruppchatten har tagits bort.",
       });
 
       fetchGameSuggestions();

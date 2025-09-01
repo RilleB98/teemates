@@ -335,6 +335,7 @@ export type Database = {
         Row: {
           created_at: string
           golf_course_id: string
+          group_chat_id: string | null
           id: string
           max_players: number | null
           message: string | null
@@ -346,6 +347,7 @@ export type Database = {
         Insert: {
           created_at?: string
           golf_course_id: string
+          group_chat_id?: string | null
           id?: string
           max_players?: number | null
           message?: string | null
@@ -357,6 +359,7 @@ export type Database = {
         Update: {
           created_at?: string
           golf_course_id?: string
+          group_chat_id?: string | null
           id?: string
           max_players?: number | null
           message?: string | null
@@ -379,6 +382,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "round_suggestions_group_chat_id_fkey"
+            columns: ["group_chat_id"]
+            isOneToOne: false
+            referencedRelation: "group_chats"
+            referencedColumns: ["id"]
           },
         ]
       }
