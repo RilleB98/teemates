@@ -75,17 +75,26 @@ export const CreateRoundSuggestion = ({ onSuccess }: CreateRoundSuggestionProps)
       console.log('Form data submitted:', data);
 
       // Validate required fields
+      console.log('Validating fields...');
       if (!data.golfCourseId) {
+        console.log('Missing golf course ID');
         throw new Error("Golf course is required");
       }
       if (!data.date) {
+        console.log('Missing date');
         throw new Error("Date is required");
       }
       if (!data.time) {
+        console.log('Missing time');
         throw new Error("Time is required");
       }
+      
+      console.log('Getting user...');
       const { data: user } = await supabase.auth.getUser();
-      if (!user.user) throw new Error("Not authenticated");
+      if (!user.user) {
+        console.log('User not authenticated');
+        throw new Error("Not authenticated");
+      }
 
       console.log('Creating round suggestion with data:', {
         user_id: user.user.id,
