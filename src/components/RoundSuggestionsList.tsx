@@ -54,7 +54,6 @@ export const RoundSuggestionsList = () => {
   };
 
   const fetchRoundSuggestions = async () => {
-    console.log('fetchRoundSuggestions called');
     try {
       // First, get round suggestions with basic data
       const { data: suggestions, error: suggestionsError } = await supabase
@@ -64,12 +63,9 @@ export const RoundSuggestionsList = () => {
         .order('suggested_date', { ascending: true })
         .order('suggested_time', { ascending: true });
 
-      console.log('Suggestions response:', { suggestions, error: suggestionsError });
-
       if (suggestionsError) throw suggestionsError;
 
       if (!suggestions || suggestions.length === 0) {
-        console.log('No suggestions found');
         setSuggestions([]);
         return;
       }
@@ -120,10 +116,8 @@ export const RoundSuggestionsList = () => {
       });
 
       setSuggestions(enrichedSuggestions as any);
-      console.log('Final enriched suggestions:', enrichedSuggestions);
     } catch (error) {
       console.error('Error fetching round suggestions:', error);
-      // Add a flag to show we tried but failed
       setSuggestions([]);
     } finally {
       setLoading(false);
@@ -219,9 +213,6 @@ export const RoundSuggestionsList = () => {
 
   return (
     <div className="space-y-4">
-      <div style={{backgroundColor: 'red', color: 'white', padding: '10px'}}>
-        DEBUG: Found {suggestions.length} suggestions
-      </div>
       {suggestions.map((suggestion) => {
         const isOwner = suggestion.user_id === currentUserId;
         const participants = suggestion.participants || [];

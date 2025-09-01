@@ -69,32 +69,22 @@ export const CreateRoundSuggestion = ({ onSuccess }: CreateRoundSuggestionProps)
   };
 
   const onSubmit = async (data: RoundSuggestionForm) => {
-    console.log('onSubmit called with data:', data);
     setIsLoading(true);
     try {
       console.log('Form data submitted:', data);
 
       // Validate required fields
-      console.log('Validating fields...');
       if (!data.golfCourseId) {
-        console.log('Missing golf course ID');
         throw new Error("Golf course is required");
       }
       if (!data.date) {
-        console.log('Missing date');
         throw new Error("Date is required");
       }
       if (!data.time) {
-        console.log('Missing time');
         throw new Error("Time is required");
       }
-      
-      console.log('Getting user...');
       const { data: user } = await supabase.auth.getUser();
-      if (!user.user) {
-        console.log('User not authenticated');
-        throw new Error("Not authenticated");
-      }
+      if (!user.user) throw new Error("Not authenticated");
 
       console.log('Creating round suggestion with data:', {
         user_id: user.user.id,
@@ -331,11 +321,6 @@ export const CreateRoundSuggestion = ({ onSuccess }: CreateRoundSuggestionProps)
               type="submit"
               disabled={isLoading}
               className="w-full bg-golf-green hover:bg-golf-green-light text-white"
-              onClick={() => {
-                console.log('Submit button clicked');
-                console.log('Form errors:', form.formState.errors);
-                console.log('Form values:', form.getValues());
-              }}
             >
               {isLoading ? "Skapar..." : "Skapa rundförslag"}
             </Button>
