@@ -217,6 +217,8 @@ export const GameSuggestionsList = () => {
   const editSuggestion = (suggestionId: string) => {
     const suggestion = suggestions.find(s => s.id === suggestionId);
     if (suggestion) {
+      console.log('Edit suggestion - original data:', suggestion);
+      console.log('Edit suggestion - suggested_time:', suggestion.suggested_time);
       setEditingSuggestion(suggestion);
     }
   };
@@ -472,7 +474,7 @@ export const GameSuggestionsList = () => {
               initialData={{
                 course: editingSuggestion.golf_course_id,
                 date: new Date(editingSuggestion.suggested_date),
-                time: editingSuggestion.suggested_time,
+                time: editingSuggestion.suggested_time.slice(0, 5), // Format från HH:MM:SS till HH:MM
                 maxPlayers: editingSuggestion.max_players,
                 message: editingSuggestion.message || ''
               }}

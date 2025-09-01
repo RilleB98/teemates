@@ -49,6 +49,9 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
   const [showCourseSearch, setShowCourseSearch] = useState(false);
   const isEditMode = !!suggestionId;
 
+  console.log('CreateGameSuggestion initialData:', initialData);
+  console.log('CreateGameSuggestion isEditMode:', isEditMode);
+
   const form = useForm<GameSuggestionForm>({
     resolver: zodResolver(gameSuggestionSchema),
     defaultValues: {
