@@ -775,7 +775,7 @@ export const Profile = () => {
                   <Label htmlFor="bio" className="text-sm font-semibold text-foreground">Bio</Label>
                   <Textarea
                     id="bio"
-                    placeholder="Berätta lite om dig själv... (syns i swipe-funktionen)"
+                    placeholder="Berätta lite om dig själv... T.ex. Vilka tider/banor du gillar att spela på"
                     value={profile.bio}
                     onChange={(e) => setProfile(prev => ({ ...prev, bio: e.target.value }))}
                     className="border-muted focus:border-primary transition-colors resize-none"
