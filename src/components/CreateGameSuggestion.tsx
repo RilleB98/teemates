@@ -322,7 +322,7 @@ export const CreateGameSuggestion = ({ onSuccess }: CreateGameSuggestionProps) =
               disabled={isLoading}
               className="w-full bg-golf-green hover:bg-golf-green-light text-white"
             >
-              {isLoading ? "Skapar..." : "Skapa rundförslag"}
+              {isLoading ? "Skapar..." : "Skapa spelförslag"}
             </Button>
           </form>
         </Form>
