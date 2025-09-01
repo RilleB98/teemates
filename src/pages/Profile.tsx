@@ -30,7 +30,8 @@ export const Profile = () => {
     gender: "",
     birth_date: null as Date | null,
     home_city: "",
-    bio: ""
+    bio: "",
+    golf_id: ""
   });
   const [birthDay, setBirthDay] = useState("");
   const [birthMonth, setBirthMonth] = useState("");
@@ -144,7 +145,8 @@ export const Profile = () => {
           gender: data.gender || "",
           birth_date: birthDate,
           home_city: data.home_city || "",
-          bio: data.bio || ""
+          bio: data.bio || "",
+          golf_id: data.golf_id || ""
         });
         
         // Set individual date components
