@@ -34,9 +34,8 @@ export const Courses = () => {
   // Function to clean location text by removing "GDF" and possessive "s"
   const cleanLocationText = (location: string): string => {
     return location
+      .replace(/ss\s+GDF$/i, 's GDF') // Convert "ss GDF" to "s GDF"
       .replace(/\s+GDF$/i, '') // Remove " GDF" from the end
-      .replace(/s\s+GDF$/i, ' GDF') // Handle "s GDF" case first
-      .replace(/\s+GDF$/i, '') // Remove " GDF" again after handling "s GDF"
       .replace(/s$/i, ''); // Remove trailing "s"
   };
 
