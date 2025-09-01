@@ -54,6 +54,7 @@ export const RoundSuggestionsList = () => {
   };
 
   const fetchRoundSuggestions = async () => {
+    console.log('fetchRoundSuggestions called');
     try {
       // First, get round suggestions with basic data
       const { data: suggestions, error: suggestionsError } = await supabase
@@ -63,9 +64,12 @@ export const RoundSuggestionsList = () => {
         .order('suggested_date', { ascending: true })
         .order('suggested_time', { ascending: true });
 
+      console.log('Suggestions response:', { suggestions, error: suggestionsError });
+
       if (suggestionsError) throw suggestionsError;
 
       if (!suggestions || suggestions.length === 0) {
+        console.log('No suggestions found');
         setSuggestions([]);
         return;
       }
