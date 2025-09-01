@@ -716,26 +716,6 @@ export const Profile = () => {
 
                 </div>
 
-                {/* Home City Selector */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-foreground">Närliggande storstad</Label>
-                  <Select 
-                    value={profile.home_city} 
-                    onValueChange={(value) => setProfile(prev => ({ ...prev, home_city: value }))}
-                  >
-                    <SelectTrigger className="border-muted focus:border-primary transition-colors bg-white/90">
-                      <SelectValue placeholder="Välj din närliggande storstad" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white/95 backdrop-blur-sm border-white/20 max-h-48 overflow-y-auto z-50">
-                      {svenskaStorstader.map((city) => (
-                        <SelectItem key={city} value={city} className="hover:bg-primary/10">
-                          {city}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
                 {/* Handikapp and Kön side by side */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -763,6 +743,26 @@ export const Profile = () => {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+
+                {/* Home City Selector */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-foreground">Närliggande storstad</Label>
+                  <Select 
+                    value={profile.home_city} 
+                    onValueChange={(value) => setProfile(prev => ({ ...prev, home_city: value }))}
+                  >
+                    <SelectTrigger className="border-muted focus:border-primary transition-colors bg-white/90">
+                      <SelectValue placeholder="Välj din närliggande storstad" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white/95 backdrop-blur-sm border-white/20 max-h-48 overflow-y-auto z-50">
+                      {svenskaStorstader.map((city) => (
+                        <SelectItem key={city} value={city} className="hover:bg-primary/10">
+                          {city}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Bio Section */}
