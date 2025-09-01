@@ -156,51 +156,17 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
           description: "Ditt spelförslag har uppdaterats.",
         });
       } else {
-        // Create new suggestion with group chat
+        // Create new suggestion (without group chat for now)
         console.log('Creating game suggestion with data:', {
           user_id: user.user.id,
           ...suggestionData
         });
 
-        // Get golf course name for chat name
-        const { data: courseData } = await supabase
-          .from('golf_courses')
-          .select('name')
-          .eq('id', data.golfCourseId)
-          .single();
-
-        const courseName = courseData?.name || 'Okänd bana';
-        const chatName = `${courseName} ${format(data.date, 'd MMM', { locale: sv })} kl ${data.time}`;
-
-        // Create group chat first
-        const { data: groupChat, error: chatError } = await supabase
-          .from('group_chats')
-          .insert({
-            name: chatName,
-            created_by: user.user.id
-          })
-          .select()
-          .single();
-
-        if (chatError) throw chatError;
-
-        // Add creator as first member of the group chat
-        const { error: memberError } = await supabase
-          .from('group_chat_members')
-          .insert({
-            group_chat_id: groupChat.id,
-            user_id: user.user.id,
-            added_by: user.user.id
-          });
-
-        if (memberError) throw memberError;
-
-        // Create round suggestion with group chat reference
+        // Create round suggestion
         const { error } = await supabase
           .from('round_suggestions')
           .insert({
             user_id: user.user.id,
-            group_chat_id: groupChat.id,
             ...suggestionData
           });
 
@@ -209,11 +175,11 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
           throw error;
         }
 
-        console.log('Round suggestion and group chat created successfully');
+        console.log('Round suggestion created successfully');
 
         toast({
           title: "Spelförslag skapat!",
-          description: "Dina vänner kan nu se ditt förslag och gå med i gruppchatten.",
+          description: "Dina vänner kan nu se ditt förslag och gå med.",
         });
 
         form.reset();
