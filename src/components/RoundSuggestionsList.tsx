@@ -243,70 +243,68 @@ export const RoundSuggestionsList = () => {
             </CardHeader>
             
             <CardContent className="space-y-4">
-              {/* Profile Icons Section - Moved up */}
-              <div className="flex items-center gap-3">
-                {/* Creator Profile Icon */}
-                <div className="flex items-center gap-2">
+              {/* Profile Icons, Course and Time Info - All on same row */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {/* Creator Profile Icon */}
                   <Avatar className="h-8 w-8 border-2 border-golf-green">
                     <AvatarImage src={suggestion.profiles.avatar_url} />
                     <AvatarFallback className="bg-golf-green text-white text-xs">
                       {suggestion.profiles.name?.charAt(0) || 'U'}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-xs text-muted-foreground">Arrangör</span>
+
+                  {/* Joined Participants */}
+                  {participants
+                    .filter(p => p.status === 'accepted')
+                    .map((participant) => (
+                      <Avatar key={participant.id} className="h-8 w-8 border-2 border-green-500">
+                        <AvatarImage src={participant.profiles.avatar_url} />
+                        <AvatarFallback className="bg-green-500 text-white text-xs">
+                          {participant.profiles.name?.charAt(0) || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                    ))}
+
+                  {/* Empty Slots with + buttons */}
+                  {Array.from({ length: spotsLeft }, (_, index) => (
+                    <div key={`empty-${index}`} className="relative">
+                      {!isOwner && !isParticipant ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 w-8 rounded-full p-0 border-dashed border-2 border-gray-300 hover:border-golf-green"
+                          onClick={() => joinRound(suggestion.id)}
+                        >
+                          <Plus className="h-4 w-4 text-gray-400 hover:text-golf-green" />
+                        </Button>
+                      ) : (
+                        <div className="h-8 w-8 rounded-full border-dashed border-2 border-gray-300 flex items-center justify-center">
+                          <Plus className="h-4 w-4 text-gray-300" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
 
-                {/* Joined Participants */}
-                {participants
-                  .filter(p => p.status === 'accepted')
-                  .map((participant) => (
-                    <Avatar key={participant.id} className="h-8 w-8 border-2 border-green-500">
-                      <AvatarImage src={participant.profiles.avatar_url} />
-                      <AvatarFallback className="bg-green-500 text-white text-xs">
-                        {participant.profiles.name?.charAt(0) || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                  ))}
-
-                {/* Empty Slots with + buttons */}
-                {Array.from({ length: spotsLeft }, (_, index) => (
-                  <div key={`empty-${index}`} className="relative">
-                    {!isOwner && !isParticipant ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 w-8 rounded-full p-0 border-dashed border-2 border-gray-300 hover:border-golf-green"
-                        onClick={() => joinRound(suggestion.id)}
-                      >
-                        <Plus className="h-4 w-4 text-gray-400 hover:text-golf-green" />
-                      </Button>
-                    ) : (
-                      <div className="h-8 w-8 rounded-full border-dashed border-2 border-gray-300 flex items-center justify-center">
-                        <Plus className="h-4 w-4 text-gray-300" />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Course and Time Info - Moved down and adjusted */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Course Info */}
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-golf-green" />
                   <div>
-                    <p className="font-medium">{suggestion.golf_courses.name}</p>
-                    <p className="text-sm text-muted-foreground">{suggestion.golf_courses.location}</p>
+                    <p className="font-medium text-sm">{suggestion.golf_courses.name}</p>
+                    <p className="text-xs text-muted-foreground">{suggestion.golf_courses.location}</p>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-2">
+                {/* Date and Time */}
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1">
                     <CalendarIcon className="w-4 h-4 text-golf-green" />
                     <span className="text-sm">
-                      {format(new Date(suggestion.suggested_date), "d MMM yyyy", { locale: sv })}
+                      {format(new Date(suggestion.suggested_date), "d MMM", { locale: sv })}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <Clock className="w-4 h-4 text-golf-green" />
                     <span className="text-sm">{suggestion.suggested_time}</span>
                   </div>
