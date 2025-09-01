@@ -69,7 +69,7 @@ export const Messages = () => {
 
           <Tabs defaultValue="friends" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="friends">Privata chatter</TabsTrigger>
+              <TabsTrigger value="friends">Chatter</TabsTrigger>
               <TabsTrigger value="groups">Gruppchatter</TabsTrigger>
             </TabsList>
             
