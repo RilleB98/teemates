@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -59,6 +59,29 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
       message: initialData?.message || "",
     },
   });
+
+  // Load initial golf course data for edit mode
+  useEffect(() => {
+    if (isEditMode && initialData?.course) {
+      const loadInitialCourse = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('golf_courses')
+            .select('id, name, location')
+            .eq('id', initialData.course)
+            .single();
+
+          if (error) throw error;
+          if (data) {
+            setSearchTerm(`${data.name} - ${data.location}`);
+          }
+        } catch (error) {
+          console.error('Error loading initial course:', error);
+        }
+      };
+      loadInitialCourse();
+    }
+  }, [isEditMode, initialData?.course]);
 
   // Search golf courses
   const searchCourses = async (search: string) => {
