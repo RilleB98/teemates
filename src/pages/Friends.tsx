@@ -3,8 +3,8 @@ import { UserSearch } from "@/components/UserSearch";
 import { FriendRequests } from "@/components/FriendRequests";
 import { FriendsList } from "@/components/FriendsList";
 import { FriendProfileModal } from "@/components/FriendProfileModal";
-import { CreateRoundSuggestion } from "@/components/CreateRoundSuggestion";
-import { RoundSuggestionsList } from "@/components/RoundSuggestionsList";
+import { CreateGameSuggestion } from "@/components/CreateGameSuggestion";
+import { GameSuggestionsList } from "@/components/GameSuggestionsList";
 import { useFriends } from "@/hooks/useFriends";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -140,27 +140,27 @@ export const Friends = () => {
 
             <TabsContent value="activity">
               <div className="space-y-6">
-                {/* Round Suggestions List - Main Focus */}
+                {/* Game Suggestions List - Main Focus */}
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xl font-semibold text-golf-premium flex items-center gap-2">
                       <Users className="w-5 h-5" />
-                      Rundförslag från vänner
+                      Spelförslag från vänner
                     </h3>
                     <Button
                       onClick={() => setShowCreateForm(!showCreateForm)}
                       className="bg-golf-green hover:bg-golf-green-light text-white"
                     >
                       <Plus className="w-4 h-4 mr-2" />
-                      {showCreateForm ? "Dölj" : "Skapa rundförslag"}
+                      {showCreateForm ? "Dölj" : "Skapa spelförslag"}
                     </Button>
                   </div>
-                  <RoundSuggestionsList />
+                  <GameSuggestionsList />
                 </div>
 
-                {/* Create Round Suggestion - Hidden behind button */}
+                {/* Create Game Suggestion - Hidden behind button */}
                 {showCreateForm && (
-                  <CreateRoundSuggestion 
+                  <CreateGameSuggestion 
                     onSuccess={() => {
                       setShowCreateForm(false);
                       // Refresh the list after creating a suggestion

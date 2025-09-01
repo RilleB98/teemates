@@ -17,31 +17,31 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-const roundSuggestionSchema = z.object({
+const gameSuggestionSchema = z.object({
   golfCourseId: z.string().min(1, "Välj en golfbana"),
   date: z.date({
-    required_error: "Välj ett datum för rundan",
+    required_error: "Välj ett datum för spelet",
   }),
   time: z.string().min(1, "Välj en tid"),
   message: z.string().optional(),
   maxPlayers: z.number().min(2).max(4).default(4),
 });
 
-type RoundSuggestionForm = z.infer<typeof roundSuggestionSchema>;
+type GameSuggestionForm = z.infer<typeof gameSuggestionSchema>;
 
-interface CreateRoundSuggestionProps {
+interface CreateGameSuggestionProps {
   onSuccess?: () => void;
 }
 
-export const CreateRoundSuggestion = ({ onSuccess }: CreateRoundSuggestionProps) => {
+export const CreateGameSuggestion = ({ onSuccess }: CreateGameSuggestionProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [golfCourses, setGolfCourses] = useState<Array<{ id: string; name: string; location: string }>>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showCourseSearch, setShowCourseSearch] = useState(false);
 
-  const form = useForm<RoundSuggestionForm>({
-    resolver: zodResolver(roundSuggestionSchema),
+  const form = useForm<GameSuggestionForm>({
+    resolver: zodResolver(gameSuggestionSchema),
     defaultValues: {
       maxPlayers: 4,
     },
@@ -68,7 +68,7 @@ export const CreateRoundSuggestion = ({ onSuccess }: CreateRoundSuggestionProps)
     }
   };
 
-  const onSubmit = async (data: RoundSuggestionForm) => {
+  const onSubmit = async (data: GameSuggestionForm) => {
     setIsLoading(true);
     try {
       console.log('Form data submitted:', data);
@@ -86,7 +86,7 @@ export const CreateRoundSuggestion = ({ onSuccess }: CreateRoundSuggestionProps)
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error("Not authenticated");
 
-      console.log('Creating round suggestion with data:', {
+      console.log('Creating game suggestion with data:', {
         user_id: user.user.id,
         golf_course_id: data.golfCourseId,
         suggested_date: format(data.date, 'yyyy-MM-dd'),

@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-interface RoundSuggestion {
+interface GameSuggestion {
   id: string;
   user_id: string;
   golf_course_id: string;
@@ -37,14 +37,14 @@ interface RoundSuggestion {
   }>;
 }
 
-export const RoundSuggestionsList = () => {
+export const GameSuggestionsList = () => {
   const { toast } = useToast();
-  const [suggestions, setSuggestions] = useState<RoundSuggestion[]>([]);
+  const [suggestions, setSuggestions] = useState<GameSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchRoundSuggestions();
+    fetchGameSuggestions();
     getCurrentUser();
   }, []);
 
@@ -53,9 +53,9 @@ export const RoundSuggestionsList = () => {
     setCurrentUserId(user?.id || null);
   };
 
-  const fetchRoundSuggestions = async () => {
+  const fetchGameSuggestions = async () => {
     try {
-      // First, get round suggestions with basic data
+      // First, get game suggestions with basic data
       const { data: suggestions, error: suggestionsError } = await supabase
         .from('round_suggestions')
         .select('*')
@@ -117,14 +117,14 @@ export const RoundSuggestionsList = () => {
 
       setSuggestions(enrichedSuggestions as any);
     } catch (error) {
-      console.error('Error fetching round suggestions:', error);
+      console.error('Error fetching game suggestions:', error);
       setSuggestions([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const joinRound = async (suggestionId: string) => {
+  const joinGame = async (suggestionId: string) => {
     if (!currentUserId) return;
 
     try {
@@ -143,7 +143,7 @@ export const RoundSuggestionsList = () => {
         description: "Du har anmält dig till rundan.",
       });
 
-      fetchRoundSuggestions();
+      fetchGameSuggestions();
     } catch (error) {
       console.error('Error joining round:', error);
       toast({
@@ -154,7 +154,7 @@ export const RoundSuggestionsList = () => {
     }
   };
 
-  const leaveRound = async (suggestionId: string) => {
+  const leaveGame = async (suggestionId: string) => {
     if (!currentUserId) return;
 
     try {
@@ -171,7 +171,7 @@ export const RoundSuggestionsList = () => {
         description: "Du har avanmält dig från rundan.",
       });
 
-      fetchRoundSuggestions();
+      fetchGameSuggestions();
     } catch (error) {
       console.error('Error leaving round:', error);
       toast({
@@ -202,9 +202,9 @@ export const RoundSuggestionsList = () => {
       <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl">
         <CardContent className="p-8 text-center">
           <CalendarIcon className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="text-lg font-semibold text-golf-premium mb-2">Inga rundförslag</h3>
+          <h3 className="text-lg font-semibold text-golf-premium mb-2">Inga spelförslag</h3>
           <p className="text-muted-foreground">
-            Skapa ett rundförslag för att börja spela med dina vänner!
+            Skapa ett spelförslag för att börja spela med dina vänner!
           </p>
         </CardContent>
       </Card>
@@ -307,7 +307,7 @@ export const RoundSuggestionsList = () => {
                           variant="outline"
                           size="sm"
                           className="h-8 w-8 rounded-full p-0 border-dashed border-2 border-gray-300 hover:border-golf-green"
-                          onClick={() => joinRound(suggestion.id)}
+                          onClick={() => joinGame(suggestion.id)}
                         >
                           <Plus className="h-4 w-4 text-gray-400 hover:text-golf-green" />
                         </Button>
@@ -357,14 +357,14 @@ export const RoundSuggestionsList = () => {
                   {isParticipant ? (
                     <Button
                       variant="outline"
-                      onClick={() => leaveRound(suggestion.id)}
+                      onClick={() => leaveGame(suggestion.id)}
                       className="w-full"
                     >
                       Avanmäl dig
                     </Button>
                   ) : spotsLeft > 0 ? (
                     <Button
-                      onClick={() => joinRound(suggestion.id)}
+                      onClick={() => joinGame(suggestion.id)}
                       className="w-full bg-golf-green hover:bg-golf-green-light text-white"
                     >
                       Anmäl dig till rundan
