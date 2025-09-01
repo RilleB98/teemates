@@ -4,6 +4,7 @@ import { FriendRequests } from "@/components/FriendRequests";
 import { FriendsList } from "@/components/FriendsList";
 import { FriendProfileModal } from "@/components/FriendProfileModal";
 import { CreateRoundSuggestion } from "@/components/CreateRoundSuggestion";
+import { SimpleCreateRound } from "@/components/SimpleCreateRound";
 import { RoundSuggestionsList } from "@/components/RoundSuggestionsList";
 import { useFriends } from "@/hooks/useFriends";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -140,6 +141,9 @@ export const Friends = () => {
 
             <TabsContent value="activity">
               <div className="space-y-6">
+                {/* Simple test component first */}
+                <SimpleCreateRound />
+                
                 {/* Round Suggestions List - Main Focus */}
                 <div>
                   <div className="flex items-center justify-between mb-4">
