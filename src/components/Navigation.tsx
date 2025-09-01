@@ -112,7 +112,7 @@ export const Navigation = ({
             <Link to="/courses">
               <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${location.pathname === '/courses' ? 'text-golf-green bg-golf-green-light' : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'}`}>
                 <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
-                <span className="text-xs font-medium">Banor</span>
+                
               </button>
             </Link>
             
