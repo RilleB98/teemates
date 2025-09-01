@@ -764,7 +764,7 @@ export const Profile = () => {
                       <Input
                         type="text"
                         maxLength={3}
-                        placeholder="023"
+                        placeholder="123"
                         value={golfIdSuffix}
                         onChange={(e) => {
                           const value = e.target.value.replace(/\D/g, ''); // Only digits
