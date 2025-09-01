@@ -175,7 +175,7 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
         console.log('About to create group chat with name:', chatName);
         console.log('User ID:', user.user.id);
 
-        // Create group chat first
+        // Create group chat first - fixed RLS policy
         const { data: groupChat, error: chatError } = await supabase
           .from('group_chats')
           .insert({
