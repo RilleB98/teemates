@@ -38,7 +38,7 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Load user photos when modal opens
+  // Load photos when modal opens
   useEffect(() => {
     if (isOpen && user?.id) {
       loadUserPhotos();
@@ -51,22 +51,27 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
     try {
       const { data, error } = await supabase
         .from('user_photos')
-        .select('*')
+        .select('id, photo_url, is_main_photo, display_order')
         .eq('user_id', user.id)
-        .order('display_order', { ascending: true });
+        .order('is_main_photo', { ascending: false })
+        .order('display_order');
 
       if (error) throw error;
 
-      const photoData = data.map(photo => ({
+      const formattedPhotos: UserPhoto[] = data.map(photo => ({
         id: photo.id,
         url: photo.photo_url,
         isMain: photo.is_main_photo,
         displayOrder: photo.display_order
       }));
 
-      setPhotos(photoData);
+      setPhotos(formattedPhotos);
     } catch (error: any) {
-      console.error('Error loading photos:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte ladda foton.",
+        variant: "destructive"
+      });
     }
   };
 
