@@ -11,6 +11,7 @@ export interface UserProfile {
   gender: string;
   home_club: string;
   birth_date: string;
+  bio: string;
 }
 
 export interface SwipeFilters {
@@ -46,7 +47,7 @@ export const useSwipeProfiles = () => {
       // Get users that are not me and not already friends
       let query = supabase
         .from('profiles')
-        .select('user_id, name, avatar_url, age, handicap, gender, home_club, birth_date')
+        .select('user_id, name, avatar_url, age, handicap, gender, home_club, birth_date, bio')
         .neq('user_id', user.id)
         .not('name', 'is', null);
 
@@ -96,7 +97,10 @@ export const useSwipeProfiles = () => {
           const swipedUserIds = swipeData?.map(s => s.target_user_id) || [];
           const excludedIds = [...friendIds, ...swipedUserIds];
           
-          const filteredProfiles = data.filter(profile => !excludedIds.includes(profile.user_id));
+          const filteredProfiles = data.filter(profile => !excludedIds.includes(profile.user_id)).map(profile => ({
+            ...profile,
+            bio: profile.bio || ""
+          }));
           
           console.log('Fetched profiles:', filteredProfiles.length);
           setProfiles(filteredProfiles);
@@ -104,7 +108,11 @@ export const useSwipeProfiles = () => {
         } catch (friendError) {
           console.error('Error fetching friends or swipes:', friendError);
           // Still set profiles even if friends/swipes query fails
-          setProfiles(data);
+          const mappedProfiles = data.map(profile => ({
+            ...profile,
+            bio: profile.bio || ""
+          }));
+          setProfiles(mappedProfiles);
           setCurrentIndex(0);
         }
       }

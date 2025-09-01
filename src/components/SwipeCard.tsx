@@ -237,8 +237,17 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
                   )}
                 </div>
                 
+                {/* Bio Section */}
+                {profile.bio && (
+                  <div className="mt-2 p-2 bg-muted/50 rounded-md">
+                    <p className="text-xs sm:text-sm text-foreground leading-relaxed">
+                      "{profile.bio}"
+                    </p>
+                  </div>
+                )}
+                
                 {profile.home_club && (
-                  <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
+                  <div className="flex items-center text-xs sm:text-sm text-muted-foreground mt-2">
                     <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
                     <span className="truncate">{profile.home_club}</span>
                   </div>

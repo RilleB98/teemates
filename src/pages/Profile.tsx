@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { format, differenceInYears } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -28,7 +29,8 @@ export const Profile = () => {
     selected_course: null as any,
     gender: "",
     birth_date: null as Date | null,
-    home_city: ""
+    home_city: "",
+    bio: ""
   });
   const [birthDay, setBirthDay] = useState("");
   const [birthMonth, setBirthMonth] = useState("");
@@ -141,7 +143,8 @@ export const Profile = () => {
           selected_course: data.selected_course || null,
           gender: data.gender || "",
           birth_date: birthDate,
-          home_city: data.home_city || ""
+          home_city: data.home_city || "",
+          bio: data.bio || ""
         });
         
         // Set individual date components
@@ -397,7 +400,8 @@ export const Profile = () => {
         home_club: profileData.selected_course?.name || null,
         gender: profileData.gender,
         birth_date: profileData.birth_date ? profileData.birth_date.toISOString().split('T')[0] : null,
-        home_city: profileData.home_city
+        home_city: profileData.home_city,
+        bio: profileData.bio
       };
 
       const { error } = await supabase
@@ -764,6 +768,23 @@ export const Profile = () => {
                     selectedCourse={profile.selected_course}
                     onCourseSelect={(course) => setProfile(prev => ({ ...prev, selected_course: course }))}
                   />
+                </div>
+
+                {/* Bio Section */}
+                <div className="space-y-2">
+                  <Label htmlFor="bio" className="text-sm font-semibold text-foreground">Bio</Label>
+                  <Textarea
+                    id="bio"
+                    placeholder="Berätta lite om dig själv... (syns i swipe-funktionen)"
+                    value={profile.bio}
+                    onChange={(e) => setProfile(prev => ({ ...prev, bio: e.target.value }))}
+                    className="border-muted focus:border-primary transition-colors resize-none"
+                    rows={3}
+                    maxLength={200}
+                  />
+                  <div className="text-xs text-muted-foreground text-right">
+                    {profile.bio.length}/200 tecken
+                  </div>
                 </div>
 
                 {/* Missing fields indicator */}
