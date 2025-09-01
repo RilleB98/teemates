@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { format, differenceInYears } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Camera, User, Save, LogOut, MapPin, Star, ArrowLeft, Edit2, CalendarIcon, Image } from "lucide-react";
+import { Camera, User, LogOut, MapPin, Star, ArrowLeft, Edit2, CalendarIcon, Image } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -378,81 +378,60 @@ export const Profile = () => {
     }
   };
 
-  const saveProfile = async () => {
+  // Auto-save function (same logic as saveProfile but without validation messages)
+  const autoSaveProfile = useCallback(async (profileData: any) => {
     try {
-      setLoading(true);
-      
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("Du måste vara inloggad");
-        return;
-      }
-
-      // Validate required fields
-      if (!profile.name) {
-        toast.error("Du måste fylla i ditt namn");
-        return;
-      }
-
-      if (!profile.birth_date) {
-        toast.error("Du måste fylla i ditt födelsedatum");
-        return;
-      }
-
-      if (!profile.gender) {
-        toast.error("Du måste välja kön");
-        return;
-      }
-
-      if (!profile.handicap) {
-        toast.error("Du måste fylla i ditt handikapp");
-        return;
-      }
-
-      if (!profile.selected_course) {
-        toast.error("Du måste välja en hemmaklubb");
-        return;
-      }
-
-                      if (!profile.home_city) {
-        toast.error("Du måste välja närliggande storstad");
-        return;
-      }
+      if (!user) return;
 
       // Calculate age from birth_date
-      const calculatedAge = profile.birth_date ? differenceInYears(new Date(), profile.birth_date) : null;
+      const calculatedAge = profileData.birth_date ? differenceInYears(new Date(), profileData.birth_date) : null;
 
-      const profileData = {
+      const dataToSave = {
         user_id: user.id,
-        name: profile.name,
+        name: profileData.name,
         age: calculatedAge,
-        handicap: parseFloat(profile.handicap),
-        avatar_url: profile.avatar_url || null,
-        selected_course: profile.selected_course,
-        home_club: profile.selected_course?.name || null, // Add home_club field
-        gender: profile.gender,
-        birth_date: profile.birth_date.toISOString().split('T')[0],
-        home_city: profile.home_city
+        handicap: profileData.handicap ? parseFloat(profileData.handicap) : null,
+        avatar_url: profileData.avatar_url || null,
+        selected_course: profileData.selected_course,
+        home_club: profileData.selected_course?.name || null,
+        gender: profileData.gender,
+        birth_date: profileData.birth_date ? profileData.birth_date.toISOString().split('T')[0] : null,
+        home_city: profileData.home_city
       };
 
       const { error } = await supabase
         .from("profiles")
-        .upsert(profileData, { onConflict: "user_id" });
+        .upsert(dataToSave, { onConflict: "user_id" });
 
       if (error) {
-        console.error("Error saving profile:", error);
-        toast.error("Kunde inte spara profil");
-        return;
+        console.error("Error auto-saving profile:", error);
       }
-
-      toast.success("Profil sparad!");
     } catch (error) {
-      console.error("Error:", error);
-      toast.error("Ett fel uppstod");
-    } finally {
-      setLoading(false);
+      console.error("Auto-save error:", error);
     }
-  };
+  }, []);
+
+  // Debounced auto-save to avoid too many API calls
+  const debouncedAutoSave = useCallback(
+    (() => {
+      let timeoutId: NodeJS.Timeout;
+      return (profileData: any) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          autoSaveProfile(profileData);
+        }, 1000); // Wait 1 second after user stops typing
+      };
+    })(),
+    [autoSaveProfile]
+  );
+
+  // Auto-save when profile changes
+  useEffect(() => {
+    if (profile.name || profile.birth_date || profile.gender || profile.handicap || profile.selected_course || profile.home_city) {
+      debouncedAutoSave(profile);
+    }
+  }, [profile, debouncedAutoSave]);
 
   const handleNameEdit = () => {
     setTempName(profile.name);
@@ -560,11 +539,10 @@ export const Profile = () => {
                           placeholder="Ange ditt namn"
                           className="text-center font-bold text-xl border-primary/30 focus:border-primary"
                         />
-                        <div className="flex gap-2 justify-center">
-                          <Button size="sm" onClick={handleNameSave} className="flex-1">
-                            <Save className="w-4 h-4 mr-1" />
-                            Spara
-                          </Button>
+                         <div className="flex gap-2 justify-center">
+                           <Button size="sm" onClick={handleNameSave} className="flex-1">
+                             Spara
+                           </Button>
                           <Button size="sm" variant="outline" onClick={handleNameCancel}>
                             Avbryt
                           </Button>
@@ -803,17 +781,8 @@ export const Profile = () => {
                   </div>
                 )}
 
-                {/* Action Buttons */}
+                {/* Action Button */}
                 <div className="flex flex-col sm:flex-row gap-3 pt-4">
-                  <Button 
-                    onClick={saveProfile} 
-                    disabled={loading || uploading || !profile.name || !profile.birth_date || !profile.gender || !profile.handicap || !profile.selected_course || !profile.home_city}
-                    className="flex-1 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white shadow-lg disabled:opacity-50"
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    {loading ? "Sparar..." : "Spara Profil"}
-                  </Button>
-                  
                   <Button 
                     variant="outline" 
                     onClick={handleLogout}
