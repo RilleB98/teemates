@@ -322,6 +322,11 @@ export const CreateRoundSuggestion = ({ onSuccess }: CreateRoundSuggestionProps)
               type="submit"
               disabled={isLoading}
               className="w-full bg-golf-green hover:bg-golf-green-light text-white"
+              onClick={() => {
+                console.log('Submit button clicked');
+                console.log('Form errors:', form.formState.errors);
+                console.log('Form values:', form.getValues());
+              }}
             >
               {isLoading ? "Skapar..." : "Skapa rundförslag"}
             </Button>
