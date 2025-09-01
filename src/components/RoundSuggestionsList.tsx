@@ -120,6 +120,7 @@ export const RoundSuggestionsList = () => {
       });
 
       setSuggestions(enrichedSuggestions as any);
+      console.log('Final enriched suggestions:', enrichedSuggestions);
     } catch (error) {
       console.error('Error fetching round suggestions:', error);
       // Only show error if we're not just getting empty results
