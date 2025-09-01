@@ -44,7 +44,8 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
 
     setUploading(true);
     try {
-      const fileName = `avatar-${user.id}-${Date.now()}.jpg`;
+      // Use user ID in the path for better organization and RLS compatibility
+      const fileName = `${user.id}/avatar-${Date.now()}.jpg`;
       
       const { error: uploadError } = await supabase.storage
         .from('avatars')
