@@ -244,6 +244,7 @@ export type Database = {
           birth_date: string | null
           created_at: string
           gender: string | null
+          golf_id: string | null
           handicap: number | null
           home_city: string | null
           home_club: string | null
@@ -263,6 +264,7 @@ export type Database = {
           birth_date?: string | null
           created_at?: string
           gender?: string | null
+          golf_id?: string | null
           handicap?: number | null
           home_city?: string | null
           home_club?: string | null
@@ -282,6 +284,7 @@ export type Database = {
           birth_date?: string | null
           created_at?: string
           gender?: string | null
+          golf_id?: string | null
           handicap?: number | null
           home_city?: string | null
           home_club?: string | null

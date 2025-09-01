@@ -36,6 +36,7 @@ export const Profile = () => {
   const [birthDay, setBirthDay] = useState("");
   const [birthMonth, setBirthMonth] = useState("");
   const [birthYear, setBirthYear] = useState("");
+  const [golfIdSuffix, setGolfIdSuffix] = useState("");
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -51,8 +52,31 @@ export const Profile = () => {
     if (day && month && year) {
       const birthDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
       setProfile(prev => ({ ...prev, birth_date: birthDate }));
+      
+      // Update golf ID when birth date changes
+      updateGolfId(birthDate, golfIdSuffix);
     } else {
       setProfile(prev => ({ ...prev, birth_date: null }));
+      updateGolfId(null, golfIdSuffix);
+    }
+  };
+
+  // Helper function to generate golf ID prefix from birth date
+  const generateGolfIdPrefix = (birthDate: Date) => {
+    const year = birthDate.getFullYear().toString().slice(-2); // Last 2 digits of year
+    const month = (birthDate.getMonth() + 1).toString().padStart(2, '0');
+    const day = birthDate.getDate().toString().padStart(2, '0');
+    return `${year}${month}${day}`;
+  };
+
+  // Helper function to update golf ID when birth date or suffix changes
+  const updateGolfId = (birthDate: Date | null, suffix: string) => {
+    if (birthDate && suffix.length === 3) {
+      const prefix = generateGolfIdPrefix(birthDate);
+      const fullGolfId = `${prefix}-${suffix}`;
+      setProfile(prev => ({ ...prev, golf_id: fullGolfId }));
+    } else if (!birthDate || suffix.length === 0) {
+      setProfile(prev => ({ ...prev, golf_id: "" }));
     }
   };
 
@@ -146,14 +170,24 @@ export const Profile = () => {
           birth_date: birthDate,
           home_city: data.home_city || "",
           bio: data.bio || "",
-          golf_id: data.golf_id || ""
+          golf_id: (data as any).golf_id || ""
         });
         
-        // Set individual date components
+        // Set individual date components and golf ID suffix
         if (birthDate) {
           setBirthDay(birthDate.getDate().toString());
           setBirthMonth((birthDate.getMonth() + 1).toString());
           setBirthYear(birthDate.getFullYear().toString());
+        }
+        
+        // Extract golf ID suffix if golf ID exists
+        if ((data as any).golf_id) {
+          const golfId = (data as any).golf_id;
+          const dashIndex = golfId.indexOf('-');
+          if (dashIndex !== -1 && dashIndex < golfId.length - 1) {
+            const suffix = golfId.substring(dashIndex + 1);
+            setGolfIdSuffix(suffix);
+          }
         }
       }
     } catch (error) {
@@ -403,7 +437,8 @@ export const Profile = () => {
         gender: profileData.gender,
         birth_date: profileData.birth_date ? profileData.birth_date.toISOString().split('T')[0] : null,
         home_city: profileData.home_city,
-        bio: profileData.bio
+        bio: profileData.bio,
+        golf_id: profileData.golf_id
       };
 
       const { error } = await supabase
@@ -714,6 +749,36 @@ export const Profile = () => {
                         </SelectContent>
                       </Select>
                     </div>
+                  </div>
+
+                  {/* Golf-ID Field */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-foreground">Golf-ID</Label>
+                    <div className="flex items-center gap-2">
+                      {/* Auto-generated prefix */}
+                      <div className="px-3 py-2 bg-muted/50 border border-muted rounded-md text-sm font-mono">
+                        {profile.birth_date ? generateGolfIdPrefix(profile.birth_date) : "------"}
+                      </div>
+                      <span className="text-lg font-bold">-</span>
+                      {/* User input for last 3 digits */}
+                      <Input
+                        type="text"
+                        maxLength={3}
+                        placeholder="023"
+                        value={golfIdSuffix}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, ''); // Only digits
+                          setGolfIdSuffix(value);
+                          updateGolfId(profile.birth_date, value);
+                        }}
+                        className="w-20 border-muted focus:border-primary transition-colors font-mono text-center"
+                      />
+                    </div>
+                    {profile.golf_id && (
+                      <p className="text-xs text-muted-foreground">
+                        Komplett Golf-ID: <span className="font-mono">{profile.golf_id}</span>
+                      </p>
+                    )}
                   </div>
 
                 </div>
