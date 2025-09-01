@@ -476,10 +476,6 @@ export type Database = {
         Args: { _chat_room_id: string; _user_id: string }
         Returns: boolean
       }
-      can_add_group_chat_member: {
-        Args: { _group_chat_id: string; _user_id: string }
-        Returns: boolean
-      }
       generate_chat_room_id: {
         Args: { user1_id: string; user2_id: string }
         Returns: string
