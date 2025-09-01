@@ -71,8 +71,29 @@ export const CreateRoundSuggestion = ({ onSuccess }: CreateRoundSuggestionProps)
   const onSubmit = async (data: RoundSuggestionForm) => {
     setIsLoading(true);
     try {
+      console.log('Form data submitted:', data);
+
+      // Validate required fields
+      if (!data.golfCourseId) {
+        throw new Error("Golf course is required");
+      }
+      if (!data.date) {
+        throw new Error("Date is required");
+      }
+      if (!data.time) {
+        throw new Error("Time is required");
+      }
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error("Not authenticated");
+
+      console.log('Creating round suggestion with data:', {
+        user_id: user.user.id,
+        golf_course_id: data.golfCourseId,
+        suggested_date: format(data.date, 'yyyy-MM-dd'),
+        suggested_time: data.time,
+        message: data.message,
+        max_players: data.maxPlayers,
+      });
 
       const { error } = await supabase
         .from('round_suggestions')
@@ -85,7 +106,12 @@ export const CreateRoundSuggestion = ({ onSuccess }: CreateRoundSuggestionProps)
           max_players: data.maxPlayers,
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      console.log('Round suggestion created successfully');
 
       toast({
         title: "Rundförslag skapat!",
@@ -124,46 +150,53 @@ export const CreateRoundSuggestion = ({ onSuccess }: CreateRoundSuggestionProps)
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Golf Course Search */}
-            <div className="space-y-2">
-              <Label>Golfbana</Label>
-              <div className="relative">
-                <Input
-                  placeholder="Sök efter golfbana..."
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    searchCourses(e.target.value);
-                    setShowCourseSearch(true);
-                  }}
-                  onFocus={() => setShowCourseSearch(true)}
-                />
-                <MapPin className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                
-                {showCourseSearch && golfCourses.length > 0 && (
-                  <Card className="absolute z-10 w-full mt-1 max-h-60 overflow-y-auto">
-                    <CardContent className="p-2">
-                      {golfCourses.map((course) => (
-                        <Button
-                          key={course.id}
-                          variant="ghost"
-                          className="w-full justify-start text-left h-auto p-2"
-                          onClick={() => {
-                            form.setValue('golfCourseId', course.id);
-                            setSearchTerm(`${course.name} - ${course.location}`);
-                            setShowCourseSearch(false);
-                          }}
-                        >
-                          <div>
-                            <div className="font-medium">{course.name}</div>
-                            <div className="text-sm text-muted-foreground">{course.location}</div>
-                          </div>
-                        </Button>
-                      ))}
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </div>
+            <FormField
+              control={form.control}
+              name="golfCourseId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Golfbana</FormLabel>
+                  <div className="relative">
+                    <Input
+                      placeholder="Sök efter golfbana..."
+                      value={searchTerm}
+                      onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        searchCourses(e.target.value);
+                        setShowCourseSearch(true);
+                      }}
+                      onFocus={() => setShowCourseSearch(true)}
+                    />
+                    <MapPin className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                    
+                    {showCourseSearch && golfCourses.length > 0 && (
+                      <Card className="absolute z-10 w-full mt-1 max-h-60 overflow-y-auto">
+                        <CardContent className="p-2">
+                          {golfCourses.map((course) => (
+                            <Button
+                              key={course.id}
+                              variant="ghost"
+                              className="w-full justify-start text-left h-auto p-2"
+                              onClick={() => {
+                                field.onChange(course.id);
+                                setSearchTerm(`${course.name} - ${course.location}`);
+                                setShowCourseSearch(false);
+                              }}
+                            >
+                              <div>
+                                <div className="font-medium">{course.name}</div>
+                                <div className="text-sm text-muted-foreground">{course.location}</div>
+                              </div>
+                            </Button>
+                          ))}
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {/* Date and Time Selection - Same Row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
