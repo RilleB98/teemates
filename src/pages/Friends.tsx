@@ -11,13 +11,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Loader2, Users, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 
 export const Friends = () => {
   const { toast } = useToast();
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<any>(null);
+  const [createGameDialogOpen, setCreateGameDialogOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   
   const {
     friends,
@@ -148,7 +150,7 @@ export const Friends = () => {
                       <Users className="w-5 h-5" />
                       Spelförslag från vänner
                     </h3>
-                    <Dialog>
+                    <Dialog open={createGameDialogOpen} onOpenChange={setCreateGameDialogOpen}>
                       <DialogTrigger asChild>
                         <Button className="bg-golf-green hover:bg-golf-green-light text-white">
                           <Plus className="w-4 h-4 mr-2" />
@@ -161,14 +163,15 @@ export const Friends = () => {
                         </DialogHeader>
                         <CreateGameSuggestion 
                           onSuccess={() => {
-                            // Refresh the list after creating a suggestion
-                            window.location.reload();
+                            // Close the dialog and trigger refresh
+                            setCreateGameDialogOpen(false);
+                            setRefreshTrigger(prev => prev + 1);
                           }} 
                         />
                       </DialogContent>
                     </Dialog>
                   </div>
-                  <GameSuggestionsList />
+                  <GameSuggestionsList key={refreshTrigger} />
                 </div>
               </div>
             </TabsContent>
