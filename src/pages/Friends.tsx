@@ -11,11 +11,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Users, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 export const Friends = () => {
   const { toast } = useToast();
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<any>(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const {
     friends,
     pendingRequests,
@@ -138,22 +140,34 @@ export const Friends = () => {
 
             <TabsContent value="activity">
               <div className="space-y-6">
-                {/* Create Round Suggestion */}
-                <CreateRoundSuggestion 
-                  onSuccess={() => {
-                    // Refresh the list after creating a suggestion
-                    window.location.reload();
-                  }} 
-                />
-                
-                {/* Round Suggestions List */}
+                {/* Round Suggestions List - Main Focus */}
                 <div>
-                  <h3 className="text-xl font-semibold text-golf-premium mb-4 flex items-center gap-2">
-                    <Users className="w-5 h-5" />
-                    Rundförslag från vänner
-                  </h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-semibold text-golf-premium flex items-center gap-2">
+                      <Users className="w-5 h-5" />
+                      Rundförslag från vänner
+                    </h3>
+                    <Button
+                      onClick={() => setShowCreateForm(!showCreateForm)}
+                      className="bg-golf-green hover:bg-golf-green-light text-white"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      {showCreateForm ? "Dölj" : "Skapa rundförslag"}
+                    </Button>
+                  </div>
                   <RoundSuggestionsList />
                 </div>
+
+                {/* Create Round Suggestion - Hidden behind button */}
+                {showCreateForm && (
+                  <CreateRoundSuggestion 
+                    onSuccess={() => {
+                      setShowCreateForm(false);
+                      // Refresh the list after creating a suggestion
+                      window.location.reload();
+                    }} 
+                  />
+                )}
               </div>
             </TabsContent>
           </Tabs>
