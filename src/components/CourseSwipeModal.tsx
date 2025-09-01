@@ -61,7 +61,7 @@ export const CourseSwipeModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] sm:max-w-md mx-auto p-0 bg-gradient-to-br from-golf-green via-background to-golf-green-light">
+      <DialogContent className="max-w-[95vw] sm:max-w-lg mx-auto p-0 bg-gradient-to-br from-golf-green via-background to-golf-green-light">
         <div className="p-4 sm:p-6">
           <DialogHeader className="mb-3 sm:mb-4">
             <div>
@@ -91,7 +91,7 @@ export const CourseSwipeModal = ({
             )}
           </DialogHeader>
 
-          <div className="relative h-[400px] sm:h-[500px] flex items-center justify-center">
+          <div className="relative h-[500px] sm:h-[600px] flex items-center justify-center">
             {!hasMoreProfiles || !currentProfile ? (
               <Card className="w-full h-full flex items-center justify-center bg-white/95 backdrop-blur-sm">
                 <div className="text-center p-4 sm:p-6 lg:p-8">
