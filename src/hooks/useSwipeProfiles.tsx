@@ -12,6 +12,7 @@ export interface UserProfile {
   home_club: string;
   birth_date: string;
   bio: string;
+  home_city: string;
 }
 
 export interface SwipeFilters {
@@ -20,6 +21,7 @@ export interface SwipeFilters {
   minHandicap: number;
   maxHandicap: number;
   gender: 'all' | 'man' | 'kvinna';
+  prioritizeLocalCity: boolean;
 }
 
 export const useSwipeProfiles = () => {
@@ -32,7 +34,8 @@ export const useSwipeProfiles = () => {
     maxAge: 80,
     minHandicap: 0,
     maxHandicap: 54,
-    gender: 'all'
+    gender: 'all',
+    prioritizeLocalCity: true
   });
 
   const fetchProfiles = async () => {
@@ -47,7 +50,7 @@ export const useSwipeProfiles = () => {
       // Get users that are not me and not already friends
       let query = supabase
         .from('profiles')
-        .select('user_id, name, avatar_url, age, handicap, gender, home_club, birth_date, bio')
+        .select('user_id, name, avatar_url, age, handicap, gender, home_club, birth_date, bio, home_city')
         .neq('user_id', user.id)
         .not('name', 'is', null);
 
@@ -97,10 +100,38 @@ export const useSwipeProfiles = () => {
           const swipedUserIds = swipeData?.map(s => s.target_user_id) || [];
           const excludedIds = [...friendIds, ...swipedUserIds];
           
-          const filteredProfiles = data.filter(profile => !excludedIds.includes(profile.user_id)).map(profile => ({
+          let filteredProfiles = data.filter(profile => !excludedIds.includes(profile.user_id)).map(profile => ({
             ...profile,
             bio: profile.bio || ""
           }));
+
+          // Sort by local city priority if enabled
+          if (filters.prioritizeLocalCity) {
+            try {
+              // Get current user's home_city
+              const { data: currentUserData } = await supabase
+                .from('profiles')
+                .select('home_city')
+                .eq('user_id', user.id)
+                .single();
+
+              if (currentUserData?.home_city) {
+                const userHomeCity = currentUserData.home_city;
+                
+                // Sort profiles: same city first, then others
+                filteredProfiles.sort((a, b) => {
+                  const aIsLocal = a.home_city === userHomeCity;
+                  const bIsLocal = b.home_city === userHomeCity;
+                  
+                  if (aIsLocal && !bIsLocal) return -1;
+                  if (!aIsLocal && bIsLocal) return 1;
+                  return 0; // Keep original order for profiles in same category
+                });
+              }
+            } catch (cityError) {
+              console.error('Error sorting by city:', cityError);
+            }
+          }
           
           console.log('Fetched profiles:', filteredProfiles.length);
           setProfiles(filteredProfiles);

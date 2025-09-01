@@ -12,6 +12,7 @@ export interface CourseUserProfile {
   home_club: string;
   birth_date: string;
   bio: string;
+  home_city: string;
 }
 
 export const useCourseProfiles = (courseName: string) => {
@@ -30,7 +31,7 @@ export const useCourseProfiles = (courseName: string) => {
       // Get users with this course as home club (excluding myself)
       let query = supabase
         .from('profiles')
-        .select('user_id, name, avatar_url, age, handicap, gender, home_club, birth_date, bio')
+        .select('user_id, name, avatar_url, age, handicap, gender, home_club, birth_date, bio, home_city')
         .eq('home_club', courseName)
         .neq('user_id', user.id)
         .not('name', 'is', null);
@@ -54,7 +55,8 @@ export const useCourseProfiles = (courseName: string) => {
           const friendIds = friendData?.map(f => f.friend_id) || [];
           const filteredProfiles = data.filter(profile => !friendIds.includes(profile.user_id)).map(profile => ({
             ...profile,
-            bio: profile.bio || ""
+            bio: profile.bio || "",
+            home_city: profile.home_city || ""
           }));
           
           // Randomize the order
@@ -67,7 +69,8 @@ export const useCourseProfiles = (courseName: string) => {
           // Still set profiles even if friends query fails, randomized
           const randomizedProfiles = data.map(profile => ({
             ...profile,
-            bio: profile.bio || ""
+            bio: profile.bio || "",
+            home_city: profile.home_city || ""
           })).sort(() => Math.random() - 0.5);
           setProfiles(randomizedProfiles);
           setCurrentIndex(0);

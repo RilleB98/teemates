@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Settings, X } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Settings, X, MapPin } from 'lucide-react';
 import { SwipeFilters } from '@/hooks/useSwipeProfiles';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
@@ -50,7 +51,8 @@ export const SwipeFiltersComponent = ({ filters, onFiltersChange }: SwipeFilters
       maxAge: 80,
       minHandicap: 0,
       maxHandicap: 54,
-      gender: 'all'
+      gender: 'all',
+      prioritizeLocalCity: true
     };
     setLocalFilters(defaultFilters);
     onFiltersChange(defaultFilters);
@@ -113,6 +115,27 @@ export const SwipeFiltersComponent = ({ filters, onFiltersChange }: SwipeFilters
                 <SelectItem value="kvinna">Kvinna</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          {/* Local City Priority Filter */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <Label className="text-sm font-medium flex items-center">
+                  <MapPin className="h-4 w-4 mr-2" />
+                  Prioritera lokal stad
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Visa profiler från din närliggande storstad först
+                </p>
+              </div>
+              <Switch
+                checked={localFilters.prioritizeLocalCity}
+                onCheckedChange={(checked) => 
+                  setLocalFilters(prev => ({ ...prev, prioritizeLocalCity: checked }))
+                }
+              />
+            </div>
           </div>
 
           {/* Active Filters Display */}
