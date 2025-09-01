@@ -88,14 +88,24 @@ export const RoundSuggestionsList = () => {
       const suggestionIds = suggestions.map(s => s.id);
       const { data: participants } = await supabase
         .from('round_suggestion_participants')
-        .select('*, profiles!user_id(name, avatar_url)')
+        .select('*')
         .in('round_suggestion_id', suggestionIds);
+
+      // Get participant profiles
+      const participantUserIds = participants?.map(p => p.user_id) || [];
+      const { data: participantProfiles } = await supabase
+        .from('profiles')
+        .select('user_id, name, avatar_url')
+        .in('user_id', participantUserIds);
 
       // Combine all data
       const enrichedSuggestions = suggestions.map(suggestion => {
         const course = courses?.find(c => c.id === suggestion.golf_course_id);
         const profile = profiles?.find(p => p.user_id === suggestion.user_id);
-        const suggestionParticipants = participants?.filter(p => p.round_suggestion_id === suggestion.id);
+        const suggestionParticipants = participants?.filter(p => p.round_suggestion_id === suggestion.id).map(participant => ({
+          ...participant,
+          profiles: participantProfiles?.find(pp => pp.user_id === participant.user_id) || { name: 'Okänd användare', avatar_url: null }
+        }));
 
         return {
           ...suggestion,
