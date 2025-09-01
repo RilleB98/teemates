@@ -314,7 +314,7 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Tid</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                          <SelectTrigger className="h-10">
                           <Clock className="mr-2 h-4 w-4" />
@@ -342,7 +342,7 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Max antal spelare</FormLabel>
-                  <Select onValueChange={(value) => field.onChange(Number(value))} defaultValue={field.value?.toString()}>
+                  <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Välj antal" />
