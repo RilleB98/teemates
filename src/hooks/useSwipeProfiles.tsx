@@ -65,38 +65,51 @@ export const useSwipeProfiles = () => {
         query = query.eq('gender', filters.gender);
       }
 
-      const { data, error } = await query.limit(20);
+      const { data, error } = await query.limit(50); // Increase limit to account for filtering
 
       if (error) {
         console.error('Error fetching profiles:', error);
-        return; // Don't throw, just return
+        return;
       }
 
-      // Filter out existing friends
+      // Filter out existing friends and users swiped on in last month
       if (data) {
         try {
+          // Get friends
           const { data: friendData } = await supabase
             .from('friends')
             .select('friend_id')
             .eq('user_id', user.id)
             .eq('status', 'accepted');
 
+          // Get users swiped on in the last month
+          const oneMonthAgo = new Date();
+          oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+          
+          const { data: swipeData } = await supabase
+            .from('user_swipes')
+            .select('target_user_id')
+            .eq('user_id', user.id)
+            .gte('created_at', oneMonthAgo.toISOString());
+
           const friendIds = friendData?.map(f => f.friend_id) || [];
-          const filteredProfiles = data.filter(profile => !friendIds.includes(profile.user_id));
+          const swipedUserIds = swipeData?.map(s => s.target_user_id) || [];
+          const excludedIds = [...friendIds, ...swipedUserIds];
+          
+          const filteredProfiles = data.filter(profile => !excludedIds.includes(profile.user_id));
           
           console.log('Fetched profiles:', filteredProfiles.length);
           setProfiles(filteredProfiles);
           setCurrentIndex(0);
         } catch (friendError) {
-          console.error('Error fetching friends:', friendError);
-          // Still set profiles even if friends query fails
+          console.error('Error fetching friends or swipes:', friendError);
+          // Still set profiles even if friends/swipes query fails
           setProfiles(data);
           setCurrentIndex(0);
         }
       }
     } catch (error) {
       console.error('Error in fetchProfiles:', error);
-      // Don't throw, just set empty array to prevent crashes
       setProfiles([]);
     } finally {
       setLoading(false);
@@ -109,9 +122,25 @@ export const useSwipeProfiles = () => {
     }
   }, [user, filters]);
 
-  const swipeLeft = (profileId: string) => {
+  const swipeLeft = async (profileId: string) => {
     console.log('Swipe left called for profile:', profileId);
-    // Just move to next profile - no action needed for left swipe
+    if (!user) return;
+
+    try {
+      // Save left swipe to database
+      await supabase
+        .from('user_swipes')
+        .upsert({
+          user_id: user.id,
+          target_user_id: profileId,
+          swipe_direction: 'left'
+        }, {
+          onConflict: 'user_id,target_user_id'
+        });
+    } catch (error) {
+      console.error('Error saving left swipe:', error);
+    }
+
     setCurrentIndex(prev => prev + 1);
   };
 
@@ -120,6 +149,17 @@ export const useSwipeProfiles = () => {
     if (!user) return;
 
     try {
+      // Save right swipe to database
+      await supabase
+        .from('user_swipes')
+        .upsert({
+          user_id: user.id,
+          target_user_id: profileId,
+          swipe_direction: 'right'
+        }, {
+          onConflict: 'user_id,target_user_id'
+        });
+
       // Send friend request
       const { error } = await supabase
         .from('friends')
@@ -133,7 +173,7 @@ export const useSwipeProfiles = () => {
         throw error;
       }
     } catch (error) {
-      console.error('Error sending friend request:', error);
+      console.error('Error processing right swipe:', error);
     }
 
     setCurrentIndex(prev => prev + 1);
