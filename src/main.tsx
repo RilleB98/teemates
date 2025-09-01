@@ -2,4 +2,15 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
-createRoot(document.getElementById("root")!).render(<App />);
+console.log('TeeMates: main.tsx loaded');
+console.log('TeeMates: DOM ready state:', document.readyState);
+
+const rootElement = document.getElementById("root");
+console.log('TeeMates: Root element found:', !!rootElement);
+
+if (rootElement) {
+  console.log('TeeMates: Creating React root');
+  createRoot(rootElement).render(<App />);
+} else {
+  console.error('TeeMates: Root element not found!');
+}
