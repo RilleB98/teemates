@@ -245,6 +245,30 @@ export const RoundSuggestionsList = () => {
             <CardContent className="space-y-4">
               {/* Profile Icons, Course and Time Info - All on same row */}
               <div className="flex items-center justify-between">
+                {/* Course Info */}
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-golf-green" />
+                  <div>
+                    <p className="font-medium text-sm">{suggestion.golf_courses.name}</p>
+                    <p className="text-xs text-muted-foreground">{suggestion.golf_courses.location}</p>
+                  </div>
+                </div>
+                
+                {/* Date and Time */}
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1">
+                    <CalendarIcon className="w-4 h-4 text-golf-green" />
+                    <span className="text-sm">
+                      {format(new Date(suggestion.suggested_date), "d MMM", { locale: sv })}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-4 h-4 text-golf-green" />
+                    <span className="text-sm">{suggestion.suggested_time}</span>
+                  </div>
+                </div>
+
+                {/* Profile Icons - Moved to far right */}
                 <div className="flex items-center gap-3">
                   {/* Creator Profile Icon */}
                   <Avatar className="h-8 w-8 border-2 border-golf-green">
@@ -285,29 +309,6 @@ export const RoundSuggestionsList = () => {
                       )}
                     </div>
                   ))}
-                </div>
-
-                {/* Course Info */}
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-golf-green" />
-                  <div>
-                    <p className="font-medium text-sm">{suggestion.golf_courses.name}</p>
-                    <p className="text-xs text-muted-foreground">{suggestion.golf_courses.location}</p>
-                  </div>
-                </div>
-                
-                {/* Date and Time */}
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1">
-                    <CalendarIcon className="w-4 h-4 text-golf-green" />
-                    <span className="text-sm">
-                      {format(new Date(suggestion.suggested_date), "d MMM", { locale: sv })}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4 text-golf-green" />
-                    <span className="text-sm">{suggestion.suggested_time}</span>
-                  </div>
                 </div>
               </div>
 
