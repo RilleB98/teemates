@@ -31,19 +31,32 @@ type GameSuggestionForm = z.infer<typeof gameSuggestionSchema>;
 
 interface CreateGameSuggestionProps {
   onSuccess?: () => void;
+  initialData?: {
+    course: string;
+    date: Date;
+    time: string;
+    maxPlayers: number;
+    message: string;
+  };
+  suggestionId?: string; // If provided, we're editing
 }
 
-export const CreateGameSuggestion = ({ onSuccess }: CreateGameSuggestionProps) => {
+export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: CreateGameSuggestionProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [golfCourses, setGolfCourses] = useState<Array<{ id: string; name: string; location: string }>>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showCourseSearch, setShowCourseSearch] = useState(false);
+  const isEditMode = !!suggestionId;
 
   const form = useForm<GameSuggestionForm>({
     resolver: zodResolver(gameSuggestionSchema),
     defaultValues: {
-      maxPlayers: 4,
+      golfCourseId: initialData?.course || "",
+      date: initialData?.date || undefined,
+      time: initialData?.time || "",
+      maxPlayers: initialData?.maxPlayers || 4,
+      message: initialData?.message || "",
     },
   });
 
@@ -86,42 +99,67 @@ export const CreateGameSuggestion = ({ onSuccess }: CreateGameSuggestionProps) =
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error("Not authenticated");
 
-      console.log('Creating game suggestion with data:', {
-        user_id: user.user.id,
+      const suggestionData = {
         golf_course_id: data.golfCourseId,
         suggested_date: format(data.date, 'yyyy-MM-dd'),
         suggested_time: data.time,
-        message: data.message,
+        message: data.message || null,
         max_players: data.maxPlayers,
-      });
+      };
 
-      const { error } = await supabase
-        .from('round_suggestions')
-        .insert({
+      if (isEditMode && suggestionId) {
+        // Update existing suggestion
+        console.log('Updating game suggestion with data:', suggestionData);
+        
+        const { error } = await supabase
+          .from('round_suggestions')
+          .update(suggestionData)
+          .eq('id', suggestionId)
+          .eq('user_id', user.user.id); // Ensure user can only edit their own suggestions
+
+        if (error) {
+          console.error('Supabase error:', error);
+          throw error;
+        }
+
+        console.log('Round suggestion updated successfully');
+
+        toast({
+          title: "Spelförslag uppdaterat!",
+          description: "Ditt spelförslag har uppdaterats.",
+        });
+      } else {
+        // Create new suggestion
+        console.log('Creating game suggestion with data:', {
           user_id: user.user.id,
-          golf_course_id: data.golfCourseId,
-          suggested_date: format(data.date, 'yyyy-MM-dd'),
-          suggested_time: data.time,
-          message: data.message || null,
-          max_players: data.maxPlayers,
+          ...suggestionData
         });
 
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
+        const { error } = await supabase
+          .from('round_suggestions')
+          .insert({
+            user_id: user.user.id,
+            ...suggestionData
+          });
+
+        if (error) {
+          console.error('Supabase error:', error);
+          throw error;
+        }
+
+        console.log('Round suggestion created successfully');
+
+        toast({
+          title: "Spelförslag skapat!",
+          description: "Dina vänner kan nu se ditt förslag och gå med.",
+        });
+
+        form.reset();
       }
 
-      console.log('Round suggestion created successfully');
-
-      toast({
-        title: "Rundförslag skapat!",
-        description: "Dina vänner kan nu se ditt förslag och gå med.",
-      });
-
-      form.reset();
       onSuccess?.();
     } catch (error) {
-      console.error('Error creating round suggestion:', error);
+      console.error('Error with round suggestion:', error);
       console.error('Error details:', {
         message: error?.message,
         details: error?.details,
@@ -130,7 +168,7 @@ export const CreateGameSuggestion = ({ onSuccess }: CreateGameSuggestionProps) =
       });
       toast({
         title: "Fel",
-        description: "Kunde inte skapa rundförslag. Försök igen.",
+        description: `Kunde inte ${isEditMode ? 'uppdatera' : 'skapa'} spelförslag. Försök igen.`,
         variant: "destructive",
       });
     } finally {
@@ -149,7 +187,7 @@ export const CreateGameSuggestion = ({ onSuccess }: CreateGameSuggestionProps) =
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-golf-premium">
           <Plus className="w-5 h-5" />
-          Föreslå en runda
+          {isEditMode ? 'Redigera spelförslag' : 'Föreslå en runda'}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -322,7 +360,7 @@ export const CreateGameSuggestion = ({ onSuccess }: CreateGameSuggestionProps) =
               disabled={isLoading}
               className="w-full bg-golf-green hover:bg-golf-green-light text-white"
             >
-              {isLoading ? "Skapar..." : "Skapa spelförslag"}
+              {isLoading ? (isEditMode ? "Uppdaterar..." : "Skapar...") : (isEditMode ? "Uppdatera spelförslag" : "Skapa spelförslag")}
             </Button>
           </form>
         </Form>
