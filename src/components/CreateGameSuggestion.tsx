@@ -172,6 +172,9 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
         const courseName = courseData?.name || 'Okänd bana';
         const chatName = `${courseName} ${format(data.date, 'd MMM', { locale: sv })} kl ${data.time}`;
 
+        console.log('About to create group chat with name:', chatName);
+        console.log('User ID:', user.user.id);
+
         // Create group chat first
         const { data: groupChat, error: chatError } = await supabase
           .from('group_chats')
@@ -182,9 +185,15 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
           .select()
           .single();
 
-        if (chatError) throw chatError;
+        if (chatError) {
+          console.error('Group chat creation failed:', chatError);
+          throw chatError;
+        }
+
+        console.log('Group chat created successfully:', groupChat);
 
         // Add creator as first member of the group chat
+        console.log('About to add creator as member, group_chat_id:', groupChat.id);
         const { error: memberError } = await supabase
           .from('group_chat_members')
           .insert({
@@ -193,9 +202,15 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
             added_by: user.user.id
           });
 
-        if (memberError) throw memberError;
+        if (memberError) {
+          console.error('Member addition failed:', memberError);
+          throw memberError;
+        }
+
+        console.log('Member added successfully');
 
         // Create round suggestion with group chat reference
+        console.log('About to create round suggestion');
         const { error } = await supabase
           .from('round_suggestions')
           .insert({
@@ -205,7 +220,7 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
           });
 
         if (error) {
-          console.error('Supabase error:', error);
+          console.error('Round suggestion creation failed:', error);
           throw error;
         }
 
