@@ -112,9 +112,9 @@ export const Navigation = ({
             <Link to="/courses">
               <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${location.pathname === '/courses' ? 'text-golf-green bg-golf-green-light' : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'}`}>
                 <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  {/* Accurate Sweden outline */}
-                  <path d="M12 2c1.5 0 2.5 0.5 3 1.5l0.5 1c0.5 1 1 2 1 3.5v1.5c0.5 0.5 1 1.5 1.5 2v1c0 1.5-0.5 2.5-0.5 3.5v2c0 1.5-1 2.5-1.5 3l-1 1c-0.5 0.5-1.5 1-2.5 1.5l-1 0.5c-1 0.5-2 0-3-0.5l-0.5-0.5c-1-0.5-1.5-1.5-2-2.5v-1.5c0-1-0.5-2-0.5-3v-2.5c0-1.5 0.5-3 1-4v-2c0-1.5 0.5-2.5 1.5-3.5l1-1c0.5-0.5 1.5-1 2.5-1z" fill="currentColor" opacity="0.15" />
-                  <path d="M12 2c1.5 0 2.5 0.5 3 1.5l0.5 1c0.5 1 1 2 1 3.5v1.5c0.5 0.5 1 1.5 1.5 2v1c0 1.5-0.5 2.5-0.5 3.5v2c0 1.5-1 2.5-1.5 3l-1 1c-0.5 0.5-1.5 1-2.5 1.5l-1 0.5c-1 0.5-2 0-3-0.5l-0.5-0.5c-1-0.5-1.5-1.5-2-2.5v-1.5c0-1-0.5-2-0.5-3v-2.5c0-1.5 0.5-3 1-4v-2c0-1.5 0.5-2.5 1.5-3.5l1-1c0.5-0.5 1.5-1 2.5-1z" />
+                  {/* Realistic Sweden outline with narrow southern peninsula and wide north */}
+                  <path d="M11.5 2.5c1.5 0 2.5 1 3.5 2.5c0.5 1 1 2.5 1.5 4.5c0.3 1.5 0.5 3 0.5 4.5c0 1 0.2 2 0.2 3c0 1.5-0.2 3-0.7 4c-0.3 0.8-0.8 1.5-1.5 2c-0.5 0.3-1 0.5-1.5 0.8c-0.8 0.4-1.5 0.2-2.3-0.1c-0.6-0.2-1.2-0.6-1.7-1.2c-0.8-0.8-1.3-1.8-1.5-2.8c-0.2-1-0.1-2 0-3c0.1-1.5 0.3-3 0.2-4.5c-0.1-2 0.2-4 1-5.5c0.5-1 1.3-2 2.3-2.5c0.3-0.1 0.7-0.1 1-0.1z M14.5 21.5c0.3 0 0.7-0.1 1-0.3 M9.5 21c-0.2-0.2-0.3-0.5-0.3-0.8 M15.8 19.5c0.2-0.3 0.2-0.7 0.2-1" fill="currentColor" opacity="0.15" />
+                  <path d="M11.5 2.5c1.5 0 2.5 1 3.5 2.5c0.5 1 1 2.5 1.5 4.5c0.3 1.5 0.5 3 0.5 4.5c0 1 0.2 2 0.2 3c0 1.5-0.2 3-0.7 4c-0.3 0.8-0.8 1.5-1.5 2c-0.5 0.3-1 0.5-1.5 0.8c-0.8 0.4-1.5 0.2-2.3-0.1c-0.6-0.2-1.2-0.6-1.7-1.2c-0.8-0.8-1.3-1.8-1.5-2.8c-0.2-1-0.1-2 0-3c0.1-1.5 0.3-3 0.2-4.5c-0.1-2 0.2-4 1-5.5c0.5-1 1.3-2 2.3-2.5c0.3-0.1 0.7-0.1 1-0.1z M14.5 21.5c0.3 0 0.7-0.1 1-0.3 M9.5 21c-0.2-0.2-0.3-0.5-0.3-0.8 M15.8 19.5c0.2-0.3 0.2-0.7 0.2-1" />
                 </svg>
                 
               </button>
