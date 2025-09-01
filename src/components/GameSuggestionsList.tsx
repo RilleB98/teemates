@@ -258,8 +258,34 @@ export const GameSuggestionsList = () => {
 
         return (
           <Card key={suggestion.id} className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
+            <CardHeader className="pb-3 relative">
+              {/* Three-dot menu at top right corner */}
+              {isOwner && (
+                <div className="absolute top-4 right-4">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => editSuggestion(suggestion.id)}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Redigera
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => deleteSuggestion(suggestion.id)}
+                        className="text-red-600"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Ta bort
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
+              
+              <div className="flex items-start justify-between pr-10">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
                     <AvatarImage src={suggestion.profiles.avatar_url} />
@@ -276,41 +302,16 @@ export const GameSuggestionsList = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {spotsLeft > 0 ? (
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">
-                      {spotsLeft} platser kvar
-                    </Badge>
-                  ) : (
-                    <Badge variant="secondary" className="bg-red-100 text-red-800">
-                      Fullbokad
-                    </Badge>
-                  )}
-                  
-                  {/* Three-dot menu for owners */}
-                  {isOwner && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => editSuggestion(suggestion.id)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Redigera
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={() => deleteSuggestion(suggestion.id)}
-                          className="text-red-600"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Ta bort
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                </div>
+                
+                {spotsLeft > 0 ? (
+                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                    {spotsLeft} platser kvar
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary" className="bg-red-100 text-red-800">
+                    Fullbokad
+                  </Badge>
+                )}
               </div>
             </CardHeader>
             
