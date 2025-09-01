@@ -92,10 +92,10 @@ export const Friends = () => {
             </p>
           </div>
           
-          <Tabs defaultValue="friends-section" className="space-y-6 animate-fade-in">
+          <Tabs defaultValue="activity" className="space-y-6 animate-fade-in">
             <TabsList className="grid w-full grid-cols-2 bg-white/95 backdrop-blur-sm shadow-lg border-0">
-              <TabsTrigger value="friends-section" className="text-golf-premium data-[state=active]:bg-golf-green data-[state=active]:text-white">Vänner</TabsTrigger>
               <TabsTrigger value="activity" className="text-golf-premium data-[state=active]:bg-golf-green data-[state=active]:text-white">Aktivitet</TabsTrigger>
+              <TabsTrigger value="friends-section" className="text-golf-premium data-[state=active]:bg-golf-green data-[state=active]:text-white">Vänner</TabsTrigger>
             </TabsList>
 
             <TabsContent value="friends-section">
