@@ -761,15 +761,6 @@ export const Profile = () => {
                   </Select>
                 </div>
 
-                {/* Course Selector */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-foreground">Hemmaklubb</Label>
-                  <CourseSelector 
-                    selectedCourse={profile.selected_course}
-                    onCourseSelect={(course) => setProfile(prev => ({ ...prev, selected_course: course }))}
-                  />
-                </div>
-
                 {/* Bio Section */}
                 <div className="space-y-2">
                   <Label htmlFor="bio" className="text-sm font-semibold text-foreground">Bio</Label>
@@ -785,6 +776,15 @@ export const Profile = () => {
                   <div className="text-xs text-muted-foreground text-right">
                     {profile.bio.length}/200 tecken
                   </div>
+                </div>
+
+                {/* Course Selector */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-foreground">Hemmaklubb</Label>
+                  <CourseSelector 
+                    selectedCourse={profile.selected_course}
+                    onCourseSelect={(course) => setProfile(prev => ({ ...prev, selected_course: course }))}
+                  />
                 </div>
 
                 {/* Missing fields indicator */}
