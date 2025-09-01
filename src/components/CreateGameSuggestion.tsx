@@ -251,7 +251,7 @@ export const CreateGameSuggestion = ({ onSuccess }: CreateGameSuggestionProps) =
                 control={form.control}
                 name="time"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col">
                     <FormLabel>Tid</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
