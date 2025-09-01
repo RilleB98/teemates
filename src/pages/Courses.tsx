@@ -219,7 +219,7 @@ export const Courses = () => {
                             alt={course.name}
                             className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-lg sm:rounded-xl object-cover shadow-lg"
                           />
-                          <div className="absolute inset-0 bg-golf-green/20 rounded-lg sm:rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          <div className="absolute inset-0 bg-golf-green/20 rounded-lg sm:rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between mb-2 sm:mb-3">
