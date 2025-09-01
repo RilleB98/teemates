@@ -3,17 +3,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'app.lovable.c3a7dfcdab3b42b0ace67b83101e3118',
   appName: 'teemates',
-  webDir: 'dist',
-  plugins: {
-    Geolocation: {
-      permissions: {
-        location: "always"
-      }
-    },
-    PushNotifications: {
-      presentationOptions: ["badge", "sound", "alert"]
-    }
-  }
+  webDir: 'dist'
 };
 
 export default config;
