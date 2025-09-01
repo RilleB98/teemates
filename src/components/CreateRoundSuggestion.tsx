@@ -102,7 +102,7 @@ export const CreateRoundSuggestion = ({ onSuccess }: CreateRoundSuggestionProps)
           golf_course_id: data.golfCourseId,
           suggested_date: format(data.date, 'yyyy-MM-dd'),
           suggested_time: data.time,
-          message: data.message,
+          message: data.message || null,
           max_players: data.maxPlayers,
         });
 
