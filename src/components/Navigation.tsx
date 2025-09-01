@@ -111,10 +111,10 @@ export const Navigation = ({
             {/* Courses */}
             <Link to="/courses">
               <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${location.pathname === '/courses' ? 'text-golf-green bg-golf-green-light' : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'}`}>
-                <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  {/* Sweden country outline */}
-                  <path d="M10 2c1 0 2 1 3 2l1 1c1 1 2 3 2 5v2c0 1 1 2 1 3v1c0 2-1 3-1 4v1c0 1-1 2-2 2h-1c-1 0-2-1-3-1h-1c-1 0-2 0-2-1v-2c0-1-1-2-1-3v-3c0-2 1-3 1-4v-2c0-1 1-2 2-3z" fill="currentColor" opacity="0.2" />
-                  <path d="M10 2c1 0 2 1 3 2l1 1c1 1 2 3 2 5v2c0 1 1 2 1 3v1c0 2-1 3-1 4v1c0 1-1 2-2 2h-1c-1 0-2-1-3-1h-1c-1 0-2 0-2-1v-2c0-1-1-2-1-3v-3c0-2 1-3 1-4v-2c0-1 1-2 2-3z" />
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  {/* Accurate Sweden outline */}
+                  <path d="M12 2c1.5 0 2.5 0.5 3 1.5l0.5 1c0.5 1 1 2 1 3.5v1.5c0.5 0.5 1 1.5 1.5 2v1c0 1.5-0.5 2.5-0.5 3.5v2c0 1.5-1 2.5-1.5 3l-1 1c-0.5 0.5-1.5 1-2.5 1.5l-1 0.5c-1 0.5-2 0-3-0.5l-0.5-0.5c-1-0.5-1.5-1.5-2-2.5v-1.5c0-1-0.5-2-0.5-3v-2.5c0-1.5 0.5-3 1-4v-2c0-1.5 0.5-2.5 1.5-3.5l1-1c0.5-0.5 1.5-1 2.5-1z" fill="currentColor" opacity="0.15" />
+                  <path d="M12 2c1.5 0 2.5 0.5 3 1.5l0.5 1c0.5 1 1 2 1 3.5v1.5c0.5 0.5 1 1.5 1.5 2v1c0 1.5-0.5 2.5-0.5 3.5v2c0 1.5-1 2.5-1.5 3l-1 1c-0.5 0.5-1.5 1-2.5 1.5l-1 0.5c-1 0.5-2 0-3-0.5l-0.5-0.5c-1-0.5-1.5-1.5-2-2.5v-1.5c0-1-0.5-2-0.5-3v-2.5c0-1.5 0.5-3 1-4v-2c0-1.5 0.5-2.5 1.5-3.5l1-1c0.5-0.5 1.5-1 2.5-1z" />
                 </svg>
                 
               </button>
