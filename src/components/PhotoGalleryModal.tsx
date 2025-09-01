@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -17,19 +17,58 @@ interface PhotoGalleryModalProps {
   onAvatarUpdate?: (newAvatarUrl: string) => void;
 }
 
+interface UserPhoto {
+  id: string;
+  url: string;
+  isMain: boolean;
+  displayOrder: number;
+}
+
 export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
   isOpen,
   onClose,
   currentAvatar,
   onAvatarUpdate
 }) => {
-  const [photos, setPhotos] = useState<string[]>([currentAvatar].filter(Boolean));
+  const [photos, setPhotos] = useState<UserPhoto[]>([]);
   const [showImageCropper, setShowImageCropper] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // Load user photos when modal opens
+  useEffect(() => {
+    if (isOpen && user?.id) {
+      loadUserPhotos();
+    }
+  }, [isOpen, user?.id]);
+
+  const loadUserPhotos = async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('user_photos')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('display_order', { ascending: true });
+
+      if (error) throw error;
+
+      const photoData = data.map(photo => ({
+        id: photo.id,
+        url: photo.photo_url,
+        isMain: photo.is_main_photo,
+        displayOrder: photo.display_order
+      }));
+
+      setPhotos(photoData);
+    } catch (error: any) {
+      console.error('Error loading photos:', error);
+    }
+  };
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -45,7 +84,7 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
     setUploading(true);
     try {
       // Use user ID in the path for better organization and RLS compatibility
-      const fileName = `${user.id}/avatar-${Date.now()}.jpg`;
+      const fileName = `${user.id}/photo-${Date.now()}.jpg`;
       
       const { error: uploadError } = await supabase.storage
         .from('avatars')
@@ -60,21 +99,48 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
         .from('avatars')
         .getPublicUrl(fileName);
 
-      // Update profile in database
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ avatar_url: publicUrl })
-        .eq('user_id', user.id);
+      // Determine if this should be the main photo (if it's the first photo)
+      const isFirstPhoto = photos.length === 0;
+      const displayOrder = photos.length;
 
-      if (updateError) throw updateError;
+      // Insert into user_photos table
+      const { data: photoData, error: insertError } = await supabase
+        .from('user_photos')
+        .insert({
+          user_id: user.id,
+          photo_url: publicUrl,
+          is_main_photo: isFirstPhoto,
+          display_order: displayOrder
+        })
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      // If this is the first photo, update the profile avatar_url
+      if (isFirstPhoto) {
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ avatar_url: publicUrl })
+          .eq('user_id', user.id);
+
+        if (updateError) throw updateError;
+        onAvatarUpdate?.(publicUrl);
+      }
 
       // Update local state
-      setPhotos(prev => [publicUrl, ...prev.filter(p => p !== currentAvatar)]);
-      onAvatarUpdate?.(publicUrl);
+      const newPhoto: UserPhoto = {
+        id: photoData.id,
+        url: publicUrl,
+        isMain: isFirstPhoto,
+        displayOrder
+      };
+
+      setPhotos(prev => [...prev, newPhoto]);
       
       toast({
         title: "Bild uppladdad",
-        description: "Din profilbild har uppdaterats."
+        description: isFirstPhoto ? "Din profilbild har uppdaterats." : "Bilden har lagts till i ditt galleri."
       });
     } catch (error: any) {
       toast({
@@ -88,20 +154,37 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
     }
   };
 
-  const setAsMainPhoto = async (photoUrl: string) => {
+  const setAsMainPhoto = async (photo: UserPhoto) => {
     if (!user?.id) return;
 
     try {
+      // Update all photos to not be main
+      await supabase
+        .from('user_photos')
+        .update({ is_main_photo: false })
+        .eq('user_id', user.id);
+
+      // Set the selected photo as main
+      await supabase
+        .from('user_photos')
+        .update({ is_main_photo: true })
+        .eq('id', photo.id);
+
+      // Update the profile avatar_url
       const { error } = await supabase
         .from('profiles')
-        .update({ avatar_url: photoUrl })
+        .update({ avatar_url: photo.url })
         .eq('user_id', user.id);
 
       if (error) throw error;
 
-      // Move photo to first position
-      setPhotos(prev => [photoUrl, ...prev.filter(p => p !== photoUrl)]);
-      onAvatarUpdate?.(photoUrl);
+      // Update local state
+      setPhotos(prev => prev.map(p => ({
+        ...p,
+        isMain: p.id === photo.id
+      })));
+
+      onAvatarUpdate?.(photo.url);
       
       toast({
         title: "Huvudbild uppdaterad",
@@ -116,13 +199,52 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
     }
   };
 
-  const deletePhoto = (photoUrl: string) => {
-    setPhotos(prev => prev.filter(p => p !== photoUrl));
-    if (photoUrl === currentAvatar) {
-      const newMain = photos.find(p => p !== photoUrl);
-      if (newMain) {
-        setAsMainPhoto(newMain);
+  const deletePhoto = async (photo: UserPhoto) => {
+    if (!user?.id) return;
+
+    try {
+      // Delete from database
+      const { error } = await supabase
+        .from('user_photos')
+        .delete()
+        .eq('id', photo.id);
+
+      if (error) throw error;
+
+      // Delete from storage
+      const fileName = photo.url.split('/').pop();
+      if (fileName) {
+        await supabase.storage
+          .from('avatars')
+          .remove([`${user.id}/${fileName}`]);
       }
+
+      // Update local state
+      const updatedPhotos = photos.filter(p => p.id !== photo.id);
+      setPhotos(updatedPhotos);
+
+      // If we deleted the main photo, set the first remaining photo as main
+      if (photo.isMain && updatedPhotos.length > 0) {
+        await setAsMainPhoto(updatedPhotos[0]);
+      } else if (photo.isMain && updatedPhotos.length === 0) {
+        // No photos left, clear avatar
+        await supabase
+          .from('profiles')
+          .update({ avatar_url: null })
+          .eq('user_id', user.id);
+        onAvatarUpdate?.('');
+      }
+
+      toast({
+        title: "Bild borttagen",
+        description: "Bilden har tagits bort från ditt galleri."
+      });
+    } catch (error: any) {
+      toast({
+        title: "Fel",
+        description: "Kunde inte ta bort bilden.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -149,15 +271,15 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
 
               {/* Existing Photos */}
               {photos.map((photo, index) => (
-                <div key={photo} className="relative group aspect-square">
+                <div key={photo.id} className="relative group aspect-square">
                   <Avatar className="w-full h-full rounded-lg">
-                    <AvatarImage src={photo} alt={`Foto ${index + 1}`} className="object-cover" />
+                    <AvatarImage src={photo.url} alt={`Foto ${index + 1}`} className="object-cover" />
                     <AvatarFallback className="rounded-lg">
                       <User className="w-8 h-8" />
                     </AvatarFallback>
                   </Avatar>
                   
-                  {index === 0 && (
+                  {photo.isMain && (
                     <Badge className="absolute top-1 left-1 text-xs bg-primary">
                       Huvud
                     </Badge>
@@ -171,7 +293,7 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        {index !== 0 && (
+                        {!photo.isMain && (
                           <DropdownMenuItem onClick={() => setAsMainPhoto(photo)}>
                             Sätt som huvudbild
                           </DropdownMenuItem>
