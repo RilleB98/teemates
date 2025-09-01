@@ -714,30 +714,32 @@ export const Profile = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="gender" className="text-sm font-semibold text-foreground">Kön</Label>
-                    <Select value={profile.gender} onValueChange={(value) => setProfile(prev => ({ ...prev, gender: value }))}>
-                      <SelectTrigger className="border-muted focus:border-primary transition-colors">
-                        <SelectValue placeholder="Välj kön" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="kvinna">Kvinna</SelectItem>
-                        <SelectItem value="man">Man</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="handicap" className="text-sm font-semibold text-foreground">Handikapp</Label>
+                      <Input
+                        id="handicap"
+                        type="number"
+                        step="0.1"
+                        placeholder="Ange ditt handikapp"
+                        value={profile.handicap}
+                        onChange={(e) => setProfile(prev => ({ ...prev, handicap: e.target.value }))}
+                        className="border-muted focus:border-primary transition-colors"
+                      />
+                    </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="handicap" className="text-sm font-semibold text-foreground">Handikapp</Label>
-                    <Input
-                      id="handicap"
-                      type="number"
-                      step="0.1"
-                      placeholder="Ange ditt handikapp"
-                      value={profile.handicap}
-                      onChange={(e) => setProfile(prev => ({ ...prev, handicap: e.target.value }))}
-                      className="border-muted focus:border-primary transition-colors"
-                    />
+                    <div className="space-y-2">
+                      <Label htmlFor="gender" className="text-sm font-semibold text-foreground">Kön</Label>
+                      <Select value={profile.gender} onValueChange={(value) => setProfile(prev => ({ ...prev, gender: value }))}>
+                        <SelectTrigger className="border-muted focus:border-primary transition-colors">
+                          <SelectValue placeholder="Välj kön" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="kvinna">Kvinna</SelectItem>
+                          <SelectItem value="man">Man</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
 
