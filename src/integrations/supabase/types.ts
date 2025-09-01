@@ -296,6 +296,82 @@ export type Database = {
         }
         Relationships: []
       }
+      round_suggestion_participants: {
+        Row: {
+          created_at: string
+          id: string
+          round_suggestion_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          round_suggestion_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          round_suggestion_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_round_participants_suggestion"
+            columns: ["round_suggestion_id"]
+            isOneToOne: false
+            referencedRelation: "round_suggestions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      round_suggestions: {
+        Row: {
+          created_at: string
+          golf_course_id: string
+          id: string
+          max_players: number | null
+          message: string | null
+          suggested_date: string
+          suggested_time: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          golf_course_id: string
+          id?: string
+          max_players?: number | null
+          message?: string | null
+          suggested_date: string
+          suggested_time: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          golf_course_id?: string
+          id?: string
+          max_players?: number | null
+          message?: string | null
+          suggested_date?: string
+          suggested_time?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_round_suggestions_golf_course"
+            columns: ["golf_course_id"]
+            isOneToOne: false
+            referencedRelation: "golf_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_photos: {
         Row: {
           created_at: string

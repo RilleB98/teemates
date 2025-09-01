@@ -3,10 +3,12 @@ import { UserSearch } from "@/components/UserSearch";
 import { FriendRequests } from "@/components/FriendRequests";
 import { FriendsList } from "@/components/FriendsList";
 import { FriendProfileModal } from "@/components/FriendProfileModal";
+import { CreateRoundSuggestion } from "@/components/CreateRoundSuggestion";
+import { RoundSuggestionsList } from "@/components/RoundSuggestionsList";
 import { useFriends } from "@/hooks/useFriends";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Users } from "lucide-react";
+import { Loader2, Users, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
@@ -135,19 +137,24 @@ export const Friends = () => {
             </TabsContent>
 
             <TabsContent value="activity">
-              <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl">
-                <CardContent className="p-6 text-center">
-                  <div className="space-y-4">
-                    <div className="w-16 h-16 mx-auto bg-gradient-to-br from-golf-green to-golf-green-light rounded-full flex items-center justify-center">
-                      <Users className="w-8 h-8 text-white" />
-                    </div>
-                    <h3 className="text-xl font-semibold text-golf-premium">Aktivitetsfeed</h3>
-                    <p className="text-muted-foreground">
-                      Här kommer du snart att kunna se aktiviteter från dina vänner - som nya ronder, achievements och matcher.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="space-y-6">
+                {/* Create Round Suggestion */}
+                <CreateRoundSuggestion 
+                  onSuccess={() => {
+                    // Refresh the list after creating a suggestion
+                    window.location.reload();
+                  }} 
+                />
+                
+                {/* Round Suggestions List */}
+                <div>
+                  <h3 className="text-xl font-semibold text-golf-premium mb-4 flex items-center gap-2">
+                    <Users className="w-5 h-5" />
+                    Rundförslag från vänner
+                  </h3>
+                  <RoundSuggestionsList />
+                </div>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
