@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { CourseSelector } from "@/components/CourseSelector";
 import { ImageCropper } from "@/components/ImageCropper";
+import { PhotoGalleryModal } from "@/components/PhotoGalleryModal";
 import { Camera as CapacitorCamera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 export const Profile = () => {
@@ -39,6 +40,7 @@ export const Profile = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [showCropper, setShowCropper] = useState(false);
   const [showImageOptions, setShowImageOptions] = useState(false);
+  const [showPhotoGallery, setShowPhotoGallery] = useState(false);
   const navigate = useNavigate();
 
   // Helper function to update birth date from individual components
@@ -521,13 +523,16 @@ export const Profile = () => {
               <CardContent className="pt-6">
                 {/* Avatar Section */}
                 <div className="flex flex-col items-center space-y-4">
-                  <div className="relative group">
-                    <Avatar className="w-32 h-32 border-4 border-white shadow-lg ring-2 ring-primary/20">
-                      <AvatarImage src={profile.avatar_url} alt="Profilbild" />
-                      <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary text-3xl">
-                        <User className="w-16 h-16" />
-                      </AvatarFallback>
-                    </Avatar>
+                   <div className="relative group">
+                     <Avatar 
+                       className="w-32 h-32 border-4 border-white shadow-lg ring-2 ring-primary/20 cursor-pointer hover:ring-primary/40 transition-all duration-200"
+                       onClick={() => setShowPhotoGallery(true)}
+                     >
+                       <AvatarImage src={profile.avatar_url} alt="Profilbild" />
+                       <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary text-3xl">
+                         <User className="w-16 h-16" />
+                       </AvatarFallback>
+                     </Avatar>
                      <button 
                        onClick={() => setShowImageOptions(true)}
                        className="absolute bottom-2 right-2 p-2 bg-primary rounded-full cursor-pointer hover:bg-primary/90 transition-all duration-200 shadow-lg group-hover:scale-110"
@@ -881,7 +886,15 @@ export const Profile = () => {
               </Button>
             </div>
           </DialogContent>
-        </Dialog>
+         </Dialog>
+
+        {/* Photo Gallery Modal */}
+        <PhotoGalleryModal
+          isOpen={showPhotoGallery}
+          onClose={() => setShowPhotoGallery(false)}
+          currentAvatar={profile.avatar_url}
+          onAvatarUpdate={(newAvatarUrl) => setProfile(prev => ({ ...prev, avatar_url: newAvatarUrl }))}
+        />
       </div>
     </div>
   );
