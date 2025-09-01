@@ -59,15 +59,26 @@ export const GameSuggestionsList = () => {
 
   const fetchGameSuggestions = async () => {
     try {
-      // First, get game suggestions with basic data
-      const { data: suggestions, error: suggestionsError } = await supabase
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+      
+      // First, get all suggestions from today and future dates
+      const { data: allSuggestions, error: suggestionsError } = await supabase
         .from('round_suggestions')
         .select('*')
-        .gte('suggested_date', new Date().toISOString().split('T')[0])
+        .gte('suggested_date', today)
         .order('suggested_date', { ascending: true })
         .order('suggested_time', { ascending: true });
 
       if (suggestionsError) throw suggestionsError;
+
+      // Filter out suggestions that have already passed (date + time)
+      const currentSuggestions = allSuggestions?.filter(suggestion => {
+        const suggestionDateTime = new Date(`${suggestion.suggested_date}T${suggestion.suggested_time}`);
+        return suggestionDateTime > now;
+      }) || [];
+
+      const suggestions = currentSuggestions;
 
       if (!suggestions || suggestions.length === 0) {
         setSuggestions([]);
