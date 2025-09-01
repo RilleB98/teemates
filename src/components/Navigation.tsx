@@ -112,14 +112,9 @@ export const Navigation = ({
             <Link to="/courses">
               <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${location.pathname === '/courses' ? 'text-golf-green bg-golf-green-light' : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'}`}>
                 <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  {/* Golf course layout with holes and paths */}
-                  <circle cx="6" cy="6" r="2" fill="currentColor" opacity="0.3" />
-                  <circle cx="18" cy="8" r="2" fill="currentColor" opacity="0.3" />
-                  <circle cx="12" cy="16" r="2" fill="currentColor" opacity="0.3" />
-                  <circle cx="4" cy="18" r="1.5" fill="currentColor" opacity="0.3" />
-                  <path d="M6 8c2 2 4 0 6 2s4-1 6 0" />
-                  <path d="M8 6c1 3 2 6 4 10" />
-                  <path d="M16 10c-2 2-4 4-4 6" />
+                  {/* Sweden country outline */}
+                  <path d="M10 2c1 0 2 1 3 2l1 1c1 1 2 3 2 5v2c0 1 1 2 1 3v1c0 2-1 3-1 4v1c0 1-1 2-2 2h-1c-1 0-2-1-3-1h-1c-1 0-2 0-2-1v-2c0-1-1-2-1-3v-3c0-2 1-3 1-4v-2c0-1 1-2 2-3z" fill="currentColor" opacity="0.2" />
+                  <path d="M10 2c1 0 2 1 3 2l1 1c1 1 2 3 2 5v2c0 1 1 2 1 3v1c0 2-1 3-1 4v1c0 1-1 2-2 2h-1c-1 0-2-1-3-1h-1c-1 0-2 0-2-1v-2c0-1-1-2-1-3v-3c0-2 1-3 1-4v-2c0-1 1-2 2-3z" />
                 </svg>
                 
               </button>
