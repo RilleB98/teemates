@@ -69,6 +69,7 @@ export const CreateRoundSuggestion = ({ onSuccess }: CreateRoundSuggestionProps)
   };
 
   const onSubmit = async (data: RoundSuggestionForm) => {
+    console.log('onSubmit called with data:', data);
     setIsLoading(true);
     try {
       console.log('Form data submitted:', data);
