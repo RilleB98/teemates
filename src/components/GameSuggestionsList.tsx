@@ -259,8 +259,8 @@ export const GameSuggestionsList = () => {
         return (
           <Card key={suggestion.id} className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl">
             <CardHeader className="pb-3 relative">
-              {/* Three-dot menu at top right corner */}
-              {isOwner && (
+              {/* Three-dot menu at top right corner - for owners and participants */}
+              {(isOwner || isParticipant) && (
                 <div className="absolute top-4 right-4">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -269,17 +269,29 @@ export const GameSuggestionsList = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => editSuggestion(suggestion.id)}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Redigera
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => deleteSuggestion(suggestion.id)}
-                        className="text-red-600"
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Ta bort
-                      </DropdownMenuItem>
+                      {isOwner ? (
+                        <>
+                          <DropdownMenuItem onClick={() => editSuggestion(suggestion.id)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Redigera
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => deleteSuggestion(suggestion.id)}
+                            className="text-red-600"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Ta bort
+                          </DropdownMenuItem>
+                        </>
+                      ) : (
+                        <DropdownMenuItem 
+                          onClick={() => leaveGame(suggestion.id)}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Lämna spelförslag
+                        </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
