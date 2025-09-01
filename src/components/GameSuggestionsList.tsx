@@ -223,6 +223,22 @@ export const GameSuggestionsList = () => {
     }
   };
 
+  const formatTimeInterval = (timeString: string) => {
+    // Remove seconds if present (e.g., "13:30:00" -> "13:30")
+    const startTime = timeString.slice(0, 5);
+    
+    // Parse the time to add 30 minutes
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const startDate = new Date();
+    startDate.setHours(hours, minutes, 0, 0);
+    
+    // Add 30 minutes
+    const endDate = new Date(startDate.getTime() + 30 * 60 * 1000);
+    const endTime = `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`;
+    
+    return `${startTime}-${endTime}`;
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -354,7 +370,7 @@ export const GameSuggestionsList = () => {
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock className="w-4 h-4 text-golf-green" />
-                      <span className="text-sm">{suggestion.suggested_time}</span>
+                      <span className="text-sm">{formatTimeInterval(suggestion.suggested_time)}</span>
                     </div>
                   </div>
 
