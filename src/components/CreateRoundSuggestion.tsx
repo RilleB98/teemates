@@ -122,6 +122,12 @@ export const CreateRoundSuggestion = ({ onSuccess }: CreateRoundSuggestionProps)
       onSuccess?.();
     } catch (error) {
       console.error('Error creating round suggestion:', error);
+      console.error('Error details:', {
+        message: error?.message,
+        details: error?.details,
+        hint: error?.hint,
+        code: error?.code
+      });
       toast({
         title: "Fel",
         description: "Kunde inte skapa rundförslag. Försök igen.",
