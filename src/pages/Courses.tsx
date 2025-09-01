@@ -31,6 +31,15 @@ export const Courses = () => {
   const { clubUserCounts, loading: usersLoading } = useGolfClubUsers();
   const { favorites, loading: favoritesLoading, toggleFavorite, isFavorite } = useFavoriteGolfCourses();
 
+  // Function to clean location text by removing "GDF" and possessive "s"
+  const cleanLocationText = (location: string): string => {
+    return location
+      .replace(/\s+GDF$/i, '') // Remove " GDF" from the end
+      .replace(/s\s+GDF$/i, ' GDF') // Handle "s GDF" case first
+      .replace(/\s+GDF$/i, '') // Remove " GDF" again after handling "s GDF"
+      .replace(/s$/i, ''); // Remove trailing "s"
+  };
+
   // Load courses from database
   useEffect(() => {
     loadCourses();
@@ -220,7 +229,7 @@ export const Courses = () => {
                               </h3>
                               <div className="flex items-center gap-2 sm:gap-3 text-sm text-muted-foreground mt-1">
                                 <MapPin className="w-3 sm:w-4 h-3 sm:h-4 text-golf-green flex-shrink-0" />
-                                <span className="font-medium truncate">{course.location}</span>
+                                <span className="font-medium truncate">{cleanLocationText(course.location)}</span>
                               </div>
                             </div>
                             <Button
@@ -274,7 +283,7 @@ export const Courses = () => {
           isOpen={swipeModalOpen}
           onClose={handleCloseSwipeModal}
           courseName={selectedCourse.name}
-          courseLocation={selectedCourse.location}
+          courseLocation={cleanLocationText(selectedCourse.location)}
         />
       )}
     </div>
