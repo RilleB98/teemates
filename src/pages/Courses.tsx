@@ -231,6 +231,9 @@ export const Courses = () => {
                                 <MapPin className="w-3 sm:w-4 h-3 sm:h-4 text-golf-green flex-shrink-0" />
                                 <span className="font-medium truncate">{cleanLocationText(course.location)}</span>
                               </div>
+                              <p className="text-xs text-golf-green/70 mt-1 italic">
+                                Klicka på klubbens namn för att hitta vänner just på denna klubb
+                              </p>
                             </div>
                             <Button
                               variant="ghost"
