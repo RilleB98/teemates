@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
+import { sv } from "date-fns/locale";
 import { CalendarIcon, Clock, MapPin, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -287,7 +288,7 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
                             )}
                           >
                             {field.value ? (
-                              format(field.value, "PPP")
+                              format(field.value, "PPP", { locale: sv })
                             ) : (
                               <span>Välj datum</span>
                             )}
@@ -302,6 +303,7 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
                           onSelect={field.onChange}
                           disabled={(date) => date < new Date()}
                           initialFocus
+                          locale={sv}
                           className={cn("p-3 pointer-events-auto")}
                         />
                       </PopoverContent>
