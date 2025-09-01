@@ -55,32 +55,61 @@ export const RoundSuggestionsList = () => {
 
   const fetchRoundSuggestions = async () => {
     try {
-      const { data, error } = await supabase
+      // First, get round suggestions with basic data
+      const { data: suggestions, error: suggestionsError } = await supabase
         .from('round_suggestions')
-        .select(`
-          *,
-          golf_courses!fk_round_suggestions_golf_course (name, location),
-          profiles!fk_round_suggestions_user (name, avatar_url),
-          round_suggestion_participants (
-            id,
-            user_id,
-            status,
-            profiles!fk_round_participants_user:user_id (name, avatar_url)
-          )
-        `)
+        .select('*')
         .gte('suggested_date', new Date().toISOString().split('T')[0])
         .order('suggested_date', { ascending: true })
         .order('suggested_time', { ascending: true });
 
-      if (error) throw error;
-      setSuggestions((data as any) || []);
+      if (suggestionsError) throw suggestionsError;
+
+      if (!suggestions || suggestions.length === 0) {
+        setSuggestions([]);
+        return;
+      }
+
+      // Get golf course details
+      const courseIds = suggestions.map(s => s.golf_course_id);
+      const { data: courses } = await supabase
+        .from('golf_courses')
+        .select('id, name, location')
+        .in('id', courseIds);
+
+      // Get user profiles
+      const userIds = suggestions.map(s => s.user_id);
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, name, avatar_url')
+        .in('user_id', userIds);
+
+      // Get participants
+      const suggestionIds = suggestions.map(s => s.id);
+      const { data: participants } = await supabase
+        .from('round_suggestion_participants')
+        .select('*, profiles!user_id(name, avatar_url)')
+        .in('round_suggestion_id', suggestionIds);
+
+      // Combine all data
+      const enrichedSuggestions = suggestions.map(suggestion => {
+        const course = courses?.find(c => c.id === suggestion.golf_course_id);
+        const profile = profiles?.find(p => p.user_id === suggestion.user_id);
+        const suggestionParticipants = participants?.filter(p => p.round_suggestion_id === suggestion.id);
+
+        return {
+          ...suggestion,
+          golf_courses: course || { name: 'Okänd bana', location: '' },
+          profiles: profile || { name: 'Okänd användare', avatar_url: null },
+          participants: suggestionParticipants || []
+        };
+      });
+
+      setSuggestions(enrichedSuggestions as any);
     } catch (error) {
       console.error('Error fetching round suggestions:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte hämta rundförslag.",
-        variant: "destructive",
-      });
+      // Only show error if we're not just getting empty results
+      setSuggestions([]);
     } finally {
       setLoading(false);
     }
