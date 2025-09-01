@@ -123,7 +123,7 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
             </Link>
 
             {/* Centered Large Swipe Button */}
-            <Link to="/swipe">
+            <Link to="/">
               <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-18 lg:h-18 bg-gradient-golf rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-lg">
                 <Target className="w-7 h-7 sm:w-8 sm:h-8 lg:w-9 lg:h-9 text-white" />
               </div>
@@ -170,12 +170,6 @@ export const Navigation = ({ onMessagesClick }: NavigationProps) => {
                   </div>
                   
                   <div className="space-y-3">
-                    <Button variant="outline" className="w-full justify-start" asChild>
-                      <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>
-                        <Home className="w-4 h-4 mr-3" />
-                        Startsidan
-                      </Link>
-                    </Button>
                     {user ? (
                       <>
                         <Button variant="outline" className="w-full justify-start" asChild>
