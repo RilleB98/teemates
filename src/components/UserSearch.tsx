@@ -14,6 +14,7 @@ interface UserProfile {
   avatar_url: string;
   handicap: number;
   home_club: string;
+  golf_id: string;
 }
 
 interface UserSearchProps {
@@ -35,9 +36,9 @@ export const UserSearch = ({ onSendRequest, sentRequests, friends }: UserSearchP
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('user_id, name, avatar_url, handicap, home_club')
+        .select('user_id, name, avatar_url, handicap, home_club, golf_id')
         .neq('user_id', user.id)
-        .ilike('name', `%${searchTerm}%`)
+        .eq('golf_id', searchTerm.trim())
         .limit(10);
 
       if (error) throw error;
@@ -70,7 +71,7 @@ export const UserSearch = ({ onSendRequest, sentRequests, friends }: UserSearchP
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Sök efter användare..."
+            placeholder="Skriv Golf-ID (t.ex. 981114-123)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyPress={handleKeyPress}
@@ -98,6 +99,11 @@ export const UserSearch = ({ onSendRequest, sentRequests, friends }: UserSearchP
                     <div>
                       <h4 className="font-medium">{profile.name || 'Okänd användare'}</h4>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        {profile.golf_id && (
+                          <Badge variant="secondary" className="font-mono">
+                            {profile.golf_id}
+                          </Badge>
+                        )}
                         {profile.handicap > 0 && (
                           <Badge variant="outline">HCP {profile.handicap}</Badge>
                         )}
