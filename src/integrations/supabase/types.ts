@@ -14,6 +14,32 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_room_members: {
+        Row: {
+          chat_room_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          chat_room_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          chat_room_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_room_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       favorite_golf_courses: {
         Row: {
           created_at: string
@@ -284,6 +310,30 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_swipes: {
+        Row: {
+          created_at: string
+          id: string
+          swipe_direction: string
+          target_user_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          swipe_direction: string
+          target_user_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          swipe_direction?: string
+          target_user_id?: string
           user_id?: string
         }
         Relationships: []
