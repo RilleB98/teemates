@@ -370,6 +370,13 @@ export type Database = {
             referencedRelation: "golf_courses"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_round_suggestions_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       user_photos: {

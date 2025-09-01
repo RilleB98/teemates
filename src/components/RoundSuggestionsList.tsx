@@ -59,13 +59,13 @@ export const RoundSuggestionsList = () => {
         .from('round_suggestions')
         .select(`
           *,
-          golf_courses!golf_course_id (name, location),
-          profiles!user_id (name, avatar_url),
+          golf_courses!fk_round_suggestions_golf_course (name, location),
+          profiles!fk_round_suggestions_user (name, avatar_url),
           round_suggestion_participants (
             id,
             user_id,
             status,
-            profiles!user_id (name, avatar_url)
+            profiles!fk_round_participants_user:user_id (name, avatar_url)
           )
         `)
         .gte('suggested_date', new Date().toISOString().split('T')[0])
