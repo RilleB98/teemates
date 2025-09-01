@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { sv } from "date-fns/locale";
-import { CalendarIcon, Clock, MapPin, Users, MessageSquare } from "lucide-react";
+import { CalendarIcon, Clock, MapPin, Users, MessageSquare, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -253,7 +253,7 @@ export const RoundSuggestionsList = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 ml-4">
                   <div className="flex items-center gap-2">
                     <CalendarIcon className="w-4 h-4 text-golf-green" />
                     <span className="text-sm">
@@ -265,6 +265,59 @@ export const RoundSuggestionsList = () => {
                     <span className="text-sm">{suggestion.suggested_time}</span>
                   </div>
                 </div>
+              </div>
+
+              {/* Profile Icons Section */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {/* Creator Profile Icon */}
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8 border-2 border-golf-green">
+                      <AvatarImage src={suggestion.profiles.avatar_url} />
+                      <AvatarFallback className="bg-golf-green text-white text-xs">
+                        {suggestion.profiles.name?.charAt(0) || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-xs text-muted-foreground">Arrangör</span>
+                  </div>
+
+                  {/* Joined Participants */}
+                  {participants
+                    .filter(p => p.status === 'accepted')
+                    .map((participant) => (
+                      <Avatar key={participant.id} className="h-8 w-8 border-2 border-green-500">
+                        <AvatarImage src={participant.profiles.avatar_url} />
+                        <AvatarFallback className="bg-green-500 text-white text-xs">
+                          {participant.profiles.name?.charAt(0) || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                    ))}
+
+                  {/* Empty Slots with + buttons */}
+                  {Array.from({ length: spotsLeft }, (_, index) => (
+                    <div key={`empty-${index}`} className="relative">
+                      {!isOwner && !isParticipant ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 w-8 rounded-full p-0 border-dashed border-2 border-gray-300 hover:border-golf-green"
+                          onClick={() => joinRound(suggestion.id)}
+                        >
+                          <Plus className="h-4 w-4 text-gray-400 hover:text-golf-green" />
+                        </Button>
+                      ) : (
+                        <div className="h-8 w-8 rounded-full border-dashed border-2 border-gray-300 flex items-center justify-center">
+                          <Plus className="h-4 w-4 text-gray-300" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Spots Counter */}
+                <Badge variant="secondary" className={spotsLeft > 0 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
+                  {participants.filter(p => p.status === 'accepted').length + 1}/{suggestion.max_players}
+                </Badge>
               </div>
 
               {/* Message */}
