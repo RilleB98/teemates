@@ -344,6 +344,31 @@ export const useFriends = () => {
     }
   };
 
+  const removeFriendRequest = async (requestId: string) => {
+    try {
+      const { error } = await supabase
+        .from('friends')
+        .delete()
+        .eq('id', requestId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Vänförfrågan borttagen",
+        description: "Din skickade vänförfrågan har tagits bort."
+      });
+
+      fetchSentRequests();
+    } catch (error) {
+      console.error('Error removing friend request:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte ta bort vänförfrågan.",
+        variant: "destructive"
+      });
+    }
+  };
+
   useEffect(() => {
     setLoading(false);
   }, [friends, pendingRequests, sentRequests]);
@@ -357,6 +382,7 @@ export const useFriends = () => {
     acceptFriendRequest,
     rejectFriendRequest,
     removeFriend,
+    removeFriendRequest,
     refetch: () => {
       fetchFriends();
       fetchPendingRequests();

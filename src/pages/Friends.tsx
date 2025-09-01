@@ -23,6 +23,7 @@ export const Friends = () => {
     acceptFriendRequest,
     rejectFriendRequest,
     removeFriend,
+    removeFriendRequest,
     refetch,
   } = useFriends();
 
@@ -110,6 +111,7 @@ export const Friends = () => {
                 sentRequests={sentRequests}
                 onAccept={acceptFriendRequest}
                 onReject={rejectFriendRequest}
+                onRemove={removeFriendRequest}
               />
             </TabsContent>
 

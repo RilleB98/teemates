@@ -1,4 +1,4 @@
-import { Check, X, Clock } from 'lucide-react';
+import { Check, X, Clock, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -28,13 +28,15 @@ interface FriendRequestsProps {
   sentRequests: FriendRequest[];
   onAccept: (requestId: string, senderId: string) => void;
   onReject: (requestId: string) => void;
+  onRemove: (requestId: string) => void;
 }
 
 export const FriendRequests = ({ 
   pendingRequests, 
   sentRequests, 
   onAccept, 
-  onReject 
+  onReject,
+  onRemove
 }: FriendRequestsProps) => {
   if (pendingRequests.length === 0 && sentRequests.length === 0) {
     return (
@@ -151,7 +153,14 @@ export const FriendRequests = ({
                       </p>
                     </div>
                   </div>
-                  <Badge variant="secondary">Väntande</Badge>
+                  <Button
+                    size="sm"
+                    onClick={() => onRemove(request.id)}
+                    variant="outline"
+                    className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               ))
             )}
