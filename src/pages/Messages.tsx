@@ -65,7 +65,7 @@ export const Messages = () => {
             </p>
           </div>
 
-          <CreateGroupChatDialog onGroupCreated={(groupId) => setSelectedGroupChat(groupId)} />
+          
 
           <Tabs defaultValue="friends" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
@@ -172,6 +172,9 @@ export const Messages = () => {
             </TabsContent>
 
             <TabsContent value="groups" className="space-y-4 mt-6">
+              <div className="flex justify-center mb-4">
+                <CreateGroupChatDialog onGroupCreated={(groupId) => setSelectedGroupChat(groupId)} />
+              </div>
               {groupLoading ? (
                 <div className="text-center py-8">
                   <div className="text-gray-500">Laddar gruppchatter...</div>
