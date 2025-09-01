@@ -94,7 +94,7 @@ export const Navigation = ({
             <Link to="/messages">
               <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${location.pathname === '/messages' ? 'text-golf-green bg-golf-green-light' : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'}`}>
                 <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-                <span className="text-xs font-medium">Meddelanden</span>
+                
                 {badgeCount && <Badge variant="destructive" className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 text-xs p-0 flex items-center justify-center">
                     {badgeCount}
                   </Badge>}
