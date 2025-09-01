@@ -313,11 +313,6 @@ export const RoundSuggestionsList = () => {
                     </div>
                   ))}
                 </div>
-
-                {/* Spots Counter */}
-                <Badge variant="secondary" className={spotsLeft > 0 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
-                  {participants.filter(p => p.status === 'accepted').length + 1} av {suggestion.max_players}
-                </Badge>
               </div>
 
               {/* Message */}
