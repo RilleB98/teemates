@@ -6,7 +6,7 @@ import { FriendProfileModal } from "@/components/FriendProfileModal";
 import { useFriends } from "@/hooks/useFriends";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
@@ -85,43 +85,69 @@ export const Friends = () => {
             </p>
           </div>
           
-          <Tabs defaultValue="search" className="space-y-6 animate-fade-in">
-            <TabsList className="grid w-full grid-cols-3 bg-white/95 backdrop-blur-sm shadow-lg border-0">
-              <TabsTrigger value="search" className="text-golf-premium data-[state=active]:bg-golf-green data-[state=active]:text-white">Sök Vänner</TabsTrigger>
-              <TabsTrigger value="requests" className="relative text-golf-premium data-[state=active]:bg-golf-green data-[state=active]:text-white">
-                Förfrågningar
-                {pendingRequests.length > 0 && (
-                  <span className="absolute -top-1 -right-1 h-2 w-2 bg-primary rounded-full animate-pulse"></span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="friends" className="text-golf-premium data-[state=active]:bg-golf-green data-[state=active]:text-white">Mina Vänner</TabsTrigger>
+          <Tabs defaultValue="friends-section" className="space-y-6 animate-fade-in">
+            <TabsList className="grid w-full grid-cols-2 bg-white/95 backdrop-blur-sm shadow-lg border-0">
+              <TabsTrigger value="friends-section" className="text-golf-premium data-[state=active]:bg-golf-green data-[state=active]:text-white">Vänner</TabsTrigger>
+              <TabsTrigger value="activity" className="text-golf-premium data-[state=active]:bg-golf-green data-[state=active]:text-white">Aktivitet</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="search">
-              <UserSearch
-                onSendRequest={sendFriendRequest}
-                sentRequests={sentRequests}
-                friends={friends}
-              />
+            <TabsContent value="friends-section">
+              {/* Sub-navigation for Friends section */}
+              <Tabs defaultValue="search" className="space-y-4">
+                <TabsList className="grid w-full grid-cols-3 bg-white/90 backdrop-blur-sm shadow-md border-0 h-10">
+                  <TabsTrigger value="search" className="text-golf-premium data-[state=active]:bg-golf-green data-[state=active]:text-white text-sm">Sök Vänner</TabsTrigger>
+                  <TabsTrigger value="requests" className="relative text-golf-premium data-[state=active]:bg-golf-green data-[state=active]:text-white text-sm">
+                    Förfrågningar
+                    {pendingRequests.length > 0 && (
+                      <span className="absolute -top-1 -right-1 h-2 w-2 bg-primary rounded-full animate-pulse"></span>
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="friends" className="text-golf-premium data-[state=active]:bg-golf-green data-[state=active]:text-white text-sm">Mina Vänner</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="search">
+                  <UserSearch
+                    onSendRequest={sendFriendRequest}
+                    sentRequests={sentRequests}
+                    friends={friends}
+                  />
+                </TabsContent>
+
+                <TabsContent value="requests">
+                  <FriendRequests
+                    pendingRequests={pendingRequests}
+                    sentRequests={sentRequests}
+                    onAccept={acceptFriendRequest}
+                    onReject={rejectFriendRequest}
+                    onRemove={removeFriendRequest}
+                  />
+                </TabsContent>
+
+                <TabsContent value="friends">
+                  <FriendsList
+                    friends={friends}
+                    onRemoveFriend={removeFriend}
+                    onStartMessage={handleStartMessage}
+                    onProfileClick={handleProfileClick}
+                  />
+                </TabsContent>
+              </Tabs>
             </TabsContent>
 
-            <TabsContent value="requests">
-              <FriendRequests
-                pendingRequests={pendingRequests}
-                sentRequests={sentRequests}
-                onAccept={acceptFriendRequest}
-                onReject={rejectFriendRequest}
-                onRemove={removeFriendRequest}
-              />
-            </TabsContent>
-
-            <TabsContent value="friends">
-              <FriendsList
-                friends={friends}
-                onRemoveFriend={removeFriend}
-                onStartMessage={handleStartMessage}
-                onProfileClick={handleProfileClick}
-              />
+            <TabsContent value="activity">
+              <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl">
+                <CardContent className="p-6 text-center">
+                  <div className="space-y-4">
+                    <div className="w-16 h-16 mx-auto bg-gradient-to-br from-golf-green to-golf-green-light rounded-full flex items-center justify-center">
+                      <Users className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-golf-premium">Aktivitetsfeed</h3>
+                    <p className="text-muted-foreground">
+                      Här kommer du snart att kunna se aktiviteter från dina vänner - som nya ronder, achievements och matcher.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>
