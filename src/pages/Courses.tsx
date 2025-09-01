@@ -31,13 +31,10 @@ export const Courses = () => {
   const { clubUserCounts, loading: usersLoading } = useGolfClubUsers();
   const { favorites, loading: favoritesLoading, toggleFavorite, isFavorite } = useFavoriteGolfCourses();
 
-  // Function to clean location text by removing "GDF" and possessive "s"
+  // Function to clean location text by keeping "s GDF"
   const cleanLocationText = (location: string): string => {
     return location
-      .replace(/ss\s+GDF$/i, 's GDF') // Convert "ss GDF" to "s GDF"
-      .replace(/\s+GDF$/i, '') // Remove " GDF" from the end
-      .replace(/ss$/i, 's') // Convert trailing "ss" to "s"
-      .replace(/s$/i, ''); // Remove trailing "s"
+      .replace(/ss\s+GDF$/i, 's GDF'); // Convert "ss GDF" to "s GDF" and keep it
   };
 
   // Load courses from database
