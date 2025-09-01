@@ -301,7 +301,7 @@ export const CreateRoundSuggestion = ({ onSuccess }: CreateRoundSuggestionProps)
                   <FormLabel>Meddelande (valfritt)</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Skriv något om rundan... Lägg till T.ex 18 håls banan."
+                      placeholder="Skriv något om rundan... T.ex 18 håls banan."
                       className="resize-none"
                       {...field}
                     />
