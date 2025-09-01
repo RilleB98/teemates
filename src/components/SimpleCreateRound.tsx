@@ -14,8 +14,15 @@ export const SimpleCreateRound = () => {
 
     try {
       console.log('SimpleCreateRound: Getting user...');
-      const { data: user } = await supabase.auth.getUser();
+      const { data: user, error: userError } = await supabase.auth.getUser();
+      console.log('SimpleCreateRound: Auth response:', { user, userError });
+      console.log('SimpleCreateRound: User object:', user);
+      console.log('SimpleCreateRound: User.user:', user.user);
+      
       if (!user.user) {
+        console.log('SimpleCreateRound: No user found, checking session...');
+        const { data: session } = await supabase.auth.getSession();
+        console.log('SimpleCreateRound: Session:', session);
         throw new Error("Not authenticated");
       }
 
