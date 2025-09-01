@@ -219,6 +219,9 @@ export const RoundSuggestionsList = () => {
 
   return (
     <div className="space-y-4">
+      <div style={{backgroundColor: 'red', color: 'white', padding: '10px'}}>
+        DEBUG: Found {suggestions.length} suggestions
+      </div>
       {suggestions.map((suggestion) => {
         const isOwner = suggestion.user_id === currentUserId;
         const participants = suggestion.participants || [];
