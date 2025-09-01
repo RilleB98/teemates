@@ -255,7 +255,7 @@ export const CreateGameSuggestion = ({ onSuccess }: CreateGameSuggestionProps) =
                     <FormLabel>Tid</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                         <SelectTrigger className="h-10">
                           <Clock className="mr-2 h-4 w-4" />
                           <SelectValue placeholder="Välj tid" />
                         </SelectTrigger>
