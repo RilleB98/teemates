@@ -39,9 +39,15 @@ export const courseImages = {
 };
 
 // Function to get a golf course image based on the course name
-// This distributes images alphabetically across all golf courses
-export const getGolfCourseImageByName = (courseName: string): string => {
-  // Simple hash function to generate a consistent index based on course name
+// This distributes images sequentially - every 20th course gets the same image
+export const getGolfCourseImageByName = (courseName: string, courseIndex?: number): string => {
+  // If we have a course index (position in sorted list), use that for sequential distribution
+  if (courseIndex !== undefined) {
+    const imageIndex = courseIndex % golfImages.length;
+    return golfImages[imageIndex];
+  }
+  
+  // Fallback: Simple hash function for backwards compatibility
   let hash = 0;
   for (let i = 0; i < courseName.length; i++) {
     const char = courseName.charCodeAt(i);
@@ -55,10 +61,10 @@ export const getGolfCourseImageByName = (courseName: string): string => {
 };
 
 // Updated function that handles both legacy paths and new course-based images
-export const getGolfCourseImage = (imagePath: string, courseName?: string): string => {
+export const getGolfCourseImage = (imagePath: string, courseName?: string, courseIndex?: number): string => {
   // If we have a course name, use the new image distribution system
   if (courseName) {
-    return getGolfCourseImageByName(courseName);
+    return getGolfCourseImageByName(courseName, courseIndex);
   }
   
   // Legacy support for existing image paths
