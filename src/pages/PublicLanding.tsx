@@ -8,12 +8,9 @@ export const PublicLanding = () => {
       {/* Header with App Download CTA */}
       <div className="bg-white/10 backdrop-blur-sm border-b border-white/20">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-golf rounded-full flex items-center justify-center">
-                <Flag className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-xl font-bold text-golf-premium">TeeMates</span>
+          <div className="flex items-center justify-start">
+            <div className="w-10 h-10 bg-gradient-golf rounded-full flex items-center justify-center">
+              <Flag className="w-6 h-6 text-white" />
             </div>
           </div>
         </div>
