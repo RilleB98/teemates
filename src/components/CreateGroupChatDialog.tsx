@@ -119,8 +119,8 @@ export const CreateGroupChatDialog = ({ onGroupCreated }: CreateGroupChatDialogP
                   <div key={friend.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted">
                     <Checkbox
                       id={friend.id}
-                      checked={selectedFriends.includes(friend.user_id)}
-                      onCheckedChange={() => toggleFriendSelection(friend.user_id)}
+                      checked={selectedFriends.includes(friend.friend_id)}
+                      onCheckedChange={() => toggleFriendSelection(friend.friend_id)}
                     />
                     <Avatar className="w-8 h-8">
                       <AvatarImage src={friend.profile.avatar_url || undefined} />
