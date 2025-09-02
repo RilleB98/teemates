@@ -1,4 +1,5 @@
 import { MessageCircle, UserMinus, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -35,6 +36,7 @@ interface FriendsListProps {
 }
 
 export const FriendsList = ({ friends, onRemoveFriend, onStartMessage, onProfileClick }: FriendsListProps) => {
+  const navigate = useNavigate();
   if (friends.length === 0) {
     return (
       <Card>
@@ -90,7 +92,7 @@ export const FriendsList = ({ friends, onRemoveFriend, onStartMessage, onProfile
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => onStartMessage(friend.friend_id)}
+                onClick={() => navigate('/messages', { state: { selectedFriendId: friend.friend_id } })}
                 className="h-8 w-8 sm:h-9 sm:w-9 p-0"
               >
                 <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
