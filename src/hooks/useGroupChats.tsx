@@ -143,16 +143,16 @@ export const useGroupChats = () => {
   const removeMemberFromGroup = async (groupChatId: string, userId: string) => {
     try {
       // First check how many members are in the group
-      const { data: memberCount, error: countError } = await supabase
+      const { data: currentMembers, error: countError } = await supabase
         .from('group_chat_members')
-        .select('id', { count: 'exact' })
+        .select('user_id')
         .eq('group_chat_id', groupChatId);
 
       if (countError) throw countError;
 
-      // If this is the last member, delete the entire group chat
-      if (memberCount && memberCount.length <= 1) {
-        console.log('Last member leaving, deleting entire group chat');
+      // If removing this member will leave 1 or fewer members, delete the entire group chat
+      if (currentMembers && currentMembers.length <= 2) {
+        console.log(`Removing member will leave ${currentMembers.length - 1} member(s), deleting entire group chat`);
         
         // Delete messages first
         const chatRoomId = `group_${groupChatId}`;
