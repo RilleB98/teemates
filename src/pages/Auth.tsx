@@ -8,7 +8,7 @@ import { Target, Mail, Lock, User, ArrowLeft, Apple } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate, Link } from "react-router-dom";
-import teeMatesLogo from "@/assets/teemates-logo.png";
+import teeMatesLogo from "@/assets/teemates-icon.png";
 export const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
