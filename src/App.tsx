@@ -25,37 +25,41 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<PublicLanding />} />
-            <Route path="/app" element={
-              <ProtectedRoute>
-                <SwipeMatch />
-              </ProtectedRoute>
-            } />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/courses" element={<Courses />} />
-            <Route path="/friends" element={<Friends />} />
-            <Route path="/messages" element={<Messages />} />
-            <Route path="/admin/golf" element={<AdminGolf />} />
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            } />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  console.log('TeeMates: App component rendering');
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<PublicLanding />} />
+              <Route path="/app" element={
+                <ProtectedRoute>
+                  <SwipeMatch />
+                </ProtectedRoute>
+              } />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/courses" element={<Courses />} />
+              <Route path="/friends" element={<Friends />} />
+              <Route path="/messages" element={<Messages />} />
+              <Route path="/admin/golf" element={<AdminGolf />} />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
