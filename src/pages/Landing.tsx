@@ -4,10 +4,7 @@ import { Flag, Users, MessageCircle, MapPin } from "lucide-react";
 
 export const Landing = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-golf-green-light via-white to-golf-green-light/50"
-         style={{ 
-           background: 'linear-gradient(135deg, hsl(var(--golf-green-light)), hsl(0 0% 100%), hsl(var(--golf-green-light) / 0.3))' 
-         }}>
+    <div className="min-h-screen bg-gradient-to-br from-golf-green via-background to-golf-green-light">
       <div className="container mx-auto px-4 py-16">
         {/* Header */}
         <div className="text-center mb-16">
