@@ -63,7 +63,7 @@ export const FriendRequests = ({
             <TabsTrigger value="received" className="relative">
               Mottagna
               {pendingRequests.length > 0 && (
-                <Badge variant="destructive" className="ml-2 h-5 w-5 p-0 text-xs">
+                <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs flex items-center justify-center rounded-full">
                   {pendingRequests.length}
                 </Badge>
               )}
