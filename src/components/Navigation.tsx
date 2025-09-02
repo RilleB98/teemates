@@ -111,14 +111,11 @@ export const Navigation = ({
             {/* Courses */}
             <Link to="/courses">
               <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${location.pathname === '/courses' ? 'text-golf-green bg-golf-green-light' : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'}`}>
-                <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  {/* Golf course icon with flag and hole */}
-                  <path d="M7 22v-4c0-1 0.5-2 1.5-2.5L12 14l3.5 1.5c1 0.5 1.5 1.5 1.5 2.5v4" fill="currentColor" opacity="0.1" />
-                  <path d="M7 22v-4c0-1 0.5-2 1.5-2.5L12 14l3.5 1.5c1 0.5 1.5 1.5 1.5 2.5v4" />
-                  <line x1="12" y1="2" x2="12" y2="14" />
-                  <path d="M12 2c3 0 5 1 5 3s-2 3-5 3" fill="currentColor" opacity="0.15" />
-                  <path d="M12 2c3 0 5 1 5 3s-2 3-5 3" />
-                  <circle cx="12" cy="20" r="1.5" fill="currentColor" />
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  {/* Golf flag and tee icon */}
+                  <path d="M12 2v16" />
+                  <path d="M12 2l6 3-6 3V2z" fill="currentColor" />
+                  <ellipse cx="12" cy="20" rx="6" ry="2" />
                 </svg>
                 
               </button>
