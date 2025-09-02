@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, ArrowLeft, Users } from "lucide-react";
+import { Send, ArrowLeft, Users, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -37,7 +37,7 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
   const [userProfiles, setUserProfiles] = useState<{[key: string]: any}>({});
   const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
   const { user } = useAuth();
-  const { getGroupMembers } = useGroupChats();
+  const { getGroupMembers, removeMemberFromGroup } = useGroupChats();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Generate chat room ID 
@@ -296,6 +296,23 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
     return null;
   };
 
+  const handleLeaveGroupChat = async () => {
+    if (!user || !groupChatId) return;
+
+    try {
+      const success = await removeMemberFromGroup(groupChatId, user.id);
+      if (success) {
+        toast.success("Du har lämnat gruppchattan");
+        onBack(); // Go back to messages list
+      } else {
+        toast.error("Kunde inte lämna gruppchatt");
+      }
+    } catch (error) {
+      console.error('Error leaving group chat:', error);
+      toast.error("Något gick fel");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -382,6 +399,16 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
                         </div>
                       </div>
                     ))}
+                    <div className="mt-8 pt-4 border-t">
+                      <Button 
+                        variant="destructive" 
+                        onClick={handleLeaveGroupChat}
+                        className="w-full gap-2"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Lämna Gruppchatt
+                      </Button>
+                    </div>
                   </div>
                 </SheetContent>
               </Sheet>
