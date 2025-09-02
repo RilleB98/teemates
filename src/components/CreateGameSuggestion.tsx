@@ -221,20 +221,21 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
 
         // Add creator as first member of the group chat
         console.log('About to add creator as member, group_chat_id:', groupChat.id);
-        const { error: memberError } = await supabase
+        const { data: memberData, error: memberError } = await supabase
           .from('group_chat_members')
           .insert({
             group_chat_id: groupChat.id,
             user_id: authData.user.id,
             added_by: authData.user.id
-          });
+          })
+          .select();
 
         if (memberError) {
           console.error('Member addition failed:', memberError);
           throw memberError;
         }
 
-        console.log('Member added successfully');
+        console.log('Member added successfully:', memberData);
 
         // Create round suggestion with group chat reference
         console.log('About to create round suggestion');
