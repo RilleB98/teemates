@@ -289,15 +289,18 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
   const getUserProfile = (userId: string) => {
     // Check userProfiles first (for users who have sent messages)
     if (userProfiles[userId]) {
+      console.log('Found profile in userProfiles for:', userId, userProfiles[userId]);
       return userProfiles[userId];
     }
     
     // Then check group members (for group chats)
     if (groupChatId && groupMembers.length > 0) {
       const member = groupMembers.find(m => m.user_id === userId);
+      console.log('Found member in groupMembers for:', userId, member?.profile);
       return member?.profile;
     }
     
+    console.log('No profile found for user:', userId);
     return null;
   };
 
