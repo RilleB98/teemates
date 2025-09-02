@@ -7,6 +7,15 @@
     <meta name="description" content="Hitta golfpartners och träffa nya människor som delar din passion för golf" />
     <meta name="author" content="TeeMates" />
 
+    <!-- Performance optimization: Resource hints for critical request chains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="modulepreload" href="/src/main.tsx">
+    
+    <!-- Preload critical CSS to avoid render blocking -->
+    <link rel="preload" href="/src/index.css" as="style">
+    <link rel="stylesheet" href="/src/index.css">
+
     <meta property="og:title" content="TeeMates - Golf Dating App" />
     <meta property="og:description" content="Hitta golfpartners och träffa nya människor som delar din passion för golf" />
     <meta property="og:type" content="website" />
