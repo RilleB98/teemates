@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, ArrowLeft } from "lucide-react";
+import { Send, ArrowLeft, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 import { markMessagesAsRead } from "@/utils/messageUtils";
 import { useGroupChats } from "@/hooks/useGroupChats";
 import { ProfilePopover } from "@/components/ProfilePopover";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import player1 from "@/assets/player1.jpg";
 
 interface Message {
@@ -325,13 +326,48 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
                : groupChatId ? (groupChat?.name || 'Gruppchatt')
                : 'Golf Gruppen'}
             </h2>
-            <p className="text-sm text-gray-500">
-              {friendId ? 
-                (friendProfile?.home_club ? `HCP ${friendProfile.handicap} • ${friendProfile.home_club}` : `HCP ${friendProfile?.handicap || 0}`) 
-                : groupChatId ? `${groupMembers.length} medlemmar`
-                : 'Ahmed, Emma, Johan och du'
-              }
-            </p>
+            {groupChatId ? (
+              <Sheet>
+                <SheetTrigger asChild>
+                  <p className="text-sm text-gray-500 cursor-pointer hover:text-gray-700 transition-colors">
+                    {`${groupMembers.length} medlemmar`}
+                  </p>
+                </SheetTrigger>
+                <SheetContent>
+                  <SheetHeader>
+                    <SheetTitle className="flex items-center gap-2">
+                      <Users className="w-5 h-5" />
+                      Gruppmedlemmar
+                    </SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6 space-y-4">
+                    {groupMembers.map((member) => (
+                      <div key={member.user_id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+                        <Avatar className="w-10 h-10">
+                          <AvatarImage src={member.profile?.avatar_url} />
+                          <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
+                            {member.profile?.name?.[0]?.toUpperCase() || 'M'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <p className="font-medium">{member.profile?.name || 'Okänd medlem'}</p>
+                          <p className="text-sm text-gray-500">
+                            {member.profile?.home_club || 'Ingen hemklubb'}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </SheetContent>
+              </Sheet>
+            ) : (
+              <p className="text-sm text-gray-500">
+                {friendId ? 
+                  (friendProfile?.home_club ? `HCP ${friendProfile.handicap} • ${friendProfile.home_club}` : `HCP ${friendProfile?.handicap || 0}`) 
+                  : 'Ahmed, Emma, Johan och du'
+                }
+              </p>
+            )}
           </div>
         </div>
       </div>
