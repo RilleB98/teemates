@@ -449,7 +449,10 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
             >
               {!isOwn && isLastInGroup && (
                 <Avatar className="w-7 h-7 mb-1">
-                  <AvatarImage src={getUserProfile(message.user_id)?.avatar_url} />
+                  <AvatarImage 
+                    src={getUserProfile(message.user_id)?.avatar_url || undefined} 
+                    alt={getUserDisplayName(message)}
+                  />
                   <AvatarFallback className="text-xs bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
                     {getUserDisplayName(message)[0]}
                   </AvatarFallback>
@@ -499,7 +502,10 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
               
               {isOwn && isLastInGroup && (
                 <Avatar className="w-7 h-7 mb-1">
-                  <AvatarImage src={currentUserProfile?.avatar_url} />
+                  <AvatarImage 
+                    src={currentUserProfile?.avatar_url || undefined}
+                    alt={currentUserProfile?.name || "You"}
+                  />
                   <AvatarFallback className="text-xs bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
                     {currentUserProfile?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
                   </AvatarFallback>
