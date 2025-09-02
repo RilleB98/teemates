@@ -167,9 +167,11 @@ export const PublicLanding = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-golf rounded-full flex items-center justify-center">
-                <Flag className="w-5 h-5 text-white" />
-              </div>
+              <img 
+                src="/lovable-uploads/e94c05df-8c2c-4ed3-8d8e-f8eb3450f6ae.png" 
+                alt="TeeMates" 
+                className="w-8 h-8 rounded"
+              />
               <span className="text-lg font-bold text-golf-premium">TeeMates</span>
             </div>
             <p className="text-golf-premium/60 text-sm">
