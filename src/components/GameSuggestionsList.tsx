@@ -617,17 +617,7 @@ export const GameSuggestionsList = () => {
                             >
                               Avanmäl dig
                             </Button>
-                          ) : spotsLeft > 0 ? (
-                            <Button
-                              onClick={() => {
-                                joinGame(selectedSuggestion.id);
-                                setModalOpen(false);
-                              }}
-                              className="w-full bg-golf-green hover:bg-golf-green-light text-white"
-                            >
-                              Anmäl dig till rundan
-                            </Button>
-                          ) : (
+                          ) : spotsLeft > 0 ? null : (
                             <Button disabled className="w-full">
                               Fullbokad
                             </Button>
