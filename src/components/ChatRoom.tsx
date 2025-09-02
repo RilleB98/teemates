@@ -16,25 +16,38 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 // Simple test component to debug avatar loading
 const DebugAvatar = ({ userId, profile }: { userId: string; profile: any }) => {
   const avatarUrl = profile?.avatar_url;
+  // Add cache buster to force reload
+  const cacheBustedUrl = avatarUrl ? `${avatarUrl}?t=${Date.now()}` : undefined;
+  
   console.log(`[DEBUG] User ${userId}:`, {
     profile,
     avatarUrl,
+    cacheBustedUrl,
     hasAvatarUrl: !!avatarUrl
   });
   
   return (
-    <div className="flex flex-col items-center gap-1 p-2 border rounded">
-      <div className="text-xs">{profile?.name || 'No name'}</div>
-      <div className="text-xs text-gray-500">{userId}</div>
+    <div className="flex flex-col items-center gap-1 p-2 border rounded bg-white">
+      <div className="text-xs font-bold">{profile?.name || 'No name'}</div>
+      <div className="text-xs text-gray-500">{userId.slice(0, 8)}...</div>
       <div className="text-xs text-red-500">{avatarUrl ? 'Has URL' : 'No URL'}</div>
       {avatarUrl && (
-        <img 
-          src={avatarUrl} 
-          alt="test" 
-          className="w-8 h-8 rounded-full"
-          onLoad={() => console.log(`[DEBUG] Image loaded for ${userId}`)}
-          onError={() => console.log(`[DEBUG] Image FAILED for ${userId}`, avatarUrl)}
-        />
+        <div className="flex flex-col gap-1">
+          <img 
+            src={avatarUrl} 
+            alt="original" 
+            className="w-8 h-8 rounded-full border"
+            onLoad={() => console.log(`[DEBUG] Original image loaded for ${userId}`)}
+            onError={() => console.log(`[DEBUG] Original image FAILED for ${userId}`, avatarUrl)}
+          />
+          <img 
+            src={cacheBustedUrl} 
+            alt="cache-bust" 
+            className="w-8 h-8 rounded-full border-2 border-red-500"
+            onLoad={() => console.log(`[DEBUG] Cache-busted image loaded for ${userId}`)}
+            onError={() => console.log(`[DEBUG] Cache-busted image FAILED for ${userId}`, cacheBustedUrl)}
+          />
+        </div>
       )}
       <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs">
         {profile?.name?.[0] || '?'}
