@@ -35,6 +35,7 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
   const [groupChat, setGroupChat] = useState<any>(null);
   const [groupMembers, setGroupMembers] = useState<any[]>([]);
   const [userProfiles, setUserProfiles] = useState<{[key: string]: any}>({});
+  const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
   const { user } = useAuth();
   const { getGroupMembers } = useGroupChats();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -45,6 +46,13 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
     : friendId && user 
       ? user.id < friendId ? `${user.id}_${friendId}` : `${friendId}_${user.id}` 
       : 'golf-group';
+
+  // Load current user profile
+  useEffect(() => {
+    if (user) {
+      loadCurrentUserProfile();
+    }
+  }, [user]);
 
   // Load friend profile if this is a private chat
   useEffect(() => {
@@ -89,6 +97,23 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
       supabase.removeChannel(channel);
     };
   }, [chatRoomId]);
+
+  const loadCurrentUserProfile = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('name, avatar_url')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) throw error;
+      setCurrentUserProfile(data);
+    } catch (error) {
+      console.error('Error loading current user profile:', error);
+    }
+  };
 
   const loadFriendProfile = async () => {
     if (!friendId) return;
@@ -447,9 +472,9 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
               
               {isOwn && isLastInGroup && (
                 <Avatar className="w-7 h-7 mb-1">
-                  <AvatarImage src={user?.user_metadata?.avatar_url} />
+                  <AvatarImage src={currentUserProfile?.avatar_url} />
                   <AvatarFallback className="text-xs bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
-                    {user?.email?.[0]?.toUpperCase()}
+                    {currentUserProfile?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               )}
