@@ -17,6 +17,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 const gameSuggestionSchema = z.object({
   golfCourseId: z.string().min(1, "Välj en golfbana"),
@@ -44,11 +46,25 @@ interface CreateGameSuggestionProps {
 
 export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: CreateGameSuggestionProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [golfCourses, setGolfCourses] = useState<Array<{ id: string; name: string; location: string }>>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showCourseSearch, setShowCourseSearch] = useState(false);
   const isEditMode = !!suggestionId;
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!user) {
+      toast({
+        title: "Logga in krävs",
+        description: "Du måste logga in för att skapa spelförslag.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+    }
+  }, [user, navigate, toast]);
 
   console.log('CreateGameSuggestion initialData:', initialData);
   console.log('CreateGameSuggestion isEditMode:', isEditMode);
