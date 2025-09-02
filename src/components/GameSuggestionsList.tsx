@@ -47,7 +47,8 @@ export const GameSuggestionsList = () => {
   const [suggestions, setSuggestions] = useState<GameSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [editingSuggestion, setEditingSuggestion] = useState<GameSuggestion | null>(null);
+  const [selectedSuggestion, setSelectedSuggestion] = useState<GameSuggestion | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     fetchGameSuggestions();
@@ -306,12 +307,10 @@ export const GameSuggestionsList = () => {
   };
 
   const editSuggestion = (suggestionId: string) => {
-    const suggestion = suggestions.find(s => s.id === suggestionId);
-    if (suggestion) {
-      console.log('Edit suggestion - original data:', suggestion);
-      console.log('Edit suggestion - suggested_time:', suggestion.suggested_time);
-      setEditingSuggestion(suggestion);
-    }
+    toast({
+      title: "Redigering",
+      description: "Redigeringsfunktionen kommer snart!",
+    });
   };
 
   const formatTimeInterval = (timeString: string) => {
@@ -363,53 +362,20 @@ export const GameSuggestionsList = () => {
     <>
       <div className="space-y-4">
         {suggestions.map((suggestion) => {
-          const isOwner = suggestion.user_id === currentUserId;
           const participants = suggestion.participants || [];
-          const isParticipant = participants.some(p => p.user_id === currentUserId);
-          const spotsLeft = suggestion.max_players - participants.filter(p => p.status === 'accepted').length - 1; // -1 for owner
+          const spotsLeft = suggestion.max_players - participants.filter(p => p.status === 'accepted').length - 1;
 
           return (
-            <Card key={suggestion.id} className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl">
+            <Card 
+              key={suggestion.id} 
+              className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl cursor-pointer hover:shadow-2xl transition-all"
+              onClick={() => {
+                setSelectedSuggestion(suggestion);
+                setModalOpen(true);
+              }}
+            >
               <CardHeader className="pb-3 relative">
-                {/* Three-dot menu at top right corner - for owners and participants */}
-                {(isOwner || isParticipant) && (
-                  <div className="absolute top-4 right-4">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {isOwner ? (
-                          <>
-                            <DropdownMenuItem onClick={() => editSuggestion(suggestion.id)}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Redigera
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => deleteSuggestion(suggestion.id)}
-                              className="text-red-600"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Ta bort
-                            </DropdownMenuItem>
-                          </>
-                        ) : (
-                          <DropdownMenuItem 
-                            onClick={() => leaveGame(suggestion.id)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Lämna spelförslag
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                )}
-                
-                <div className="flex items-start justify-between pr-10">
+                <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={suggestion.profiles.avatar_url} />
@@ -431,162 +397,218 @@ export const GameSuggestionsList = () => {
                   )}
                 </div>
               </CardHeader>
-              
-              <CardContent className="space-y-4">
-                {/* Profile Icons, Course and Time Info - All on same row */}
-                <div className="flex items-center justify-between">
-                  {/* Course Info */}
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-golf-green" />
-                    <div>
-                      <p className="font-medium text-sm">{suggestion.golf_courses.name}</p>
-                      <p className="text-xs text-muted-foreground">{suggestion.golf_courses.location}</p>
-                    </div>
-                  </div>
-                  
-                  {/* Date and Time */}
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1">
-                      <CalendarIcon className="w-4 h-4 text-golf-green" />
-                      <span className="text-sm">
-                        {format(new Date(suggestion.suggested_date), "d MMM", { locale: sv })}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-4 h-4 text-golf-green" />
-                      <span className="text-sm">{formatTimeInterval(suggestion.suggested_time)}</span>
-                    </div>
-                  </div>
-
-                  {/* Profile Icons - Moved to far right */}
-                  <div className="flex items-center gap-3">
-                    {/* Creator Profile Icon */}
-                    <Avatar className="h-8 w-8 border-2 border-golf-green">
-                      <AvatarImage src={suggestion.profiles.avatar_url} />
-                      <AvatarFallback className="bg-golf-green text-white text-xs">
-                        {suggestion.profiles.name?.charAt(0) || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-
-                    {/* Joined Participants */}
-                    {participants
-                      .filter(p => p.status === 'accepted')
-                      .map((participant) => (
-                        <Avatar key={participant.id} className="h-8 w-8 border-2 border-green-500">
-                          <AvatarImage src={participant.profiles.avatar_url} />
-                          <AvatarFallback className="bg-green-500 text-white text-xs">
-                            {participant.profiles.name?.charAt(0) || 'U'}
-                          </AvatarFallback>
-                        </Avatar>
-                      ))}
-
-                    {/* Empty Slots with + buttons */}
-                    {Array.from({ length: spotsLeft }, (_, index) => (
-                      <div key={`empty-${index}`} className="relative">
-                        {!isOwner && !isParticipant ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 w-8 rounded-full p-0 border-dashed border-2 border-gray-300 hover:border-golf-green"
-                            onClick={() => joinGame(suggestion.id)}
-                          >
-                            <Plus className="h-4 w-4 text-gray-400 hover:text-golf-green" />
-                          </Button>
-                        ) : (
-                          <div className="h-8 w-8 rounded-full border-dashed border-2 border-gray-300 flex items-center justify-center">
-                            <Plus className="h-4 w-4 text-gray-300" />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Message */}
-                {suggestion.message && (
-                  <div className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg">
-                    <MessageSquare className="w-4 h-4 text-golf-green mt-0.5" />
-                    <p className="text-sm text-gray-700">{suggestion.message}</p>
-                  </div>
-                )}
-
-                {/* Participants */}
-                {participants.length > 0 && (
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Users className="w-4 h-4 text-golf-green" />
-                      <span className="text-sm font-medium">Anmälda ({participants.filter(p => p.status === 'accepted').length + 1}/{suggestion.max_players})</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline" className="bg-golf-green text-white">
-                        {suggestion.profiles.name} (arrangör)
-                      </Badge>
-                      {participants
-                        .filter(p => p.status === 'accepted')
-                        .map((participant) => (
-                          <Badge key={participant.id} variant="outline">
-                            {participant.profiles.name}
-                          </Badge>
-                        ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Action Button */}
-                {!isOwner && (
-                  <div className="pt-2">
-                    {isParticipant ? (
-                      <Button
-                        variant="outline"
-                        onClick={() => leaveGame(suggestion.id)}
-                        className="w-full"
-                      >
-                        Avanmäl dig
-                      </Button>
-                    ) : spotsLeft > 0 ? (
-                      <Button
-                        onClick={() => joinGame(suggestion.id)}
-                        className="w-full bg-golf-green hover:bg-golf-green-light text-white"
-                      >
-                        Anmäl dig till rundan
-                      </Button>
-                    ) : (
-                      <Button disabled className="w-full">
-                        Rundan är fullbokad
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </CardContent>
             </Card>
           );
         })}
       </div>
 
-      {/* Edit Modal */}
-      <Dialog open={!!editingSuggestion} onOpenChange={(open) => !open && setEditingSuggestion(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Redigera spelförslag</DialogTitle>
-          </DialogHeader>
-          {editingSuggestion && (
-            <CreateGameSuggestion 
-              initialData={{
-                course: editingSuggestion.golf_course_id,
-                date: new Date(editingSuggestion.suggested_date),
-                time: editingSuggestion.suggested_time.slice(0, 5), // Format från HH:MM:SS till HH:MM
-                maxPlayers: editingSuggestion.max_players,
-                message: editingSuggestion.message || ''
-              }}
-              suggestionId={editingSuggestion.id}
-              onSuccess={() => {
-                setEditingSuggestion(null);
-                fetchGameSuggestions();
-              }} 
-            />
+      {/* Detailed Modal */}
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          {selectedSuggestion && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={selectedSuggestion.profiles.avatar_url} />
+                    <AvatarFallback>
+                      {selectedSuggestion.profiles.name?.charAt(0) || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span>{selectedSuggestion.profiles.name} föreslår en runda</span>
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                {(() => {
+                  const isOwner = selectedSuggestion.user_id === currentUserId;
+                  const participants = selectedSuggestion.participants || [];
+                  const isParticipant = participants.some(p => p.user_id === currentUserId);
+                  const spotsLeft = selectedSuggestion.max_players - participants.filter(p => p.status === 'accepted').length - 1;
+
+                  return (
+                    <>
+                      {/* Three-dot menu for owners and participants */}
+                      {(isOwner || isParticipant) && (
+                        <div className="flex justify-end">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {isOwner ? (
+                                <>
+                                  <DropdownMenuItem onClick={() => editSuggestion(selectedSuggestion.id)}>
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Redigera
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={() => {
+                                      deleteSuggestion(selectedSuggestion.id);
+                                      setModalOpen(false);
+                                    }}
+                                    className="text-red-600"
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Ta bort
+                                  </DropdownMenuItem>
+                                </>
+                              ) : (
+                                <DropdownMenuItem 
+                                  onClick={() => {
+                                    leaveGame(selectedSuggestion.id);
+                                    setModalOpen(false);
+                                  }}
+                                  className="text-red-600"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Lämna spelförslag
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      )}
+
+                      {/* Course and Time Info */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-golf-green" />
+                          <div>
+                            <p className="font-medium text-sm">{selectedSuggestion.golf_courses.name}</p>
+                            <p className="text-xs text-muted-foreground">{selectedSuggestion.golf_courses.location}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-1">
+                            <CalendarIcon className="w-4 h-4 text-golf-green" />
+                            <span className="text-sm">
+                              {format(new Date(selectedSuggestion.suggested_date), "d MMM", { locale: sv })}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4 text-golf-green" />
+                            <span className="text-sm">{formatTimeInterval(selectedSuggestion.suggested_time)}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Profile Icons */}
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8 border-2 border-golf-green">
+                          <AvatarImage src={selectedSuggestion.profiles.avatar_url} />
+                          <AvatarFallback className="bg-golf-green text-white text-xs">
+                            {selectedSuggestion.profiles.name?.charAt(0) || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+
+                        {participants
+                          .filter(p => p.status === 'accepted')
+                          .map((participant) => (
+                            <Avatar key={participant.id} className="h-8 w-8 border-2 border-green-500">
+                              <AvatarImage src={participant.profiles.avatar_url} />
+                              <AvatarFallback className="bg-green-500 text-white text-xs">
+                                {participant.profiles.name?.charAt(0) || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                          ))}
+
+                        {Array.from({ length: spotsLeft }, (_, index) => (
+                          <div key={`empty-${index}`} className="relative">
+                            {!isOwner && !isParticipant ? (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 w-8 rounded-full p-0 border-dashed border-2 border-gray-300 hover:border-golf-green"
+                                onClick={() => {
+                                  joinGame(selectedSuggestion.id);
+                                  setModalOpen(false);
+                                }}
+                              >
+                                <Plus className="h-4 w-4 text-gray-400 hover:text-golf-green" />
+                              </Button>
+                            ) : (
+                              <div className="h-8 w-8 rounded-full border-dashed border-2 border-gray-300 flex items-center justify-center">
+                                <Plus className="h-4 w-4 text-gray-300" />
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Message */}
+                      {selectedSuggestion.message && (
+                        <div className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg">
+                          <MessageSquare className="w-4 h-4 text-golf-green mt-0.5" />
+                          <p className="text-sm text-gray-700">{selectedSuggestion.message}</p>
+                        </div>
+                      )}
+
+                      {/* Participants */}
+                      {participants.length > 0 && (
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Users className="w-4 h-4 text-golf-green" />
+                            <span className="text-sm font-medium">Anmälda ({participants.filter(p => p.status === 'accepted').length + 1}/{selectedSuggestion.max_players})</span>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            <Badge variant="outline" className="bg-golf-green text-white">
+                              {selectedSuggestion.profiles.name} (arrangör)
+                            </Badge>
+                            {participants
+                              .filter(p => p.status === 'accepted')
+                              .map((participant) => (
+                                <Badge key={participant.id} variant="outline">
+                                  {participant.profiles.name}
+                                </Badge>
+                              ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Action Button */}
+                      {!isOwner && (
+                        <div className="pt-2">
+                          {isParticipant ? (
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                leaveGame(selectedSuggestion.id);
+                                setModalOpen(false);
+                              }}
+                              className="w-full"
+                            >
+                              Avanmäl dig
+                            </Button>
+                          ) : spotsLeft > 0 ? (
+                            <Button
+                              onClick={() => {
+                                joinGame(selectedSuggestion.id);
+                                setModalOpen(false);
+                              }}
+                              className="w-full bg-golf-green hover:bg-golf-green-light text-white"
+                            >
+                              Anmäl dig till rundan
+                            </Button>
+                          ) : (
+                            <Button disabled className="w-full">
+                              Fullbokad
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
+            </>
           )}
         </DialogContent>
       </Dialog>
+
     </>
   );
 };
