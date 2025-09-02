@@ -103,15 +103,15 @@ export const Navigation = ({
 
             {/* Centered Large Swipe Button */}
             <Link to="/app">
-              <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth w-14 h-14 sm:w-16 sm:h-16 lg:w-18 lg:h-18 rounded-full ${location.pathname === '/app' ? 'text-golf-green bg-golf-green-light' : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'}`}>
-                <svg className="w-7 h-7 sm:w-8 sm:h-8 lg:w-9 lg:h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-18 lg:h-18 bg-gradient-golf rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-lg">
+                <svg className="w-7 h-7 sm:w-8 sm:h-8 lg:w-9 lg:h-9 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   {/* Crossed golf clubs */}
-                  <path d="M4 20l7-7m9-9l-7 7m0 0l-2.5 2.5M11 13l2.5-2.5" />
-                  <path d="M20 4l-7 7m-9 9l7-7m0 0l2.5-2.5M13 11l-2.5 2.5" />
-                  <circle cx="4.5" cy="19.5" r="1" fill="currentColor" />
-                  <circle cx="19.5" cy="4.5" r="1" fill="currentColor" />
+                  <path d="M4 4l16 16" />
+                  <path d="M20 4L4 20" />
+                  <circle cx="6" cy="6" r="2" fill="currentColor" />
+                  <circle cx="18" cy="18" r="2" fill="currentColor" />
                 </svg>
-              </button>
+              </div>
             </Link>
             
             {/* Courses */}
