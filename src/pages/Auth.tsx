@@ -8,6 +8,7 @@ import { Target, Mail, Lock, User, ArrowLeft, Apple } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate, Link } from "react-router-dom";
+import teeMatesLogo from "@/assets/teemates-logo.png";
 export const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -154,10 +155,10 @@ export const Auth = () => {
             Tillbaka till startsidan
           </Link>
           <div className="flex items-center justify-center space-x-2 xs:space-x-3 mb-3 xs:mb-4">
-            <div className="w-10 h-10 xs:w-12 xs:h-12 bg-gradient-golf rounded-full flex items-center justify-center shadow-golf animate-float">
-              <Target className="w-6 h-6 xs:w-7 xs:h-7 text-white" />
+            <div className="w-10 h-10 xs:w-12 xs:h-12 bg-gradient-golf rounded-full flex items-center justify-center shadow-golf animate-float overflow-hidden">
+              <img src={teeMatesLogo} alt="teeMates logo" className="w-full h-full object-cover" />
             </div>
-            <h1 className="text-xl xs:text-2xl md:text-3xl font-bold text-golf-premium">TeeMates</h1>
+            <h1 className="text-xl xs:text-2xl md:text-3xl font-bold text-golf-premium">teeMates</h1>
           </div>
           <p className="text-muted-foreground text-sm xs:text-base">Välkommen till golfgemenskapen</p>
         </div>
