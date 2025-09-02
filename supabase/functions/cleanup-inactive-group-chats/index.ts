@@ -18,15 +18,52 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    console.log('Starting cleanup of inactive group chats...')
+    console.log('Starting cleanup of inactive and single-member group chats...')
 
-    // Calculate the cutoff date (1 month ago)
+    let totalDeletedCount = 0
+
+    // First: Clean up group chats with only 1 member
+    console.log('Step 1: Checking for group chats with only 1 member...')
+    
+    const { data: singleMemberGroups, error: singleMemberError } = await supabase
+      .from('group_chat_members')
+      .select('group_chat_id, group_chats!inner(name)')
+      .group('group_chat_id')
+      .having('count(*) = 1')
+
+    if (singleMemberError) {
+      console.error('Error finding single member groups:', singleMemberError)
+    } else {
+      console.log(`Found ${singleMemberGroups?.length || 0} group chats with only 1 member`)
+      
+      for (const group of singleMemberGroups || []) {
+        console.log(`Deleting single-member group: ${group.group_chats.name}`)
+        
+        const chatRoomId = `group_${group.group_chat_id}`
+        
+        // Delete messages
+        await supabase.from('messages').delete().eq('chat_room_id', chatRoomId)
+        
+        // Delete members
+        await supabase.from('group_chat_members').delete().eq('group_chat_id', group.group_chat_id)
+        
+        // Delete group chat
+        await supabase.from('group_chats').delete().eq('id', group.group_chat_id)
+        
+        totalDeletedCount++
+        console.log(`Successfully deleted single-member group: ${group.group_chats.name}`)
+      }
+    }
+
+    // Second: Clean up inactive group chats (1 month old)
+    console.log('Step 2: Checking for inactive group chats...')
+    
     const oneMonthAgo = new Date()
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
     
     console.log(`Cutoff date: ${oneMonthAgo.toISOString()}`)
 
-    // Get all group chats
+    // Get remaining group chats
     const { data: groupChats, error: groupChatsError } = await supabase
       .from('group_chats')
       .select('id, name, created_at')
@@ -36,9 +73,9 @@ serve(async (req) => {
       throw groupChatsError
     }
 
-    console.log(`Found ${groupChats?.length || 0} group chats to check`)
+    console.log(`Found ${groupChats?.length || 0} group chats to check for inactivity`)
 
-    let deletedCount = 0
+    let inactiveDeletedCount = 0
 
     for (const groupChat of groupChats || []) {
       console.log(`Checking group chat: ${groupChat.name} (${groupChat.id})`)
@@ -107,18 +144,21 @@ serve(async (req) => {
           continue
         }
 
-        deletedCount++
-        console.log(`Successfully deleted group chat: ${groupChat.name}`)
+        inactiveDeletedCount++
+        totalDeletedCount++
+        console.log(`Successfully deleted inactive group chat: ${groupChat.name}`)
       }
     }
 
-    console.log(`Cleanup completed. Deleted ${deletedCount} inactive group chats.`)
+    console.log(`Cleanup completed. Total deleted: ${totalDeletedCount} group chats (${totalDeletedCount - inactiveDeletedCount} single-member, ${inactiveDeletedCount} inactive)`)
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `Cleanup completed. Deleted ${deletedCount} inactive group chats.`,
-        deletedCount 
+        message: `Cleanup completed. Total deleted: ${totalDeletedCount} group chats (${totalDeletedCount - inactiveDeletedCount} single-member, ${inactiveDeletedCount} inactive)`,
+        totalDeleted: totalDeletedCount,
+        singleMemberDeleted: totalDeletedCount - inactiveDeletedCount,
+        inactiveDeleted: inactiveDeletedCount
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

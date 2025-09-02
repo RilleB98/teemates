@@ -142,6 +142,38 @@ export const useGroupChats = () => {
 
   const removeMemberFromGroup = async (groupChatId: string, userId: string) => {
     try {
+      // First check how many members are in the group
+      const { data: memberCount, error: countError } = await supabase
+        .from('group_chat_members')
+        .select('id', { count: 'exact' })
+        .eq('group_chat_id', groupChatId);
+
+      if (countError) throw countError;
+
+      // If this is the last member, delete the entire group chat
+      if (memberCount && memberCount.length <= 1) {
+        console.log('Last member leaving, deleting entire group chat');
+        
+        // Delete messages first
+        const chatRoomId = `group_${groupChatId}`;
+        await supabase.from('messages').delete().eq('chat_room_id', chatRoomId);
+        
+        // Delete all members
+        await supabase.from('group_chat_members').delete().eq('group_chat_id', groupChatId);
+        
+        // Delete the group chat itself
+        const { error: deleteGroupError } = await supabase
+          .from('group_chats')
+          .delete()
+          .eq('id', groupChatId);
+
+        if (deleteGroupError) throw deleteGroupError;
+        
+        await fetchGroupChats(); // Refresh the list
+        return true;
+      }
+
+      // Otherwise, just remove this member
       const { error } = await supabase
         .from('group_chat_members')
         .delete()
