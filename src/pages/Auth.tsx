@@ -160,7 +160,7 @@ export const Auth = () => {
             <div className="w-10 h-10 xs:w-12 xs:h-12 bg-gradient-golf rounded-full flex items-center justify-center shadow-golf animate-float">
               <Target className="w-6 h-6 xs:w-7 xs:h-7 text-white" />
             </div>
-            <h1 className="text-xl xs:text-2xl md:text-3xl font-bold text-golf-premium">GolfConnect</h1>
+            <h1 className="text-xl xs:text-2xl md:text-3xl font-bold text-golf-premium">teemates</h1>
           </div>
           <p className="text-muted-foreground text-sm xs:text-base">Välkommen till golfgemenskapen</p>
         </div>
