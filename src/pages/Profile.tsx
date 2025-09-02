@@ -159,7 +159,8 @@ export const Profile = () => {
       }
 
       if (data) {
-        const birthDate = data.birth_date ? new Date(data.birth_date) : null;
+        // Fix timezone issue: parse date as local date instead of UTC
+        const birthDate = data.birth_date ? new Date(data.birth_date + 'T00:00:00') : null;
         setProfile({
           name: data.name || "",
           age: data.age?.toString() || "",
@@ -435,7 +436,9 @@ export const Profile = () => {
         selected_course: profileData.selected_course,
         home_club: profileData.selected_course?.name || null,
         gender: profileData.gender,
-        birth_date: profileData.birth_date ? profileData.birth_date.toISOString().split('T')[0] : null,
+        birth_date: profileData.birth_date ? 
+          `${profileData.birth_date.getFullYear()}-${String(profileData.birth_date.getMonth() + 1).padStart(2, '0')}-${String(profileData.birth_date.getDate()).padStart(2, '0')}` 
+          : null,
         home_city: profileData.home_city,
         bio: profileData.bio,
         golf_id: profileData.golf_id
