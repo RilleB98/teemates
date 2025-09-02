@@ -12,7 +12,57 @@ import { markMessagesAsRead } from "@/utils/messageUtils";
 import { useGroupChats } from "@/hooks/useGroupChats";
 import { ProfilePopover } from "@/components/ProfilePopover";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import player1 from "@/assets/player1.jpg";
+
+// Avatar component that handles loading errors gracefully
+const RobustAvatar = ({ src, alt, fallbackText, className = "w-7 h-7" }: {
+  src?: string;
+  alt: string;
+  fallbackText: string;
+  className?: string;
+}) => {
+  const [imageSrc, setImageSrc] = useState<string | null>(src || null);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    if (src) {
+      setImageSrc(src);
+      setHasError(false);
+      // Test if image can load
+      const img = new Image();
+      img.onload = () => {
+        console.log('Avatar image loaded successfully:', src);
+      };
+      img.onerror = () => {
+        console.error('Avatar image failed to load:', src);
+        setImageSrc(null);
+        setHasError(true);
+      };
+      img.src = src;
+    } else {
+      setImageSrc(null);
+      setHasError(false);
+    }
+  }, [src]);
+
+  return (
+    <Avatar className={className + " ring-2 ring-primary/20"}>
+      {imageSrc && !hasError ? (
+        <AvatarImage
+          src={imageSrc}
+          alt={alt}
+          onError={() => {
+            console.error('AvatarImage onError triggered for:', imageSrc);
+            setImageSrc(null);
+            setHasError(true);
+          }}
+        />
+      ) : null}
+      <AvatarFallback className="text-xs bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
+        {fallbackText}
+      </AvatarFallback>
+    </Avatar>
+  );
+};
 
 interface Message {
   id: string;
@@ -358,18 +408,12 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div className="flex items-center space-x-3">
-          <Avatar className="w-10 h-10 ring-2 ring-primary/20">
-            <AvatarImage src={
-              friendId ? friendProfile?.avatar_url 
-              : groupChatId ? undefined
-              : player1
-            } />
-            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
-              {friendId ? (friendProfile?.name?.[0]?.toUpperCase() || 'V') 
-               : groupChatId ? 'G'
-               : 'GG'}
-            </AvatarFallback>
-          </Avatar>
+          <RobustAvatar 
+            src={friendId ? friendProfile?.avatar_url : undefined}
+            alt={friendId ? (friendProfile?.name || 'Okänd vän') : 'Golf Gruppen'}
+            fallbackText={friendId ? (friendProfile?.name?.[0]?.toUpperCase() || 'V') : 'G'}
+            className="w-10 h-10"
+          />
           <div>
             <h2 className="font-semibold text-gray-900">
               {friendId ? (friendProfile?.name || 'Okänd vän') 
@@ -456,17 +500,12 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
               className={`flex items-end space-x-2 ${isOwn ? "justify-end" : "justify-start"} ${isLastInGroup ? "mb-3" : "mb-1"}`}
             >
               {!isOwn && isLastInGroup && (
-                <Avatar className="w-7 h-7 mb-1">
-                  <AvatarImage 
-                    src={getUserProfile(message.user_id)?.avatar_url || undefined} 
-                    alt={getUserDisplayName(message)}
-                    onLoad={() => console.log('Avatar loaded for user:', message.user_id, 'URL:', getUserProfile(message.user_id)?.avatar_url)}
-                    onError={(e) => console.log('Avatar failed to load for user:', message.user_id, 'URL:', getUserProfile(message.user_id)?.avatar_url, e)}
-                  />
-                  <AvatarFallback className="text-xs bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
-                    {getUserDisplayName(message)[0]}
-                  </AvatarFallback>
-                </Avatar>
+                <RobustAvatar
+                  src={getUserProfile(message.user_id)?.avatar_url}
+                  alt={getUserDisplayName(message)}
+                  fallbackText={getUserDisplayName(message)[0]}
+                  className="w-7 h-7 mb-1"
+                />
               )}
               {!isOwn && !isLastInGroup && (
                 <div className="w-7 h-7 mb-1" />
@@ -511,17 +550,12 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
               </div>
               
               {isOwn && isLastInGroup && (
-                <Avatar className="w-7 h-7 mb-1">
-                  <AvatarImage 
-                    src={currentUserProfile?.avatar_url || undefined}
-                    alt={currentUserProfile?.name || "You"}
-                    onLoad={() => console.log('Current user avatar loaded')}
-                    onError={(e) => console.log('Current user avatar failed to load', e)}
-                  />
-                  <AvatarFallback className="text-xs bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
-                    {currentUserProfile?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+                <RobustAvatar
+                  src={currentUserProfile?.avatar_url}
+                  alt={currentUserProfile?.name || "You"}
+                  fallbackText={currentUserProfile?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U"}
+                  className="w-7 h-7 mb-1"
+                />
               )}
               {isOwn && !isLastInGroup && (
                 <div className="w-7 h-7 mb-1" />
