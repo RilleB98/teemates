@@ -15,10 +15,6 @@ export const PublicLanding = () => {
               </div>
               <span className="text-xl font-bold text-golf-premium">TeeMates</span>
             </div>
-            <Button className="bg-white text-golf-green hover:bg-gray-100">
-              <Download className="w-4 h-4 mr-2" />
-              Ladda ner
-            </Button>
           </div>
         </div>
       </div>
