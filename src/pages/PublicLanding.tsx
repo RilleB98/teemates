@@ -9,9 +9,11 @@ export const PublicLanding = () => {
       <div className="bg-white/10 backdrop-blur-sm border-b border-white/20">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-start">
-            <div className="w-10 h-10 bg-gradient-golf rounded-full flex items-center justify-center">
-              <Flag className="w-6 h-6 text-white" />
-            </div>
+            <img 
+              src="/lovable-uploads/e94c05df-8c2c-4ed3-8d8e-f8eb3450f6ae.png" 
+              alt="TeeMates" 
+              className="w-10 h-10 rounded-lg"
+            />
           </div>
         </div>
       </div>
