@@ -416,8 +416,11 @@ export const GameSuggestionsList = () => {
                     </Avatar>
                     <div>
                       <CardTitle className="text-lg text-golf-premium">
-                        {suggestion.profiles.name} föreslår en runda
+                        {suggestion.golf_courses.name}
                       </CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(suggestion.suggested_date), 'PPP', { locale: sv })} kl. {suggestion.suggested_time.slice(0, 5)}
+                      </p>
                     </div>
                   </div>
                   
