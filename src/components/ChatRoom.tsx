@@ -452,8 +452,8 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
                   <AvatarImage 
                     src={getUserProfile(message.user_id)?.avatar_url || undefined} 
                     alt={getUserDisplayName(message)}
-                    onLoad={() => console.log('Avatar loaded for user:', message.user_id)}
-                    onError={(e) => console.log('Avatar failed to load for user:', message.user_id, e)}
+                    onLoad={() => console.log('Avatar loaded for user:', message.user_id, 'URL:', getUserProfile(message.user_id)?.avatar_url)}
+                    onError={(e) => console.log('Avatar failed to load for user:', message.user_id, 'URL:', getUserProfile(message.user_id)?.avatar_url, e)}
                   />
                   <AvatarFallback className="text-xs bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
                     {getUserDisplayName(message)[0]}
