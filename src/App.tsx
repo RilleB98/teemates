@@ -9,7 +9,7 @@ import { Friends } from "./pages/Friends";
 import { SwipeMatch } from "./pages/SwipeMatch";
 import { Messages } from "./pages/Messages";
 import { Auth } from "./pages/Auth";
-import { Landing } from "./pages/Landing";
+import { PublicLanding } from "./pages/PublicLanding";
 import { AuthProvider } from "./hooks/useAuth";
 import { AdminGolf } from "./pages/AdminGolf";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -25,7 +25,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Landing />} />
+            <Route path="/" element={<PublicLanding />} />
             <Route path="/app" element={
               <ProtectedRoute>
                 <SwipeMatch />
