@@ -17,6 +17,7 @@ import { MessageCircle, Users, ChevronRight } from "lucide-react";
 export const Messages = () => {
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
   const [selectedGroupChat, setSelectedGroupChat] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("friends");
   const { friends, loading } = useFriends();
   const { groupChats, loading: groupLoading } = useGroupChats();
   const { unreadByFriend, refetchUnreadCounts } = useUnreadMessagesByFriend();
@@ -43,6 +44,7 @@ export const Messages = () => {
         groupChatId={selectedGroupChat}
         onBack={() => {
           setSelectedGroupChat(null);
+          setActiveTab("groups"); // Set to groups tab when coming back from group chat
           refetchUnreadCounts();
         }} 
       />
@@ -67,7 +69,7 @@ export const Messages = () => {
 
           
 
-          <Tabs defaultValue="friends" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="friends">Chatter</TabsTrigger>
               <TabsTrigger value="groups">Gruppchatter</TabsTrigger>
