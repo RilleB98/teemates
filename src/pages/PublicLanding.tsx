@@ -12,7 +12,7 @@ export const PublicLanding = () => {
             <img 
               src="/lovable-uploads/e94c05df-8c2c-4ed3-8d8e-f8eb3450f6ae.png" 
               alt="TeeMates" 
-              className="w-16 h-16 rounded-lg"
+              className="w-20 h-20 rounded-lg ml-0"
             />
           </div>
         </div>
