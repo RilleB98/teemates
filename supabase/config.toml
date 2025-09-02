@@ -52,3 +52,6 @@ enable_signup = true
 
 [functions.geocode-golf-courses]
 verify_jwt = false
+
+[functions.cleanup-inactive-group-chats]
+verify_jwt = false
