@@ -495,6 +495,10 @@ export type Database = {
         Args: { _group_chat_id: string; _user_id: string }
         Returns: boolean
       }
+      is_group_member: {
+        Args: { _group_chat_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
