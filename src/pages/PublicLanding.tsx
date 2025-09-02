@@ -63,7 +63,7 @@ export const PublicLanding = () => {
           </div>
 
           <p className="text-golf-premium/70 text-lg">
-            🚀 Appen lanseras snart! Registrera dig för att få notifiering när den är tillgänglig.
+            🚀 Appen lanseras snart!
           </p>
         </div>
 
