@@ -8,12 +8,9 @@ export const Landing = () => {
       <div className="container mx-auto px-4 py-16">
         {/* Header */}
          <div className="text-center mb-16">
-           <h1 className="text-5xl font-bold text-red-500 mb-4">
-             *** TEST - DETTA ÄR LANDING SIDAN ***
-           </h1>
-           <h2 className="text-3xl font-bold text-golf-premium mb-4">
+           <h1 className="text-5xl font-bold text-golf-premium mb-4">
              TeeMates
-           </h2>
+           </h1>
            <p className="text-xl text-golf-premium/80 max-w-2xl mx-auto">
              Hitta golfkompisar och spela mer golf. Anslut med golfare i ditt område och boka rundor tillsammans.
            </p>

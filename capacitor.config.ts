@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'teemates',
   webDir: 'dist',
   server: {
-    url: 'https://c3a7dfcd-ab3b-42b0-ace6-7b83101e3118.lovableproject.com/?forceHideBadge=true',
+    url: 'https://c3a7dfcd-ab3b-42b0-ace6-7b83101e3118.sandbox.lovable.dev/?forceHideBadge=true',
     cleartext: true
   },
   bundledWebRuntime: false
