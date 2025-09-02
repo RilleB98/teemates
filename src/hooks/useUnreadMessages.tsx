@@ -72,7 +72,7 @@ export const useUnreadMessages = () => {
 
     fetchUnreadCount();
 
-    // Set up real-time subscription to update count when new messages arrive
+    // Set up real-time subscription to update count when new messages arrive or are marked as read
     const channel = supabase
       .channel('message-count-updates')
       .on(
@@ -83,9 +83,23 @@ export const useUnreadMessages = () => {
           table: 'messages'
         },
         (payload) => {
-          // If the new message is not from the current user, increment count
+          // If the new message is not from the current user, refetch count
           if (payload.new.user_id !== user.id) {
-            fetchUnreadCount(); // Refetch to get accurate count
+            fetchUnreadCount();
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'message_reads'
+        },
+        (payload) => {
+          // If the current user marked a message as read, refetch count
+          if (payload.new.user_id === user.id) {
+            fetchUnreadCount();
           }
         }
       )
