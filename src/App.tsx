@@ -25,7 +25,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Landing />} />
+            <Route path="/" element={<div style={{background: 'red', color: 'white', fontSize: '50px', textAlign: 'center', padding: '100px'}}>DETTA ÄR ROOT ROUTEN - LANDING SIDAN!</div>} />
             <Route path="/app" element={
               <ProtectedRoute>
                 <SwipeMatch />
