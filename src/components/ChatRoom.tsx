@@ -13,54 +13,33 @@ import { useGroupChats } from "@/hooks/useGroupChats";
 import { ProfilePopover } from "@/components/ProfilePopover";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-// Avatar component that handles loading errors gracefully
-const RobustAvatar = ({ src, alt, fallbackText, className = "w-7 h-7" }: {
-  src?: string;
-  alt: string;
-  fallbackText: string;
-  className?: string;
-}) => {
-  const [imageSrc, setImageSrc] = useState<string | null>(src || null);
-  const [hasError, setHasError] = useState(false);
-
-  useEffect(() => {
-    if (src) {
-      setImageSrc(src);
-      setHasError(false);
-      // Test if image can load
-      const img = new Image();
-      img.onload = () => {
-        console.log('Avatar image loaded successfully:', src);
-      };
-      img.onerror = () => {
-        console.error('Avatar image failed to load:', src);
-        setImageSrc(null);
-        setHasError(true);
-      };
-      img.src = src;
-    } else {
-      setImageSrc(null);
-      setHasError(false);
-    }
-  }, [src]);
-
+// Simple test component to debug avatar loading
+const DebugAvatar = ({ userId, profile }: { userId: string; profile: any }) => {
+  const avatarUrl = profile?.avatar_url;
+  console.log(`[DEBUG] User ${userId}:`, {
+    profile,
+    avatarUrl,
+    hasAvatarUrl: !!avatarUrl
+  });
+  
   return (
-    <Avatar className={className + " ring-2 ring-primary/20"}>
-      {imageSrc && !hasError ? (
-        <AvatarImage
-          src={imageSrc}
-          alt={alt}
-          onError={() => {
-            console.error('AvatarImage onError triggered for:', imageSrc);
-            setImageSrc(null);
-            setHasError(true);
-          }}
+    <div className="flex flex-col items-center gap-1 p-2 border rounded">
+      <div className="text-xs">{profile?.name || 'No name'}</div>
+      <div className="text-xs text-gray-500">{userId}</div>
+      <div className="text-xs text-red-500">{avatarUrl ? 'Has URL' : 'No URL'}</div>
+      {avatarUrl && (
+        <img 
+          src={avatarUrl} 
+          alt="test" 
+          className="w-8 h-8 rounded-full"
+          onLoad={() => console.log(`[DEBUG] Image loaded for ${userId}`)}
+          onError={() => console.log(`[DEBUG] Image FAILED for ${userId}`, avatarUrl)}
         />
-      ) : null}
-      <AvatarFallback className="text-xs bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
-        {fallbackText}
-      </AvatarFallback>
-    </Avatar>
+      )}
+      <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs">
+        {profile?.name?.[0] || '?'}
+      </div>
+    </div>
   );
 };
 
@@ -408,12 +387,12 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div className="flex items-center space-x-3">
-          <RobustAvatar 
-            src={friendId ? friendProfile?.avatar_url : undefined}
-            alt={friendId ? (friendProfile?.name || 'Okänd vän') : 'Golf Gruppen'}
-            fallbackText={friendId ? (friendProfile?.name?.[0]?.toUpperCase() || 'V') : 'G'}
-            className="w-10 h-10"
-          />
+          <Avatar className="w-10 h-10 ring-2 ring-primary/20">
+            <AvatarImage src={friendId ? friendProfile?.avatar_url : undefined} />
+            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
+              {friendId ? (friendProfile?.name?.[0]?.toUpperCase() || 'V') : 'G'}
+            </AvatarFallback>
+          </Avatar>
           <div>
             <h2 className="font-semibold text-gray-900">
               {friendId ? (friendProfile?.name || 'Okänd vän') 
@@ -476,6 +455,18 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
         </div>
       </div>
 
+      {/* Debug panel - temporary */}
+      <div className="p-2 bg-yellow-100 border-b overflow-x-auto">
+        <div className="flex gap-2">
+          {Object.entries(userProfiles).map(([userId, profile]) => (
+            <DebugAvatar key={userId} userId={userId} profile={profile} />
+          ))}
+          {currentUserProfile && (
+            <DebugAvatar userId={user?.id || 'current'} profile={currentUserProfile} />
+          )}
+        </div>
+      </div>
+
       {/* Messages - Instagram style with better spacing */}
       <ScrollArea className="flex-1 px-4 py-2">
         {messages.length === 0 ? (
@@ -500,12 +491,15 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
               className={`flex items-end space-x-2 ${isOwn ? "justify-end" : "justify-start"} ${isLastInGroup ? "mb-3" : "mb-1"}`}
             >
               {!isOwn && isLastInGroup && (
-                <RobustAvatar
-                  src={getUserProfile(message.user_id)?.avatar_url}
-                  alt={getUserDisplayName(message)}
-                  fallbackText={getUserDisplayName(message)[0]}
-                  className="w-7 h-7 mb-1"
-                />
+                <Avatar className="w-7 h-7 mb-1">
+                  <AvatarImage 
+                    src={getUserProfile(message.user_id)?.avatar_url || undefined}
+                    alt={getUserDisplayName(message)}
+                  />
+                  <AvatarFallback className="text-xs bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
+                    {getUserDisplayName(message)[0]}
+                  </AvatarFallback>
+                </Avatar>
               )}
               {!isOwn && !isLastInGroup && (
                 <div className="w-7 h-7 mb-1" />
@@ -550,12 +544,15 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
               </div>
               
               {isOwn && isLastInGroup && (
-                <RobustAvatar
-                  src={currentUserProfile?.avatar_url}
-                  alt={currentUserProfile?.name || "You"}
-                  fallbackText={currentUserProfile?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U"}
-                  className="w-7 h-7 mb-1"
-                />
+                <Avatar className="w-7 h-7 mb-1">
+                  <AvatarImage 
+                    src={currentUserProfile?.avatar_url || undefined}
+                    alt={currentUserProfile?.name || "You"}
+                  />
+                  <AvatarFallback className="text-xs bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
+                    {currentUserProfile?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
               )}
               {isOwn && !isLastInGroup && (
                 <div className="w-7 h-7 mb-1" />
