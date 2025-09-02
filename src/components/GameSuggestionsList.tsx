@@ -427,11 +427,7 @@ export const GameSuggestionsList = () => {
                     </div>
                   </div>
                   
-                  {spotsLeft > 0 ? (
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">
-                      {spotsLeft} platser kvar
-                    </Badge>
-                  ) : (
+                  {spotsLeft <= 0 && (
                     <Badge variant="secondary" className="bg-red-100 text-red-800">
                       Fullbokad
                     </Badge>
