@@ -421,9 +421,6 @@ export const GameSuggestionsList = () => {
                       <CardTitle className="text-lg text-golf-premium">
                         {suggestion.profiles.name} föreslår en runda
                       </CardTitle>
-                      <p className="text-sm text-muted-foreground">
-                        {format(new Date(suggestion.created_at), "d MMM", { locale: sv })}
-                      </p>
                     </div>
                   </div>
                   
