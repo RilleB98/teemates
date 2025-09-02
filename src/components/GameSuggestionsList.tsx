@@ -53,6 +53,37 @@ export const GameSuggestionsList = () => {
   useEffect(() => {
     fetchGameSuggestions();
     getCurrentUser();
+    
+    // Set up real-time listener for round suggestions
+    const channel = supabase
+      .channel('round-suggestions-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'round_suggestions'
+        },
+        () => {
+          fetchGameSuggestions();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'round_suggestion_participants'
+        },
+        () => {
+          fetchGameSuggestions();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [friends]);
 
   const getCurrentUser = async () => {
