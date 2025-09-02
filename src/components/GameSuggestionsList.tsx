@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CreateGameSuggestion } from "@/components/CreateGameSuggestion";
+import { useFriends } from "@/hooks/useFriends";
 
 interface GameSuggestion {
   id: string;
@@ -42,6 +43,7 @@ interface GameSuggestion {
 
 export const GameSuggestionsList = () => {
   const { toast } = useToast();
+  const { friends } = useFriends();
   const [suggestions, setSuggestions] = useState<GameSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -50,7 +52,7 @@ export const GameSuggestionsList = () => {
   useEffect(() => {
     fetchGameSuggestions();
     getCurrentUser();
-  }, []);
+  }, [friends]);
 
   const getCurrentUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -62,11 +64,22 @@ export const GameSuggestionsList = () => {
       const now = new Date();
       const today = now.toISOString().split('T')[0];
       
-      // First, get all suggestions from today and future dates
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Extract friend IDs from the useFriends hook
+      const friendIds = friends.map(friend => friend.user_id);
+
+      // Include current user in the list to see their own suggestions
+      const allowedUserIds = [...friendIds, user.id];
+      
+      // First, get all suggestions from today and future dates, only from friends and self
       const { data: allSuggestions, error: suggestionsError } = await supabase
         .from('round_suggestions')
         .select('*')
         .gte('suggested_date', today)
+        .in('user_id', allowedUserIds)
         .order('suggested_date', { ascending: true })
         .order('suggested_time', { ascending: true });
 
