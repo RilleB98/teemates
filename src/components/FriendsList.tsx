@@ -57,63 +57,64 @@ export const FriendsList = ({ friends, onRemoveFriend, onStartMessage, onProfile
           Mina Vänner ({friends.length})
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-2 sm:space-y-3 p-3 sm:p-6">
         {friends.map((friend) => (
           <div 
             key={friend.id} 
-            className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+            className="flex items-center justify-between p-2 sm:p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
             onClick={() => onProfileClick(friend)}
           >
-            <div className="flex items-center gap-3">
-              <Avatar>
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+              <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
                 <AvatarImage src={friend.profile.avatar_url || ''} />
-                <AvatarFallback>
+                <AvatarFallback className="text-xs sm:text-sm">
                   {friend.profile.name?.charAt(0) || 'U'}
                 </AvatarFallback>
               </Avatar>
-              <div>
-                <h4 className="font-medium">{friend.profile.name || 'Okänd användare'}</h4>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="min-w-0 flex-1">
+                <h4 className="font-medium text-sm sm:text-base truncate">{friend.profile.name || 'Okänd användare'}</h4>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
                   {friend.profile.handicap > 0 && (
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs w-fit">
                       HCP {friend.profile.handicap}
                     </Badge>
                   )}
                   {friend.profile.home_club && (
-                    <span className="text-xs">{friend.profile.home_club}</span>
+                    <span className="text-xs truncate">{friend.profile.home_club}</span>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+            <div className="flex gap-1 sm:gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => onStartMessage(friend.friend_id)}
+                className="h-8 w-8 sm:h-9 sm:w-9 p-0"
               >
-                <MessageCircle className="h-4 w-4" />
+                <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
               
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button size="sm" variant="outline">
-                    <UserMinus className="h-4 w-4" />
+                  <Button size="sm" variant="outline" className="h-8 w-8 sm:h-9 sm:w-9 p-0">
+                    <UserMinus className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent>
+                <AlertDialogContent className="max-w-[95vw] sm:max-w-lg mx-2">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Ta bort vän</AlertDialogTitle>
-                    <AlertDialogDescription>
+                    <AlertDialogTitle className="text-lg sm:text-xl">Ta bort vän</AlertDialogTitle>
+                    <AlertDialogDescription className="text-sm sm:text-base">
                       Är du säker på att du vill ta bort {friend.profile.name} från din vänlista?
                       Denna åtgärd kan inte ångras.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                  <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                    <AlertDialogCancel className="w-full sm:w-auto">Avbryt</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={() => onRemoveFriend(friend.id)}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90 w-full sm:w-auto"
                     >
                       Ta bort
                     </AlertDialogAction>
