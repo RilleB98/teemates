@@ -13,47 +13,13 @@ import { useGroupChats } from "@/hooks/useGroupChats";
 import { ProfilePopover } from "@/components/ProfilePopover";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-// Simple test component to debug avatar loading
-const DebugAvatar = ({ userId, profile }: { userId: string; profile: any }) => {
-  const avatarUrl = profile?.avatar_url;
-  // Add cache buster to force reload
-  const cacheBustedUrl = avatarUrl ? `${avatarUrl}?t=${Date.now()}` : undefined;
-  
-  console.log(`[DEBUG] User ${userId}:`, {
-    profile,
-    avatarUrl,
-    cacheBustedUrl,
-    hasAvatarUrl: !!avatarUrl
-  });
-  
-  return (
-    <div className="flex flex-col items-center gap-1 p-2 border rounded bg-white">
-      <div className="text-xs font-bold">{profile?.name || 'No name'}</div>
-      <div className="text-xs text-gray-500">{userId.slice(0, 8)}...</div>
-      <div className="text-xs text-red-500">{avatarUrl ? 'Has URL' : 'No URL'}</div>
-      {avatarUrl && (
-        <div className="flex flex-col gap-1">
-          <img 
-            src={avatarUrl} 
-            alt="original" 
-            className="w-8 h-8 rounded-full border"
-            onLoad={() => console.log(`[DEBUG] Original image loaded for ${userId}`)}
-            onError={() => console.log(`[DEBUG] Original image FAILED for ${userId}`, avatarUrl)}
-          />
-          <img 
-            src={cacheBustedUrl} 
-            alt="cache-bust" 
-            className="w-8 h-8 rounded-full border-2 border-red-500"
-            onLoad={() => console.log(`[DEBUG] Cache-busted image loaded for ${userId}`)}
-            onError={() => console.log(`[DEBUG] Cache-busted image FAILED for ${userId}`, cacheBustedUrl)}
-          />
-        </div>
-      )}
-      <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs">
-        {profile?.name?.[0] || '?'}
-      </div>
-    </div>
-  );
+// Helper function to add cache busting to avatar URLs
+const addCacheBuster = (url?: string) => {
+  if (!url) return undefined;
+  // Only add cache buster in production or if URL contains updated_at info
+  const cacheBuster = Date.now();
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}t=${cacheBuster}`;
 };
 
 interface Message {
@@ -401,7 +367,7 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
         </Button>
         <div className="flex items-center space-x-3">
           <Avatar className="w-10 h-10 ring-2 ring-primary/20">
-            <AvatarImage src={friendId ? friendProfile?.avatar_url : undefined} />
+            <AvatarImage src={addCacheBuster(friendId ? friendProfile?.avatar_url : undefined)} />
             <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
               {friendId ? (friendProfile?.name?.[0]?.toUpperCase() || 'V') : 'G'}
             </AvatarFallback>
@@ -468,18 +434,6 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
         </div>
       </div>
 
-      {/* Debug panel - temporary */}
-      <div className="p-2 bg-yellow-100 border-b overflow-x-auto">
-        <div className="flex gap-2">
-          {Object.entries(userProfiles).map(([userId, profile]) => (
-            <DebugAvatar key={userId} userId={userId} profile={profile} />
-          ))}
-          {currentUserProfile && (
-            <DebugAvatar userId={user?.id || 'current'} profile={currentUserProfile} />
-          )}
-        </div>
-      </div>
-
       {/* Messages - Instagram style with better spacing */}
       <ScrollArea className="flex-1 px-4 py-2">
         {messages.length === 0 ? (
@@ -506,7 +460,7 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
               {!isOwn && isLastInGroup && (
                 <Avatar className="w-7 h-7 mb-1">
                   <AvatarImage 
-                    src={getUserProfile(message.user_id)?.avatar_url || undefined}
+                    src={addCacheBuster(getUserProfile(message.user_id)?.avatar_url)}
                     alt={getUserDisplayName(message)}
                   />
                   <AvatarFallback className="text-xs bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
@@ -559,7 +513,7 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
               {isOwn && isLastInGroup && (
                 <Avatar className="w-7 h-7 mb-1">
                   <AvatarImage 
-                    src={currentUserProfile?.avatar_url || undefined}
+                    src={addCacheBuster(currentUserProfile?.avatar_url)}
                     alt={currentUserProfile?.name || "You"}
                   />
                   <AvatarFallback className="text-xs bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
