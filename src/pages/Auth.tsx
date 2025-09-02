@@ -158,7 +158,7 @@ export const Auth = () => {
             <div className="w-10 h-10 xs:w-12 xs:h-12 bg-gradient-golf rounded-full flex items-center justify-center shadow-golf animate-float overflow-hidden">
               <img src={teeMatesLogo} alt="teeMates logo" className="w-full h-full object-cover" />
             </div>
-            <h1 className="text-xl xs:text-2xl md:text-3xl font-bold text-golf-premium">teeMates</h1>
+            <h1 className="text-xl xs:text-2xl md:text-3xl font-bold text-golf-premium">TeeMates</h1>
           </div>
           <p className="text-muted-foreground text-sm xs:text-base">Välkommen till golfgemenskapen</p>
         </div>
