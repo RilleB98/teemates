@@ -33,6 +33,7 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
   const [friendProfile, setFriendProfile] = useState<any>(null);
   const [groupChat, setGroupChat] = useState<any>(null);
   const [groupMembers, setGroupMembers] = useState<any[]>([]);
+  const [userProfiles, setUserProfiles] = useState<{[key: string]: any}>({});
   const { user } = useAuth();
   const { getGroupMembers } = useGroupChats();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -144,6 +145,27 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
       if (error) throw error;
       setMessages(data || []);
 
+      // Load user profiles for all unique users in the messages
+      if (data && data.length > 0) {
+        const uniqueUserIds = [...new Set(data.map(msg => msg.user_id))];
+        const userIds = uniqueUserIds.filter(id => id !== user?.id); // Exclude current user
+        
+        if (userIds.length > 0) {
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('user_id, name, avatar_url')
+            .in('user_id', userIds);
+            
+          if (profiles) {
+            const profileMap = profiles.reduce((acc, profile) => {
+              acc[profile.user_id] = profile;
+              return acc;
+            }, {} as {[key: string]: any});
+            setUserProfiles(profileMap);
+          }
+        }
+      }
+
       // Mark messages from others as read when opening the chat
       if (user && data && data.length > 0) {
         const messagesFromOthers = data.filter(msg => msg.user_id !== user.id);
@@ -234,10 +256,17 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
   };
 
   const getUserProfile = (userId: string) => {
+    // Check userProfiles first (for users who have sent messages)
+    if (userProfiles[userId]) {
+      return userProfiles[userId];
+    }
+    
+    // Then check group members (for group chats)
     if (groupChatId && groupMembers.length > 0) {
       const member = groupMembers.find(m => m.user_id === userId);
       return member?.profile;
     }
+    
     return null;
   };
 
@@ -332,7 +361,7 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
             >
               {!isOwn && isLastInGroup && (
                 <Avatar className="w-7 h-7 mb-1">
-                  <AvatarImage src={player1} />
+                  <AvatarImage src={getUserProfile(message.user_id)?.avatar_url} />
                   <AvatarFallback className="text-xs bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
                     {getUserDisplayName(message)[0]}
                   </AvatarFallback>
