@@ -137,17 +137,12 @@ export const Messages = () => {
                               {friend.profile.name?.[0]?.toUpperCase() || 'V'}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2">
+                            <div className="flex-1">
                               <h3 className={`font-semibold ${
                                 hasUnread ? 'text-green-900' : 'text-gray-900'
                               }`}>
                                 {friend.profile.name || 'Okänd vän'}
                               </h3>
-                              <div className={`w-2 h-2 rounded-full ${
-                                hasUnread ? 'bg-green-600' : 'bg-green-500'
-                              }`}></div>
-                            </div>
                             <div className={`text-sm ${
                               hasUnread ? 'text-green-700' : 'text-gray-500'
                             } truncate flex items-center justify-between`}>
