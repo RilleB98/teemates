@@ -1,5 +1,6 @@
 import { MessageCircle, UserMinus, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -92,7 +93,16 @@ export const FriendsList = ({ friends, onRemoveFriend, onStartMessage, onProfile
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => navigate('/messages', { state: { selectedFriendId: friend.friend_id } })}
+                onClick={async () => {
+                  const { data: { user } } = await supabase.auth.getUser();
+                  if (user) {
+                    // Generate chat room ID using the same logic as the database function
+                    const chatRoomId = user.id < friend.friend_id 
+                      ? `${user.id}_${friend.friend_id}` 
+                      : `${friend.friend_id}_${user.id}`;
+                    navigate(`/messages?chat=${chatRoomId}`);
+                  }
+                }}
                 className="h-8 w-8 sm:h-9 sm:w-9 p-0"
               >
                 <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
