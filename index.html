@@ -46,9 +46,21 @@
       @media (min-width: 1280px) {.container{max-width:1280px}}
     </style>
 
-    <!-- Defer non-critical CSS to avoid render blocking -->
-    <link rel="preload" href="/src/index.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <!-- Eliminate render-blocking CSS with improved async loading -->
+    <link rel="preload" href="/src/index.css" as="style" onload="this.onload=null;this.rel='stylesheet'" media="print">
     <noscript><link rel="stylesheet" href="/src/index.css"></noscript>
+    
+    <!-- JavaScript to ensure CSS loads without blocking -->
+    <script>
+      (function() {
+        var link = document.querySelector('link[href="/src/index.css"]');
+        if (link) {
+          setTimeout(function() {
+            link.media = 'all';
+          }, 0);
+        }
+      })();
+    </script>
 
     <meta property="og:title" content="TeeMates - Golf Dating App" />
     <meta property="og:description" content="Hitta golfpartners och träffa nya människor som delar din passion för golf" />
