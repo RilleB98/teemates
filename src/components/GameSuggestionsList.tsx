@@ -101,7 +101,7 @@ export const GameSuggestionsList = () => {
       if (!user) return;
 
       // Extract friend IDs from the useFriends hook
-      const friendIds = friends.map(friend => friend.user_id);
+      const friendIds = friends.map(friend => friend.friend_id);
 
       // Include current user in the list to see their own suggestions
       const allowedUserIds = [...friendIds, user.id];
