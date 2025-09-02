@@ -66,8 +66,9 @@ export const useGroupChats = () => {
 
       if (groupError) throw groupError;
 
-      // Add the creator as a member
-      const membersToAdd = [user.id, ...memberIds].map(userId => ({
+      // Add the creator and selected members (avoid duplicates)
+      const uniqueMemberIds = [...new Set([user.id, ...memberIds])];
+      const membersToAdd = uniqueMemberIds.map(userId => ({
         group_chat_id: groupChat.id,
         user_id: userId,
         added_by: user.id
