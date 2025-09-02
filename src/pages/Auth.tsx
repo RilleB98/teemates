@@ -8,51 +8,52 @@ import { Target, Mail, Lock, User, ArrowLeft, Apple } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate, Link } from "react-router-dom";
-
 export const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-
   useEffect(() => {
     // Check if user is already logged in
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (session?.user) {
-          navigate("/");
-        }
+    const {
+      data: {
+        subscription
       }
-    );
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
         navigate("/");
       }
     });
 
+    // Check for existing session
+    supabase.auth.getSession().then(({
+      data: {
+        session
+      }
+    }) => {
+      if (session?.user) {
+        navigate("/");
+      }
+    });
     return () => subscription.unsubscribe();
   }, [navigate]);
-
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       toast.error("Vänligen fyll i alla fält");
       return;
     }
-
     setLoading(true);
     const redirectUrl = `${window.location.origin}/`;
-
-    const { error } = await supabase.auth.signUp({
+    const {
+      error
+    } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectUrl
       }
     });
-
     if (error) {
       if (error.message.includes("already registered")) {
         toast.error("Den här e-postadressen är redan registrerad");
@@ -64,20 +65,20 @@ export const Auth = () => {
     }
     setLoading(false);
   };
-
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       toast.error("Vänligen fyll i alla fält");
       return;
     }
-
     setLoading(true);
-    const { error, data } = await supabase.auth.signInWithPassword({
+    const {
+      error,
+      data
+    } = await supabase.auth.signInWithPassword({
       email,
-      password,
+      password
     });
-
     if (error) {
       if (error.message.includes("Invalid login credentials")) {
         toast.error("Fel e-postadress eller lösenord");
@@ -87,12 +88,9 @@ export const Auth = () => {
     } else {
       // Try to get the user's name from their profile
       try {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("name")
-          .eq("user_id", data.user.id)
-          .maybeSingle();
-        
+        const {
+          data: profile
+        } = await supabase.from("profiles").select("name").eq("user_id", data.user.id).maybeSingle();
         const userName = profile?.name;
         if (userName) {
           toast.success(`Välkommen tillbaka ${userName}!`);
@@ -103,30 +101,31 @@ export const Auth = () => {
         // If we can't get the name, just show the generic message
         toast.success("Välkommen tillbaka!");
       }
-      
       navigate("/");
     }
     setLoading(false);
   };
-
   const handleAppleSignIn = async () => {
     setLoading(true);
     try {
       console.log('Starting Apple sign-in...');
-      
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const {
+        data,
+        error
+      } = await supabase.auth.signInWithOAuth({
         provider: 'apple',
         options: {
           redirectTo: `${window.location.origin}/`,
           queryParams: {
             access_type: 'offline',
-            prompt: 'consent',
+            prompt: 'consent'
           }
         }
       });
-
-      console.log('Apple OAuth response:', { data, error });
-
+      console.log('Apple OAuth response:', {
+        data,
+        error
+      });
       if (error) {
         console.error('Apple sign-in error:', error);
         toast.error("Apple-inloggning misslyckades: " + error.message);
@@ -146,9 +145,7 @@ export const Auth = () => {
       setLoading(false);
     }
   };
-
-  return (
-    <div className="min-h-screen bg-gradient-hero flex flex-col items-center justify-center p-4 xs:p-6">
+  return <div className="min-h-screen bg-gradient-hero flex flex-col items-center justify-center p-4 xs:p-6">
       <div className="w-full max-w-sm xs:max-w-md animate-slide-up">
         {/* Header */}
         <div className="text-center mb-6 xs:mb-8">
@@ -160,7 +157,7 @@ export const Auth = () => {
             <div className="w-10 h-10 xs:w-12 xs:h-12 bg-gradient-golf rounded-full flex items-center justify-center shadow-golf animate-float">
               <Target className="w-6 h-6 xs:w-7 xs:h-7 text-white" />
             </div>
-            <h1 className="text-xl xs:text-2xl md:text-3xl font-bold text-golf-premium">teemates</h1>
+            <h1 className="text-xl xs:text-2xl md:text-3xl font-bold text-golf-premium">TeeMates</h1>
           </div>
           <p className="text-muted-foreground text-sm xs:text-base">Välkommen till golfgemenskapen</p>
         </div>
@@ -183,15 +180,7 @@ export const Auth = () => {
                     <Label htmlFor="signin-email" className="text-sm xs:text-base font-medium">E-postadress</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="signin-email"
-                        type="email"
-                        placeholder="din@email.se"
-                        className="pl-10 h-10 xs:h-11 bg-background/50 border-muted-foreground/20 focus:border-golf-green transition-all duration-200"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
+                      <Input id="signin-email" type="email" placeholder="din@email.se" className="pl-10 h-10 xs:h-11 bg-background/50 border-muted-foreground/20 focus:border-golf-green transition-all duration-200" value={email} onChange={e => setEmail(e.target.value)} required />
                     </div>
                   </div>
                   
@@ -199,23 +188,11 @@ export const Auth = () => {
                     <Label htmlFor="signin-password" className="text-sm xs:text-base font-medium">Lösenord</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="signin-password"
-                        type="password"
-                        placeholder="Ditt lösenord"
-                        className="pl-10 h-10 xs:h-11 bg-background/50 border-muted-foreground/20 focus:border-golf-green transition-all duration-200"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                      />
+                      <Input id="signin-password" type="password" placeholder="Ditt lösenord" className="pl-10 h-10 xs:h-11 bg-background/50 border-muted-foreground/20 focus:border-golf-green transition-all duration-200" value={password} onChange={e => setPassword(e.target.value)} required />
                     </div>
                   </div>
                   
-                  <Button 
-                    type="submit" 
-                    className="w-full h-10 xs:h-11 bg-gradient-golf hover:shadow-golf transition-all duration-300 text-sm xs:text-base font-medium" 
-                    disabled={loading}
-                  >
+                  <Button type="submit" className="w-full h-10 xs:h-11 bg-gradient-golf hover:shadow-golf transition-all duration-300 text-sm xs:text-base font-medium" disabled={loading}>
                     {loading ? "Loggar in..." : "Logga in"}
                   </Button>
                 </form>
@@ -229,12 +206,7 @@ export const Auth = () => {
                   </div>
                 </div>
 
-                <Button 
-                  onClick={handleAppleSignIn}
-                  variant="outline"
-                  className="w-full h-10 xs:h-11 border-muted-foreground/20 bg-black text-white hover:bg-black/90 transition-all duration-300 text-sm xs:text-base font-medium" 
-                  disabled={loading}
-                >
+                <Button onClick={handleAppleSignIn} variant="outline" className="w-full h-10 xs:h-11 border-muted-foreground/20 bg-black text-white hover:bg-black/90 transition-all duration-300 text-sm xs:text-base font-medium" disabled={loading}>
                   <Apple className="w-4 h-4 mr-2" />
                   Logga in med Apple
                 </Button>
@@ -246,15 +218,7 @@ export const Auth = () => {
                     <Label htmlFor="signup-email" className="text-sm xs:text-base font-medium">E-postadress</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="signup-email"
-                        type="email"
-                        placeholder="din@email.se"
-                        className="pl-10 h-10 xs:h-11 bg-background/50 border-muted-foreground/20 focus:border-golf-green transition-all duration-200"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
+                      <Input id="signup-email" type="email" placeholder="din@email.se" className="pl-10 h-10 xs:h-11 bg-background/50 border-muted-foreground/20 focus:border-golf-green transition-all duration-200" value={email} onChange={e => setEmail(e.target.value)} required />
                     </div>
                   </div>
                   
@@ -262,25 +226,12 @@ export const Auth = () => {
                     <Label htmlFor="signup-password" className="text-sm xs:text-base font-medium">Lösenord</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="signup-password"
-                        type="password"
-                        placeholder="Välj ett säkert lösenord"
-                        className="pl-10 h-10 xs:h-11 bg-background/50 border-muted-foreground/20 focus:border-golf-green transition-all duration-200"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        minLength={6}
-                      />
+                      <Input id="signup-password" type="password" placeholder="Välj ett säkert lösenord" className="pl-10 h-10 xs:h-11 bg-background/50 border-muted-foreground/20 focus:border-golf-green transition-all duration-200" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
                     </div>
                     <p className="text-xs text-muted-foreground">Minst 6 tecken</p>
                   </div>
                   
-                  <Button 
-                    type="submit" 
-                    className="w-full h-10 xs:h-11 bg-gradient-golf hover:shadow-golf transition-all duration-300 text-sm xs:text-base font-medium" 
-                    disabled={loading}
-                  >
+                  <Button type="submit" className="w-full h-10 xs:h-11 bg-gradient-golf hover:shadow-golf transition-all duration-300 text-sm xs:text-base font-medium" disabled={loading}>
                     <User className="w-4 h-4 mr-2" />
                     {loading ? "Skapar konto..." : "Skapa konto"}
                   </Button>
@@ -290,6 +241,5 @@ export const Auth = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
