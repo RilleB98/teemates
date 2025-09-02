@@ -123,8 +123,19 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
       if (!data.time) {
         throw new Error("Time is required");
       }
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) throw new Error("Not authenticated");
+      
+      // Check authentication before proceeding
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      
+      if (authError) {
+        console.error('Auth error:', authError);
+        throw new Error(`Autentiseringsfel: ${authError.message}`);
+      }
+      
+      if (!authData.user) {
+        console.error('User not authenticated');
+        throw new Error("Du måste logga in för att skapa spelförslag. Gå till inloggningssidan och logga in först.");
+      }
 
       const suggestionData = {
         golf_course_id: data.golfCourseId,
@@ -142,7 +153,7 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
           .from('round_suggestions')
           .update(suggestionData)
           .eq('id', suggestionId)
-          .eq('user_id', user.user.id); // Ensure user can only edit their own suggestions
+          .eq('user_id', authData.user.id); // Ensure user can only edit their own suggestions
 
         if (error) {
           console.error('Supabase error:', error);
@@ -158,7 +169,7 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
       } else {
         // Create new suggestion with group chat
         console.log('Creating game suggestion with data:', {
-          user_id: user.user.id,
+          user_id: authData.user.id,
           ...suggestionData
         });
 
@@ -173,14 +184,14 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
         const chatName = `${courseName} ${format(data.date, 'd MMM', { locale: sv })} kl ${data.time}`;
 
         console.log('About to create group chat with name:', chatName);
-        console.log('User ID:', user.user.id);
+        console.log('User ID:', authData.user.id);
 
         // Create group chat first - fixed RLS policy
         const { data: groupChat, error: chatError } = await supabase
           .from('group_chats')
           .insert({
             name: chatName,
-            created_by: user.user.id
+            created_by: authData.user.id
           })
           .select()
           .single();
@@ -198,8 +209,8 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
           .from('group_chat_members')
           .insert({
             group_chat_id: groupChat.id,
-            user_id: user.user.id,
-            added_by: user.user.id
+            user_id: authData.user.id,
+            added_by: authData.user.id
           });
 
         if (memberError) {
@@ -214,7 +225,7 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
         const { error } = await supabase
           .from('round_suggestions')
           .insert({
-            user_id: user.user.id,
+            user_id: authData.user.id,
             group_chat_id: groupChat.id,
             ...suggestionData
           });
