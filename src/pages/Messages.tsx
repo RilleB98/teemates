@@ -122,7 +122,7 @@ export const Messages = () => {
                       key={friend.id}
                       className={`shadow-sm border transition-all duration-200 cursor-pointer ${
                         hasUnread 
-                          ? 'bg-green-50 border-green-200 hover:bg-green-100 hover:shadow-md' 
+                          ? 'bg-green-100 border-green-300 hover:bg-green-200 hover:shadow-md' 
                           : 'bg-white border-gray-200 hover:shadow-md'
                       }`}
                       onClick={() => setSelectedFriend(friend.friend_id)}
