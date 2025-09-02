@@ -176,17 +176,22 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
         const uniqueUserIds = [...new Set(data.map(msg => msg.user_id))];
         const userIds = uniqueUserIds.filter(id => id !== user?.id); // Exclude current user
         
+        console.log('Loading profiles for users:', userIds);
+        
         if (userIds.length > 0) {
           const { data: profiles } = await supabase
             .from('profiles')
             .select('user_id, name, avatar_url')
             .in('user_id', userIds);
             
+          console.log('Loaded profiles:', profiles);
+            
           if (profiles) {
             const profileMap = profiles.reduce((acc, profile) => {
               acc[profile.user_id] = profile;
               return acc;
             }, {} as {[key: string]: any});
+            console.log('Profile map:', profileMap);
             setUserProfiles(profileMap);
           }
         }
