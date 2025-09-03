@@ -444,7 +444,10 @@ export const GameSuggestionsList = () => {
             Du behöver en Premium-prenumeration för att se och delta i spelförslag.
           </p>
           <Button
-            onClick={() => setShowPremiumModal(true)}
+            onClick={() => {
+              console.log('Premium button clicked');
+              setShowPremiumModal(true);
+            }}
             className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white"
           >
             <Crown className="w-4 h-4 mr-2" />
