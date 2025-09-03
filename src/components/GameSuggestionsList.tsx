@@ -187,10 +187,36 @@ export const GameSuggestionsList = () => {
   
   const refreshSelectedSuggestion = async (suggestionId: string) => {
     if (selectedSuggestion && selectedSuggestion.id === suggestionId) {
-      // Find the updated suggestion from the suggestions state
-      const updatedSuggestion = suggestions.find(s => s.id === suggestionId);
-      if (updatedSuggestion) {
-        setSelectedSuggestion(updatedSuggestion);
+      try {
+        // Fetch the updated suggestion directly from the database
+        const { data: updatedSuggestion } = await supabase
+          .from('round_suggestions')
+          .select(`
+            *,
+            golf_courses:golf_course_id (name, location),
+            profiles:user_id (name, avatar_url)
+          `)
+          .eq('id', suggestionId)
+          .single();
+
+        if (updatedSuggestion) {
+          // Get updated participants
+          const { data: participants } = await supabase
+            .from('round_suggestion_participants')
+            .select(`
+              *,
+              profiles:user_id (name, avatar_url)
+            `)
+            .eq('round_suggestion_id', suggestionId);
+
+          // Update the selected suggestion with fresh data
+          setSelectedSuggestion({
+            ...updatedSuggestion,
+            participants: participants || []
+          } as any);
+        }
+      } catch (error) {
+        console.error('Error refreshing selected suggestion:', error);
       }
     }
   };
