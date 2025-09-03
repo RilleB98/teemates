@@ -265,7 +265,8 @@ export const GameSuggestionsList = () => {
       });
 
       await fetchGameSuggestions();
-      await refreshSelectedSuggestion(suggestionId);
+      // Small delay to ensure database has updated
+      setTimeout(() => refreshSelectedSuggestion(suggestionId), 100);
     } catch (error) {
       console.error('Error joining round:', error);
       toast({
