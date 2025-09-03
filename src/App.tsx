@@ -16,6 +16,13 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AdminOnlyRoute } from "./components/AdminOnlyRoute";
 import NotFound from "./pages/NotFound";
 import WebViewGuard from "./components/WebViewGuard";
+import { useNotificationProcessor } from "./hooks/useNotificationProcessor";
+
+// Component to handle notifications
+const NotificationHandler = () => {
+  useNotificationProcessor();
+  return null;
+};
 
 // Create QueryClient instance outside of component to prevent recreation
 const queryClient = new QueryClient({
@@ -33,6 +40,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <NotificationHandler />
         <TooltipProvider>
           <Toaster />
           <Sonner />

@@ -236,6 +236,36 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_queue: {
+        Row: {
+          created_at: string | null
+          id: string
+          message_content: string
+          notification_type: string
+          processed: boolean | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message_content: string
+          notification_type?: string
+          processed?: boolean | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message_content?: string
+          notification_type?: string
+          processed?: boolean | null
+          recipient_id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
