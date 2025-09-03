@@ -84,7 +84,7 @@ export const GameSuggestionsList = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [friends]);
+  }, [friends, selectedSuggestion]);
 
   const getCurrentUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
