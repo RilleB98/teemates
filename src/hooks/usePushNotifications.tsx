@@ -42,20 +42,27 @@ export const usePushNotifications = () => {
     // On success, we should be able to receive notifications
     PushNotifications.addListener('registration', async (token: Token) => {
       console.log('🔔 Push registration success, token: ' + token.value);
+      console.log('👤 Trying to save token for user:', user.id);
       
       // Store the token in the user's profile for sending notifications
       try {
-        const { error } = await supabase
+        console.log('📝 About to call supabase.from("profiles").update()...');
+        const { data, error } = await supabase
           .from('profiles')
           .update({ 
             push_token: token.value 
           })
-          .eq('user_id', user.id);
+          .eq('user_id', user.id)
+          .select();
+        
+        console.log('📊 Supabase response data:', data);
+        console.log('📊 Supabase response error:', error);
         
         if (error) {
           console.error('❌ Kunde inte spara token i Supabase:', error);
         } else {
           console.log('✅ Push token saved successfully for user:', user.id);
+          console.log('✅ Updated profile data:', data);
         }
       } catch (error) {
         console.error('❌ Error storing push token:', error);
@@ -104,7 +111,7 @@ export const usePushNotifications = () => {
         .from('profiles')
         .select('push_token')
         .eq('user_id', recipientId)
-        .single();
+        .maybeSingle();
 
       if (!profile?.push_token) {
         console.log('No push token found for recipient');
