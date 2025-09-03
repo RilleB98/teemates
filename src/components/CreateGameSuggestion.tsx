@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { sv } from "date-fns/locale";
-import { CalendarIcon, Clock, MapPin, Plus } from "lucide-react";
+import { CalendarIcon, Clock, MapPin, Plus, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
@@ -19,6 +19,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { useSubscription } from "@/hooks/useSubscription";
+import { PremiumUpgradeModal } from "./PremiumUpgradeModal";
 
 const gameSuggestionSchema = z.object({
   golfCourseId: z.string().min(1, "Välj en golfbana"),
@@ -48,6 +50,8 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { isSubscribed } = useSubscription();
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [golfCourses, setGolfCourses] = useState<Array<{ id: string; name: string; location: string }>>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -293,6 +297,36 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
     "21:00-21:30", "21:30-22:00"
   ];
 
+  // Check subscription status before showing form
+  if (!isSubscribed) {
+    return (
+      <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-golf-premium">
+            <Crown className="w-5 h-5" />
+            Premium krävs
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-center space-y-4">
+          <p className="text-muted-foreground">
+            Du behöver en Premium-prenumeration för att skapa och se spelförslag.
+          </p>
+          <Button
+            onClick={() => setShowPremiumModal(true)}
+            className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white"
+          >
+            <Crown className="w-4 h-4 mr-2" />
+            Skaffa Premium
+          </Button>
+          <PremiumUpgradeModal
+            isOpen={showPremiumModal}
+            onClose={() => setShowPremiumModal(false)}
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl">
       <CardHeader>
@@ -477,6 +511,11 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
           </form>
         </Form>
       </CardContent>
+      
+      <PremiumUpgradeModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+      />
     </Card>
   );
 };

@@ -11,6 +11,7 @@ import { Messages } from "./pages/Messages";
 import { Auth } from "./pages/Auth";
 import { PublicLanding } from "./pages/PublicLanding";
 import { AuthProvider } from "./hooks/useAuth";
+import { SubscriptionProvider } from "./hooks/useSubscription";
 import { AdminGolf } from "./pages/AdminGolf";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AdminOnlyRoute } from "./components/AdminOnlyRoute";
@@ -42,7 +43,8 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <NotificationHandler />
+        <SubscriptionProvider>
+          <NotificationHandler />
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -87,6 +89,7 @@ const App = () => {
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
+        </SubscriptionProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

@@ -1,21 +1,39 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Star, Users } from "lucide-react";
+import { MapPin, Star, Users, Crown } from "lucide-react";
+import { useState } from "react";
+import { useSubscription } from "@/hooks/useSubscription";
+import { PremiumUpgradeModal } from "./PremiumUpgradeModal";
+import { CourseSwipeModal } from "./CourseSwipeModal";
 
 interface CourseCardProps {
   name: string;
   location: string;
   image: string;
   activeUsers: number;
+  onSwipeClick?: () => void;
 }
 
 export const CourseCard = ({ 
   name, 
   location, 
   image, 
-  activeUsers 
+  activeUsers,
+  onSwipeClick
 }: CourseCardProps) => {
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [showSwipeModal, setShowSwipeModal] = useState(false);
+  const { isSubscribed } = useSubscription();
+
+  const handleSwipeClick = () => {
+    if (!isSubscribed) {
+      setShowPremiumModal(true);
+      return;
+    }
+    setShowSwipeModal(true);
+    onSwipeClick?.();
+  };
   return (
     <Card className="overflow-hidden shadow-golf hover:shadow-premium transition-spring transform hover:scale-105">
       {/* Course Image */}
@@ -43,12 +61,42 @@ export const CourseCard = ({
           </div>
         </div>
         
-        <div className="flex justify-center pt-2 sm:pt-4">
-          <Button variant="golf" size="sm" className="w-full text-sm sm:text-base touch-target">
+        <div className="flex gap-2 pt-2 sm:pt-4">
+          <Button variant="outline" size="sm" className="flex-1 text-sm sm:text-base touch-target">
             Visa detaljer
+          </Button>
+          <Button 
+            variant="default" 
+            size="sm" 
+            className={`flex-1 text-sm sm:text-base touch-target ${!isSubscribed ? 'bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600' : ''}`}
+            onClick={handleSwipeClick}
+          >
+            {isSubscribed ? (
+              <>
+                <Users className="w-4 h-4 mr-2" />
+                Swipa här
+              </>
+            ) : (
+              <>
+                <Crown className="w-4 h-4 mr-2" />
+                Premium
+              </>
+            )}
           </Button>
         </div>
       </div>
+
+      <PremiumUpgradeModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+      />
+
+      <CourseSwipeModal
+        isOpen={showSwipeModal}
+        onClose={() => setShowSwipeModal(false)}
+        courseName={name}
+        courseLocation={location}
+      />
     </Card>
   );
 };
