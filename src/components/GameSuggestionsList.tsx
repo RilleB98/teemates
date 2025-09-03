@@ -651,6 +651,15 @@ export const GameSuggestionsList = () => {
                       )}
 
                       {/* Action Button */}
+                      {!isOwner && !isParticipant && spotsLeft > 0 && (
+                        <Button 
+                          onClick={() => joinGame(selectedSuggestion.id)} 
+                          className="w-full bg-golf-green hover:bg-golf-green/90"
+                        >
+                          Anmäl dig ({spotsLeft} platser kvar)
+                        </Button>
+                      )}
+                      
                       {!isOwner && spotsLeft === 0 && (
                         <Button disabled className="w-full">
                           Fullbokad
