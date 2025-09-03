@@ -36,12 +36,12 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={
+              <Route path="/" element={<PublicLanding />} />
+              <Route path="/app" element={
                 <ProtectedRoute>
                   <SwipeMatch />
                 </ProtectedRoute>
               } />
-              <Route path="/landing" element={<PublicLanding />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/courses" element={<Courses />} />
               <Route path="/friends" element={<Friends />} />
