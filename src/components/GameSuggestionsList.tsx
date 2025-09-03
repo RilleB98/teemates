@@ -577,8 +577,8 @@ export const GameSuggestionsList = () => {
                                     </>
                                   ) : (
                                     <DropdownMenuItem 
-                                      onClick={() => {
-                                        leaveGame(selectedSuggestion.id);
+                                      onClick={async () => {
+                                        await leaveGame(selectedSuggestion.id);
                                         setModalOpen(false);
                                       }}
                                       className="text-red-600"
