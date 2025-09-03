@@ -67,11 +67,7 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
 
       setPhotos(formattedPhotos);
     } catch (error: any) {
-      toast({
-        title: "Fel",
-        description: "Kunde inte ladda foton.",
-        variant: "destructive"
-      });
+      console.error('Failed to load photos:', error);
     }
   };
 
@@ -142,17 +138,8 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
       };
 
       setPhotos(prev => [...prev, newPhoto]);
-      
-      toast({
-        title: "Bild uppladdad",
-        description: isFirstPhoto ? "Din profilbild har uppdaterats." : "Bilden har lagts till i ditt galleri."
-      });
     } catch (error: any) {
-      toast({
-        title: "Fel",
-        description: error.message || "Kunde inte ladda upp bilden.",
-        variant: "destructive"
-      });
+      console.error('Failed to upload image:', error);
     } finally {
       setUploading(false);
       setShowImageCropper(false);
@@ -190,17 +177,8 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
       })));
 
       onAvatarUpdate?.(photo.url);
-      
-      toast({
-        title: "Huvudbild uppdaterad",
-        description: "Bilden är nu din huvudprofilbild."
-      });
     } catch (error: any) {
-      toast({
-        title: "Fel",
-        description: "Kunde inte uppdatera huvudbild.",
-        variant: "destructive"
-      });
+      console.error('Failed to update main photo:', error);
     }
   };
 
@@ -239,17 +217,8 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
           .eq('user_id', user.id);
         onAvatarUpdate?.('');
       }
-
-      toast({
-        title: "Bild borttagen",
-        description: "Bilden har tagits bort från ditt galleri."
-      });
     } catch (error: any) {
-      toast({
-        title: "Fel",
-        description: "Kunde inte ta bort bilden.",
-        variant: "destructive"
-      });
+      console.error('Failed to delete photo:', error);
     }
   };
 
