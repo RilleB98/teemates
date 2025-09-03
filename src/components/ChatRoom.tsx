@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, ArrowLeft, Users, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { toast } from "sonner";
+
 import { Link } from "react-router-dom";
 import { markMessagesAsRead } from "@/utils/messageUtils";
 import { useGroupChats } from "@/hooks/useGroupChats";
@@ -215,7 +215,7 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
       }
     } catch (error) {
       console.error('Error loading messages:', error);
-      toast.error("Kunde inte ladda meddelanden");
+      console.log("Kunde inte ladda meddelanden");
     } finally {
       setLoading(false);
     }
@@ -223,12 +223,12 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) {
-      toast.error("Meddelandet kan inte vara tomt");
+      return;
       return;
     }
     
     if (!user) {
-      toast.error("Du måste vara inloggad för att skicka meddelanden");
+      return;
       return;
     }
 
@@ -246,10 +246,10 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
         throw error;
       }
       setNewMessage("");
-      toast.success("Meddelande skickat!");
+      // Meddelande skickat
     } catch (error) {
       console.error('Error sending message:', error);
-      toast.error("Kunde inte skicka meddelandet");
+      console.log("Kunde inte skicka meddelandet");
     }
   };
 
@@ -318,14 +318,14 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
     try {
       const success = await removeMemberFromGroup(groupChatId, user.id);
       if (success) {
-        toast.success("Du har lämnat gruppchattan");
+        // Du har lämnat gruppchattan
         onBack(); // Go back to messages list
       } else {
-        toast.error("Kunde inte lämna gruppchatt");
+        console.log("Kunde inte lämna gruppchatt");
       }
     } catch (error) {
       console.error('Error leaving group chat:', error);
-      toast.error("Något gick fel");
+      console.log("Något gick fel");
     }
   };
 

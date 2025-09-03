@@ -3,7 +3,7 @@ import { PushNotifications, Token, PushNotificationSchema, ActionPerformed } fro
 import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
-import { toast } from '@/hooks/use-toast';
+
 
 export const usePushNotifications = () => {
   const { user } = useAuth();
@@ -79,10 +79,7 @@ export const usePushNotifications = () => {
 
     // Show us the notification payload if the app is open on our device
     PushNotifications.addListener('pushNotificationReceived', (notification: PushNotificationSchema) => {
-      toast({
-        title: notification.title || 'Ny notifikation',
-        description: notification.body,
-      });
+      // Push notification received
     });
 
     // Method called when tapping on a notification

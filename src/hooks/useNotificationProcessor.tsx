@@ -45,12 +45,7 @@ export const useNotificationProcessor = () => {
             if (!notification.processed) {
               console.log(`Push notification would be sent: ${senderName} - ${notification.message_content}`);
               
-              // Show toast notification for web testing
-              const { toast } = await import('@/hooks/use-toast');
-              toast({
-                title: `Nytt meddelande från ${senderName}`,
-                description: notification.message_content,
-              });
+              // Notification would be shown
             }
             
             // Send push notification (only works on native)

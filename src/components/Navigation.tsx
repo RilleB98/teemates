@@ -11,7 +11,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+
 import { PremiumUpgradeModal } from "./PremiumUpgradeModal";
 interface NavLinkProps {
   icon: React.ElementType;
@@ -77,7 +77,7 @@ export const Navigation = ({
   }, []);
   const handleLogout = useCallback(async () => {
     await supabase.auth.signOut();
-    toast.success("Du är nu utloggad");
+    // Du är nu utloggad
     setIsMobileMenuOpen(false);
   }, []);
   const badgeCount = useMemo(() => formatBadgeCount(messageCount), [messageCount, formatBadgeCount]);

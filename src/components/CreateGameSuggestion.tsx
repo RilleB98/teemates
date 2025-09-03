@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -47,7 +47,7 @@ interface CreateGameSuggestionProps {
 }
 
 export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: CreateGameSuggestionProps) => {
-  const { toast } = useToast();
+  
   const { user } = useAuth();
   const navigate = useNavigate();
   const { isSubscribed } = useSubscription();
@@ -61,14 +61,9 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
   // Redirect to auth if not logged in
   useEffect(() => {
     if (!user) {
-      toast({
-        title: "Logga in krävs",
-        description: "Du måste logga in för att skapa spelförslag.",
-        variant: "destructive",
-      });
       navigate("/auth");
     }
-  }, [user, navigate, toast]);
+  }, [user, navigate]);
 
   console.log('CreateGameSuggestion initialData:', initialData);
   console.log('CreateGameSuggestion isEditMode:', isEditMode);
@@ -182,10 +177,7 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
 
         console.log('Round suggestion updated successfully');
 
-        toast({
-          title: "Spelförslag uppdaterat!",
-          description: "Ditt spelförslag har uppdaterats.",
-        });
+        // Spelförslag uppdaterat!
       } else {
         // Create new suggestion with group chat
         console.log('Creating game suggestion with data:', {
@@ -258,10 +250,7 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
 
         console.log('Round suggestion and group chat created successfully');
 
-        toast({
-          title: "Spelförslag skapat!",
-          description: "Dina vänner kan nu se ditt förslag och gå med i gruppchatten.",
-        });
+        // Spelförslag skapat!
 
         form.reset();
       }
@@ -275,11 +264,7 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
         hint: error?.hint,
         code: error?.code
       });
-      toast({
-        title: "Fel",
-        description: `Kunde inte ${isEditMode ? 'uppdatera' : 'skapa'} spelförslag. Försök igen.`,
-        variant: "destructive",
-      });
+      console.log("Fel vid skapande av spelförslag:", error);
     } finally {
       setIsLoading(false);
     }

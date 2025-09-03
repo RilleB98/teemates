@@ -8,7 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Users, Plus } from 'lucide-react';
 import { useFriends } from '@/hooks/useFriends';
 import { useGroupChats } from '@/hooks/useGroupChats';
-import { useToast } from '@/hooks/use-toast';
+
 
 interface CreateGroupChatDialogProps {
   onGroupCreated?: (groupId: string) => void;
@@ -22,24 +22,14 @@ export const CreateGroupChatDialog = ({ onGroupCreated }: CreateGroupChatDialogP
   
   const { friends } = useFriends();
   const { createGroupChat } = useGroupChats();
-  const { toast } = useToast();
+  
 
   const handleCreateGroup = async () => {
     if (!groupName.trim()) {
-      toast({ 
-        title: "Fel", 
-        description: "Gruppnamn krävs",
-        variant: "destructive"
-      });
       return;
     }
 
     if (selectedFriends.length === 0) {
-      toast({ 
-        title: "Fel", 
-        description: "Välj minst en vän att lägga till",
-        variant: "destructive"
-      });
       return;
     }
 
@@ -47,28 +37,16 @@ export const CreateGroupChatDialog = ({ onGroupCreated }: CreateGroupChatDialogP
     try {
       const groupChat = await createGroupChat(groupName, selectedFriends);
       if (groupChat) {
-        toast({ 
-          title: "Gruppchatt skapad", 
-          description: `${groupName} har skapats`
-        });
+        // Gruppchatt skapad
         setGroupName('');
         setSelectedFriends([]);
         setOpen(false);
         onGroupCreated?.(groupChat.id);
       } else {
-        toast({ 
-          title: "Fel", 
-          description: "Kunde inte skapa gruppchatt",
-          variant: "destructive"
-        });
+        // Kunde inte skapa gruppchatt
       }
     } catch (error) {
       console.error('Error creating group:', error);
-      toast({ 
-        title: "Fel", 
-        description: "Något gick fel",
-        variant: "destructive"
-      });
     } finally {
       setIsCreating(false);
     }

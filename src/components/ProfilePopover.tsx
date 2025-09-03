@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { UserPlus, User, MessageCircle } from 'lucide-react';
 import { useFriends } from '@/hooks/useFriends';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+
 
 interface ProfilePopoverProps {
   userId: string;
@@ -28,7 +28,7 @@ export const ProfilePopover = ({
   
   const { user } = useAuth();
   const { friends, sendFriendRequest } = useFriends();
-  const { toast } = useToast();
+  
 
   // Don't show popover for current user
   if (user?.id === userId) {
@@ -42,25 +42,13 @@ export const ProfilePopover = ({
     try {
       const success = await sendFriendRequest(userId);
       if (success) {
-        toast({
-          title: "Vänförfrågan skickad",
-          description: `Vänförfrågan skickad till ${userName}`
-        });
+        // Vänförfrågan skickad till användarnamn
         setOpen(false);
       } else {
-        toast({
-          title: "Fel",
-          description: "Kunde inte skicka vänförfrågan",
-          variant: "destructive"
-        });
+        // Kunde inte skicka vänförfrågan
       }
     } catch (error) {
-      console.error('Error sending friend request:', error);
-      toast({
-        title: "Fel",
-        description: "Något gick fel",
-        variant: "destructive"
-      });
+      console.log('Error sending friend request:', error);
     } finally {
       setIsLoading(false);
     }

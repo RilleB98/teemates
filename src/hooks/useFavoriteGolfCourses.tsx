@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
+
 import { useAuth } from './useAuth';
 
 export const useFavoriteGolfCourses = () => {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  
   const { user } = useAuth();
 
   useEffect(() => {
@@ -30,11 +30,6 @@ export const useFavoriteGolfCourses = () => {
       setFavorites(data?.map(item => item.golf_course_id) || []);
     } catch (error) {
       console.error('Error loading favorites:', error);
-      toast({
-        title: "Error",
-        description: "Kunde inte ladda favoriter",
-        variant: "destructive",
-      });
     } finally {
       setLoading(false);
     }
@@ -42,11 +37,6 @@ export const useFavoriteGolfCourses = () => {
 
   const toggleFavorite = async (golfCourseId: string) => {
     if (!user) {
-      toast({
-        title: "Logga in",
-        description: "Du måste vara inloggad för att markera favoriter",
-        variant: "destructive",
-      });
       return;
     }
 
@@ -63,10 +53,7 @@ export const useFavoriteGolfCourses = () => {
         if (error) throw error;
 
         setFavorites(prev => prev.filter(id => id !== golfCourseId));
-        toast({
-          title: "Borttagen från favoriter",
-          description: "Golfbanan har tagits bort från dina favoriter",
-        });
+        // Golfbanan har tagits bort från dina favoriter
       } else {
         const { error } = await supabase
           .from('favorite_golf_courses')
@@ -78,18 +65,10 @@ export const useFavoriteGolfCourses = () => {
         if (error) throw error;
 
         setFavorites(prev => [...prev, golfCourseId]);
-        toast({
-          title: "Tillagd i favoriter",
-          description: "Golfbanan har lagts till i dina favoriter",
-        });
+        // Golfbanan har lagts till i dina favoriter
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
-      toast({
-        title: "Error",
-        description: "Kunde inte uppdatera favoriter",
-        variant: "destructive",
-      });
     }
   };
 

@@ -13,7 +13,7 @@ import { useUnreadMessagesByFriend } from "@/hooks/useUnreadMessagesByFriend";
 import { useLatestMessages } from "@/hooks/useLatestMessages";
 import { useAuth } from "@/hooks/useAuth";
 import { MessageCircle, Users, ChevronRight } from "lucide-react";
-import { toast } from "sonner";
+
 
 export const Messages = () => {
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);

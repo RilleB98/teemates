@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Target, Mail, Lock, User, ArrowLeft, Apple } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+
 import { useNavigate, Link } from "react-router-dom";
 import teeMatesLogo from "@/assets/teemates-icon.png";
 export const Auth = () => {
@@ -41,7 +41,6 @@ export const Auth = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.error("Vänligen fyll i alla fält");
       return;
     }
     setLoading(true);
@@ -56,20 +55,15 @@ export const Auth = () => {
       }
     });
     if (error) {
-      if (error.message.includes("already registered")) {
-        toast.error("Den här e-postadressen är redan registrerad");
-      } else {
-        toast.error("Registrering misslyckades: " + error.message);
-      }
+      console.log(error.message);
     } else {
-      toast.success("Konto skapat! Kontrollera din e-post för bekräftelse.");
+      // Konto skapat! Kontrollera din e-post för bekräftelse.
     }
     setLoading(false);
   };
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.error("Vänligen fyll i alla fält");
       return;
     }
     setLoading(true);
@@ -81,27 +75,9 @@ export const Auth = () => {
       password
     });
     if (error) {
-      if (error.message.includes("Invalid login credentials")) {
-        toast.error("Fel e-postadress eller lösenord");
-      } else {
-        toast.error("Inloggning misslyckades: " + error.message);
-      }
+      console.log(error.message);
     } else {
-      // Try to get the user's name from their profile
-      try {
-        const {
-          data: profile
-        } = await supabase.from("profiles").select("name").eq("user_id", data.user.id).maybeSingle();
-        const userName = profile?.name;
-        if (userName) {
-          toast.success(`Välkommen tillbaka ${userName}!`);
-        } else {
-          toast.success("Välkommen tillbaka!");
-        }
-      } catch (profileError) {
-        // If we can't get the name, just show the generic message
-        toast.success("Välkommen tillbaka!");
-      }
+      // Inloggning lyckades
       navigate("/");
     }
     setLoading(false);
@@ -128,21 +104,18 @@ export const Auth = () => {
         error
       });
       if (error) {
-        console.error('Apple sign-in error:', error);
-        toast.error("Apple-inloggning misslyckades: " + error.message);
+        console.log("Apple sign-in error:", error);
         setLoading(false);
       } else if (data?.url) {
         console.log('Redirecting to Apple OAuth URL:', data.url);
         // OAuth provider should handle the redirect
         window.location.href = data.url;
       } else {
-        console.error('No URL returned from Apple OAuth');
-        toast.error("Apple-inloggning kunde inte startas");
+        console.log("No URL returned from Apple OAuth");
         setLoading(false);
       }
     } catch (err) {
-      console.error('Unexpected error during Apple sign-in:', err);
-      toast.error("Ett oväntat fel uppstod vid Apple-inloggning");
+      console.log("Unexpected error during Apple sign-in:", err);
       setLoading(false);
     }
   };

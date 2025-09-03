@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+
 
 export interface FriendRequest {
   id: string;
@@ -34,7 +34,7 @@ export interface Friend {
 
 export const useFriends = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
+  
   const [friends, setFriends] = useState<Friend[]>([]);
   const [pendingRequests, setPendingRequests] = useState<FriendRequest[]>([]);
   const [sentRequests, setSentRequests] = useState<FriendRequest[]>([]);
@@ -236,20 +236,13 @@ export const useFriends = () => {
 
       if (error) throw error;
 
-      toast({
-        title: "Vänförfrågan skickad",
-        description: "Din vänförfrågan har skickats framgångsrikt."
-      });
+      // Vänförfrågan skickad
 
       fetchSentRequests();
       return true;
     } catch (error) {
       console.error('Error sending friend request:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte skicka vänförfrågan.",
-        variant: "destructive"
-      });
+      console.log("Kunde inte skicka vänförfrågan.");
       return false;
     }
   };
@@ -277,20 +270,13 @@ export const useFriends = () => {
 
       if (insertError) throw insertError;
 
-      toast({
-        title: "Vänförfrågan accepterad",
-        description: "Ni är nu vänner!"
-      });
+      // Vänförfrågan accepterad - ni är nu vänner!
 
       fetchFriends();
       fetchPendingRequests();
     } catch (error) {
       console.error('Error accepting friend request:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte acceptera vänförfrågan.",
-        variant: "destructive"
-      });
+      console.log("Kunde inte acceptera vänförfrågan.");
     }
   };
 
@@ -303,19 +289,12 @@ export const useFriends = () => {
 
       if (error) throw error;
 
-      toast({
-        title: "Vänförfrågan avvisad",
-        description: "Förfrågan har avvisats."
-      });
+      // Vänförfrågan avvisad
 
       fetchPendingRequests();
     } catch (error) {
       console.error('Error rejecting friend request:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte avvisa vänförfrågan.",
-        variant: "destructive"
-      });
+      console.log("Kunde inte avvisa vänförfrågan.");
     }
   };
 
@@ -328,19 +307,12 @@ export const useFriends = () => {
 
       if (error) throw error;
 
-      toast({
-        title: "Vän borttagen",
-        description: "Vänskapet har avslutats."
-      });
+      // Vän borttagen - vänskapet har avslutats
 
       fetchFriends();
     } catch (error) {
       console.error('Error removing friend:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte ta bort vännen.",
-        variant: "destructive"
-      });
+      console.log("Kunde inte ta bort vännen.");
     }
   };
 
@@ -353,19 +325,12 @@ export const useFriends = () => {
 
       if (error) throw error;
 
-      toast({
-        title: "Vänförfrågan borttagen",
-        description: "Din skickade vänförfrågan har tagits bort."
-      });
+      // Vänförfrågan borttagen
 
       fetchSentRequests();
     } catch (error) {
       console.error('Error removing friend request:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte ta bort vänförfrågan.",
-        variant: "destructive"
-      });
+      console.log("Kunde inte ta bort vänförfrågan.");
     }
   };
 

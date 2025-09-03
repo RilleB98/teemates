@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Camera, Plus, X, MoreVertical, User } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ImageCropper } from "@/components/ImageCropper";
-import { useToast } from "@/hooks/use-toast";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -36,7 +36,7 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
-  const { toast } = useToast();
+  
 
   // Load photos when modal opens
   useEffect(() => {

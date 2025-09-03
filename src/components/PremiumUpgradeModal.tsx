@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Check, Crown, Star, Zap } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+
 
 interface PremiumUpgradeModalProps {
   isOpen: boolean;
@@ -20,7 +20,7 @@ interface PremiumUpgradeModalProps {
 
 export function PremiumUpgradeModal({ isOpen, onClose, onUpgrade }: PremiumUpgradeModalProps) {
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+  
 
   const handleUpgrade = async () => {
     setLoading(true);

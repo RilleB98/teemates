@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+
 import { CreateGameSuggestion } from "@/components/CreateGameSuggestion";
 import { useFriends } from "@/hooks/useFriends";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -44,7 +44,7 @@ interface GameSuggestion {
 }
 
 export const GameSuggestionsList = () => {
-  const { toast } = useToast();
+  
   const { friends } = useFriends();
   const { isSubscribed } = useSubscription();
   const [suggestions, setSuggestions] = useState<GameSuggestion[]>([]);
@@ -296,10 +296,7 @@ export const GameSuggestionsList = () => {
         }
       }
 
-      toast({
-        title: "Anmäld!",
-        description: "Du har anmält dig till rundan och gruppchatten.",
-      });
+      // Du har anmält dig till rundan och gruppchatten.
 
       // Update main list and close modal to return to main view
       await fetchGameSuggestions();
@@ -309,11 +306,7 @@ export const GameSuggestionsList = () => {
     } catch (error) {
       console.error('Error joining round:', error);
       const errorMessage = error instanceof Error ? error.message : 'Kunde inte anmäla dig till rundan.';
-      toast({
-        title: "Fel",
-        description: errorMessage,
-        variant: "destructive",
-      });
+      console.log("Fel:", errorMessage);
     }
   };
 
@@ -351,10 +344,7 @@ export const GameSuggestionsList = () => {
         }
       }
 
-      toast({
-        title: "Avanmäld",
-        description: "Du har avanmält dig från rundan och gruppchatten.",
-      });
+      // Du har avanmält dig från rundan och gruppchatten.
 
       // Update main list and close modal to return to main view
       await fetchGameSuggestions();
@@ -363,11 +353,7 @@ export const GameSuggestionsList = () => {
       console.log('Leave game completed, returning to main view');
     } catch (error) {
       console.error('Error leaving round:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte avanmäla dig från rundan.",
-        variant: "destructive",
-      });
+      console.log("Kunde inte avanmäla dig från rundan.");
     }
   };
 
@@ -404,27 +390,17 @@ export const GameSuggestionsList = () => {
         }
       }
 
-      toast({
-        title: "Borttaget",
-        description: "Spelförslaget och gruppchatten har tagits bort.",
-      });
+      // Spelförslaget och gruppchatten har tagits bort.
 
       fetchGameSuggestions();
     } catch (error) {
       console.error('Error deleting suggestion:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte ta bort spelförslaget.",
-        variant: "destructive",
-      });
+      console.log("Kunde inte ta bort spelförslaget.");
     }
   };
 
   const editSuggestion = (suggestionId: string) => {
-    toast({
-      title: "Redigering",
-      description: "Redigeringsfunktionen kommer snart!",
-    });
+    // Redigeringsfunktionen kommer snart!
   };
 
   const formatTimeInterval = (timeString: string) => {
