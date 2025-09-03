@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Heart, X, RefreshCw, MapPin } from 'lucide-react';
+import { Heart, X, MapPin } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -288,17 +288,6 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
         >
           <X className="h-4 sm:h-5 w-4 sm:w-5 text-red-500" />
         </Button>
-        
-        {onRefresh && (
-          <Button
-            variant="outline"
-            size="icon"
-            className="w-8 sm:w-10 h-8 sm:h-10 rounded-full bg-white border-2 border-blue-200 hover:bg-blue-50 hover:border-blue-300"
-            onClick={onRefresh}
-          >
-            <RefreshCw className="h-3 sm:h-4 w-3 sm:w-4 text-blue-500" />
-          </Button>
-        )}
         
         <Button
           variant="outline"
