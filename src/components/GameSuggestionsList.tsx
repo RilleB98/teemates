@@ -514,6 +514,14 @@ export const GameSuggestionsList = () => {
                   const participants = selectedSuggestion.participants || [];
                   const isParticipant = participants.some(p => p.user_id === currentUserId && p.status === 'accepted');
                   const spotsLeft = selectedSuggestion.max_players - participants.filter(p => p.status === 'accepted').length - 1;
+                  
+                  console.log('Modal state:', { 
+                    isOwner, 
+                    isParticipant, 
+                    currentUserId, 
+                    participants: participants.map(p => ({ id: p.user_id, status: p.status })),
+                    spotsLeft 
+                  });
 
                   return (
                     <>
