@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { MessageCircle, Users, ChevronRight, Bell } from "lucide-react";
 import { PushNotifications } from '@capacitor/push-notifications';
 import { Capacitor } from '@capacitor/core';
+import { toast } from "sonner";
 
 export const Messages = () => {
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
@@ -27,25 +28,29 @@ export const Messages = () => {
   const { user } = useAuth();
 
   const testPushNotifications = async () => {
-    console.log('🧪 Testing push notifications...');
-    console.log('📱 Platform:', Capacitor.getPlatform());
-    console.log('🏠 Is native:', Capacitor.isNativePlatform());
-    console.log('👤 User:', user?.id);
+    toast.info('🧪 Testing push notifications...');
     
-    if (Capacitor.isNativePlatform()) {
+    const platform = Capacitor.getPlatform();
+    const isNative = Capacitor.isNativePlatform();
+    
+    toast.info(`📱 Platform: ${platform}, Native: ${isNative}`);
+    
+    if (isNative) {
       try {
         const permStatus = await PushNotifications.requestPermissions();
-        console.log('📋 Permission status:', permStatus);
+        toast.info(`📋 Permission: ${permStatus.receive}`);
         
         if (permStatus.receive === 'granted') {
           await PushNotifications.register();
-          console.log('✅ Registered for push notifications');
+          toast.success('✅ Registered for push notifications!');
+        } else {
+          toast.error('❌ Permission denied');
         }
       } catch (error) {
-        console.error('❌ Error testing push notifications:', error);
+        toast.error(`❌ Error: ${error}`);
       }
     } else {
-      console.log('⚠️ Not on native platform');
+      toast.warning('⚠️ Not on native platform');
     }
   };
 
