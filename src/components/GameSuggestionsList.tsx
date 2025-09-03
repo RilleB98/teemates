@@ -271,11 +271,13 @@ export const GameSuggestionsList = () => {
         description: "Du har anmält dig till rundan och gruppchatten.",
       });
 
-      // Update lists and force immediate update of selected suggestion
-      await fetchGameSuggestions();
+      // Force immediate update of both lists and selected suggestion
+      await Promise.all([
+        fetchGameSuggestions(),
+        refreshSelectedSuggestion(suggestionId)
+      ]);
       
-      // Immediately update the selected suggestion with fresh data
-      await refreshSelectedSuggestion(suggestionId);
+      console.log('Join game completed, lists updated');
     } catch (error) {
       console.error('Error joining round:', error);
       const errorMessage = error instanceof Error ? error.message : 'Kunde inte anmäla dig till rundan.';
