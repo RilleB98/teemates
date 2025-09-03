@@ -365,73 +365,85 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
         <Button variant="ghost" size="sm" onClick={onBack} className="mr-3 hover:bg-gray-100">
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <div className="flex items-center space-x-3">
-          <Avatar className="w-10 h-10 ring-2 ring-primary/20">
-            <AvatarImage src={addCacheBuster(friendId ? friendProfile?.avatar_url : undefined)} />
-            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
-              {friendId ? (friendProfile?.name?.[0]?.toUpperCase() || 'V') : 'G'}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <h2 className="font-semibold text-gray-900">
-              {friendId ? (friendProfile?.name || 'Okänd vän') 
-               : groupChatId ? (groupChat?.name || 'Gruppchatt')
-               : 'Golf Gruppen'}
-            </h2>
-            {groupChatId ? (
-              <Sheet>
-                <SheetTrigger asChild>
-                  <p className="text-sm text-gray-500 cursor-pointer hover:text-gray-700 transition-colors">
+        {groupChatId ? (
+          <Sheet>
+            <SheetTrigger asChild>
+              <div className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors">
+                <Avatar className="w-10 h-10 ring-2 ring-primary/20">
+                  <AvatarImage src={addCacheBuster(undefined)} />
+                  <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
+                    G
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h2 className="font-semibold text-gray-900">
+                    {groupChat?.name || 'Gruppchatt'}
+                  </h2>
+                  <p className="text-sm text-gray-500">
                     {`${groupMembers.length} medlemmar`}
                   </p>
-                </SheetTrigger>
-                <SheetContent>
-                  <SheetHeader>
-                    <SheetTitle className="flex items-center gap-2">
-                      <Users className="w-5 h-5" />
-                      Gruppmedlemmar
-                    </SheetTitle>
-                  </SheetHeader>
-                  <div className="mt-6 space-y-4">
-                    {groupMembers.map((member) => (
-                      <div key={member.user_id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
-                        <Avatar className="w-10 h-10">
-                          <AvatarImage src={member.profile?.avatar_url} />
-                          <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
-                            {member.profile?.name?.[0]?.toUpperCase() || 'M'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <p className="font-medium">{member.profile?.name || 'Okänd medlem'}</p>
-                          <p className="text-sm text-gray-500">
-                            {member.profile?.home_club || 'Ingen hemklubb'}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                    <div className="mt-8 pt-4 border-t">
-                      <Button 
-                        variant="destructive" 
-                        onClick={handleLeaveGroupChat}
-                        className="w-full gap-2"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        Lämna Gruppchatt
-                      </Button>
+                </div>
+              </div>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Gruppmedlemmar
+                </SheetTitle>
+              </SheetHeader>
+              <div className="mt-6 space-y-4">
+                {groupMembers.map((member) => (
+                  <div key={member.user_id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+                    <Avatar className="w-10 h-10">
+                      <AvatarImage src={member.profile?.avatar_url} />
+                      <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
+                        {member.profile?.name?.[0]?.toUpperCase() || 'M'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <p className="font-medium">{member.profile?.name || 'Okänd medlem'}</p>
+                      <p className="text-sm text-gray-500">
+                        {member.profile?.home_club || 'Ingen hemklubb'}
+                      </p>
                     </div>
                   </div>
-                </SheetContent>
-              </Sheet>
-            ) : (
+                ))}
+                <div className="mt-8 pt-4 border-t">
+                  <Button 
+                    variant="destructive" 
+                    onClick={handleLeaveGroupChat}
+                    className="w-full gap-2"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Lämna Gruppchatt
+                  </Button>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        ) : (
+          <div className="flex items-center space-x-3">
+            <Avatar className="w-10 h-10 ring-2 ring-primary/20">
+              <AvatarImage src={addCacheBuster(friendId ? friendProfile?.avatar_url : undefined)} />
+              <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
+                {friendId ? (friendProfile?.name?.[0]?.toUpperCase() || 'V') : 'G'}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h2 className="font-semibold text-gray-900">
+                {friendId ? (friendProfile?.name || 'Okänd vän') 
+                  : 'Golf Gruppen'}
+              </h2>
               <p className="text-sm text-gray-500">
                 {friendId ? 
                   (friendProfile?.home_club ? `HCP ${friendProfile.handicap} • ${friendProfile.home_club}` : `HCP ${friendProfile?.handicap || 0}`) 
                   : 'Ahmed, Emma, Johan och du'
                 }
               </p>
-            )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Messages - Instagram style with better spacing */}
