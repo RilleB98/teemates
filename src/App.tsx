@@ -14,6 +14,7 @@ import { AuthProvider } from "./hooks/useAuth";
 import { AdminGolf } from "./pages/AdminGolf";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
+import WebViewGuard from "./components/WebViewGuard";
 
 // Create QueryClient instance outside of component to prevent recreation
 const queryClient = new QueryClient({
@@ -38,9 +39,11 @@ const App = () => {
             <Routes>
               <Route path="/" element={<PublicLanding />} />
               <Route path="/app" element={
-                <ProtectedRoute>
-                  <SwipeMatch />
-                </ProtectedRoute>
+                <WebViewGuard>
+                  <ProtectedRoute>
+                    <SwipeMatch />
+                  </ProtectedRoute>
+                </WebViewGuard>
               } />
               <Route path="/auth" element={<Auth />} />
               <Route path="/courses" element={<Courses />} />
