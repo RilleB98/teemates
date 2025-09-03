@@ -124,7 +124,7 @@ export const Navigation = ({
             {/* Hamburger Menu */}
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
-                <button className="relative flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-golf-green text-white hover:bg-golf-green/90 transition-smooth">
+                <button className="relative flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-golf-green text-white hover:bg-golf-green/90 transition-smooth aspect-square">
                   <Menu className="w-6 h-6 sm:w-7 sm:h-7" />
                 </button>
               </SheetTrigger>
