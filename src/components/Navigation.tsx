@@ -81,7 +81,7 @@ export const Navigation = ({
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4">
         <div className="flex items-center justify-center">
           {/* Navigation items with even spacing */}
-          <div className="flex items-center justify-center gap-8 w-full max-w-sm">
+          <div className="flex items-center justify-center gap-4 w-full max-w-xs">
             {/* Friends */}
             <Link to="/friends">
               <button className={`relative flex flex-col items-center space-y-1 px-3 py-2 rounded-lg transition-smooth ${location.pathname === '/friends' ? 'text-golf-green bg-golf-green-light' : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'}`}>
