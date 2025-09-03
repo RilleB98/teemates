@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, ArrowLeft, Users, LogOut } from "lucide-react";
+import { Send, ArrowLeft, Users, LogOut, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useFriends } from "@/hooks/useFriends";
 
 import { Link } from "react-router-dom";
 import { markMessagesAsRead } from "@/utils/messageUtils";
@@ -45,6 +46,7 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
   const [userProfiles, setUserProfiles] = useState<{[key: string]: any}>({});
   const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
   const { user } = useAuth();
+  const { friends, sendFriendRequest, sentRequests } = useFriends();
   const { getGroupMembers, removeMemberFromGroup } = useGroupChats();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -105,6 +107,32 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
       supabase.removeChannel(channel);
     };
   }, [chatRoomId]);
+
+  // Set up real-time subscription for group members changes
+  useEffect(() => {
+    if (!groupChatId) return;
+
+    const channel = supabase
+      .channel('group-members-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'group_chat_members',
+          filter: `group_chat_id=eq.${groupChatId}`
+        },
+        () => {
+          // Reload group members when changes occur
+          loadGroupMembers();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [groupChatId]);
 
   const loadCurrentUserProfile = async () => {
     if (!user) return;
@@ -329,6 +357,24 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
     }
   };
 
+  // Helper function to check if a user is already a friend
+  const isFriend = (userId: string) => {
+    return friends.some(friend => friend.friend_id === userId);
+  };
+
+  // Helper function to check if a friend request has been sent
+  const hasRequestSent = (userId: string) => {
+    return sentRequests.some(request => request.friend_id === userId);
+  };
+
+  // Function to handle sending friend request
+  const handleSendFriendRequest = async (userId: string) => {
+    const success = await sendFriendRequest(userId);
+    if (success) {
+      console.log("Vänförfrågan skickad!");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -393,22 +439,40 @@ export const ChatRoom = ({ friendId, groupChatId, onBack }: ChatRoomProps) => {
                 </SheetTitle>
               </SheetHeader>
               <div className="mt-6 space-y-4">
-                {groupMembers.map((member) => (
-                  <div key={member.user_id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
-                    <Avatar className="w-10 h-10">
-                      <AvatarImage src={member.profile?.avatar_url} />
-                      <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
-                        {member.profile?.name?.[0]?.toUpperCase() || 'M'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p className="font-medium">{member.profile?.name || 'Okänd medlem'}</p>
-                      <p className="text-sm text-gray-500">
-                        {member.profile?.home_club || 'Ingen hemklubb'}
-                      </p>
+                {groupMembers.map((member) => {
+                  const isCurrentUser = member.user_id === user?.id;
+                  const isAlreadyFriend = isFriend(member.user_id);
+                  const hasRequestPending = hasRequestSent(member.user_id);
+                  
+                  return (
+                    <div key={member.user_id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+                      <Avatar className="w-10 h-10">
+                        <AvatarImage src={member.profile?.avatar_url} />
+                        <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/40 text-primary">
+                          {member.profile?.name?.[0]?.toUpperCase() || 'M'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="font-medium">{member.profile?.name || 'Okänd medlem'}</p>
+                        <p className="text-sm text-gray-500">
+                          {member.profile?.home_club || 'Ingen hemklubb'}
+                        </p>
+                      </div>
+                      {!isCurrentUser && !isAlreadyFriend && (
+                        <Button
+                          size="sm"
+                          variant={hasRequestPending ? "secondary" : "default"}
+                          onClick={() => handleSendFriendRequest(member.user_id)}
+                          disabled={hasRequestPending}
+                          className="gap-1"
+                        >
+                          <UserPlus className="w-3 h-3" />
+                          {hasRequestPending ? "Skickad" : "Lägg till"}
+                        </Button>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 <div className="mt-8 pt-4 border-t">
                   <Button 
                     variant="destructive" 
