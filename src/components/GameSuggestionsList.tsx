@@ -276,9 +276,10 @@ export const GameSuggestionsList = () => {
       setTimeout(() => refreshSelectedSuggestion(suggestionId), 100);
     } catch (error) {
       console.error('Error joining round:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Kunde inte anmäla dig till rundan.';
       toast({
         title: "Fel",
-        description: "Kunde inte anmäla dig till rundan.",
+        description: errorMessage,
         variant: "destructive",
       });
     }
