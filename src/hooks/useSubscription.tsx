@@ -16,13 +16,17 @@ const SubscriptionContext = createContext<SubscriptionContextType | undefined>(u
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const { isAdmin } = useUserRole();
+  const { isAdmin, loading: adminLoading } = useUserRole();
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<string | null>(null);
   const [subscriptionEnd, setSubscriptionEnd] = useState<Date | null>(null);
   const [loading, setLoading] = useState(true);
 
+  console.log('SubscriptionProvider - Admin status:', isAdmin, 'Admin loading:', adminLoading);
+
   const refreshSubscription = async () => {
+    console.log('refreshSubscription called - User:', user?.email, 'Admin:', isAdmin);
+    
     if (!user?.email) {
       setIsSubscribed(false);
       setSubscriptionTier(null);
@@ -34,12 +38,15 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     try {
       // If user is admin, they automatically get premium
       if (isAdmin) {
+        console.log('User is admin, setting premium status');
         setIsSubscribed(true);
         setSubscriptionTier('Admin');
         setSubscriptionEnd(null); // No expiry for admin
         setLoading(false);
         return;
       }
+
+      console.log('User is not admin, checking database subscription');
 
       const { data, error } = await supabase
         .from('subscribers')
@@ -97,8 +104,11 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    refreshSubscription();
-  }, [user?.email, isAdmin]); // Also refresh when admin status changes
+    // Only refresh subscription when admin loading is complete
+    if (!adminLoading) {
+      refreshSubscription();
+    }
+  }, [user?.email, isAdmin, adminLoading]); // Refresh when admin status changes or loading completes
 
   return (
     <SubscriptionContext.Provider value={{

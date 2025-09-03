@@ -20,6 +20,8 @@ export const AdminUserManagement = () => {
   const [golfIdSearch, setGolfIdSearch] = useState('');
   const [foundUser, setFoundUser] = useState<any>(null);
   const [searchLoading, setSearchLoading] = useState(false);
+
+  console.log('AdminUserManagement - Current user is admin, checking subscription context...');
   
 
   useEffect(() => {
