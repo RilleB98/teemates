@@ -12,6 +12,7 @@ import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { PremiumUpgradeModal } from "./PremiumUpgradeModal";
 interface NavLinkProps {
   icon: React.ElementType;
   label: string;
@@ -56,6 +57,7 @@ export const Navigation = ({
   onMessagesClick
 }: NavigationProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const {
     user,
     loading
@@ -179,6 +181,9 @@ export const Navigation = ({
                        variant="outline" 
                        className={`w-full justify-start ${isSubscribed ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-none' : ''}`}
                        onClick={() => {
+                         if (!isSubscribed) {
+                           setShowPremiumModal(true);
+                         }
                          setIsMobileMenuOpen(false);
                        }}
                      >
@@ -192,5 +197,10 @@ export const Navigation = ({
           </div>
         </div>
       </div>
+
+      <PremiumUpgradeModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+      />
     </nav>;
 };

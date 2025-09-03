@@ -26,21 +26,11 @@ export function PremiumUpgradeModal({ isOpen, onClose, onUpgrade }: PremiumUpgra
     setLoading(true);
     try {
       // Här skulle du normalt öppna App Store för köp
-      // För nu visar vi bara ett meddelande
-      toast({
-        title: "Prenumeration",
-        description: "Du kommer att omdirigeras till App Store för att köpa Premium.",
-      });
-      
+      // För nu stänger vi bara modalen
       onUpgrade?.();
       onClose();
     } catch (error) {
       console.error('Error during upgrade:', error);
-      toast({
-        title: "Fel",
-        description: "Något gick fel. Försök igen.",
-        variant: "destructive",
-      });
     } finally {
       setLoading(false);
     }
