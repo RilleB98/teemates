@@ -84,16 +84,16 @@ export const Navigation = ({
           <div className="flex items-center justify-center gap-8 w-full max-w-sm">
             {/* Friends */}
             <Link to="/friends">
-              <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${location.pathname === '/friends' ? 'text-golf-green bg-golf-green-light' : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'}`}>
-                <Users className="w-5 h-5 sm:w-6 sm:h-6" />
+              <button className={`relative flex flex-col items-center space-y-1 px-3 py-2 rounded-lg transition-smooth ${location.pathname === '/friends' ? 'text-golf-green bg-golf-green-light' : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'}`}>
+                <Users className="w-6 h-6 sm:w-7 sm:h-7" />
                 
               </button>
             </Link>
             
             {/* Messages */}
             <Link to="/messages">
-              <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${location.pathname === '/messages' ? 'text-golf-green bg-golf-green-light' : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'}`}>
-                <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+              <button className={`relative flex flex-col items-center space-y-1 px-3 py-2 rounded-lg transition-smooth ${location.pathname === '/messages' ? 'text-golf-green bg-golf-green-light' : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'}`}>
+                <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7" />
                 
                 {badgeCount && <Badge variant="destructive" className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 text-xs p-0 flex items-center justify-center">
                     {badgeCount}
@@ -103,15 +103,15 @@ export const Navigation = ({
 
             {/* Centered Large Swipe Button */}
             <Link to="/app">
-              <div className="w-16 h-16 sm:w-18 sm:h-18 lg:w-20 lg:h-20 bg-gradient-golf rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-lg">
+              <div className="w-18 h-18 sm:w-20 sm:h-20 lg:w-22 lg:h-22 bg-gradient-golf rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-lg">
                 <span className="text-white font-bold text-xs sm:text-sm lg:text-base text-center leading-tight">Find your<br />TeeMate</span>
               </div>
             </Link>
             
             {/* Courses */}
             <Link to="/courses">
-              <button className={`relative flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-smooth ${location.pathname === '/courses' ? 'text-golf-green bg-golf-green-light' : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'}`}>
-                <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <button className={`relative flex flex-col items-center space-y-1 px-3 py-2 rounded-lg transition-smooth ${location.pathname === '/courses' ? 'text-golf-green bg-golf-green-light' : 'text-muted-foreground hover:text-golf-green hover:bg-golf-green-light/50'}`}>
+                <svg className="w-6 h-6 sm:w-7 sm:h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   {/* Golf flag and tee icon */}
                   <path d="M12 2v16" />
                   <path d="M12 2l6 3-6 3V2z" fill="currentColor" />
@@ -124,8 +124,8 @@ export const Navigation = ({
             {/* Hamburger Menu */}
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
-                <button className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-golf-green text-white hover:bg-golf-green/90 transition-smooth">
-                  <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
+                <button className="relative flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-golf-green text-white hover:bg-golf-green/90 transition-smooth">
+                  <Menu className="w-6 h-6 sm:w-7 sm:h-7" />
                 </button>
               </SheetTrigger>
               <SheetContent side="right" className="w-80">
