@@ -151,17 +151,7 @@ export const AdminUserManagement = () => {
       }
 
       if (profile) {
-        // Get current subscription status
-        const { data: subscription } = await supabase
-          .from('subscribers')
-          .select('*')
-          .eq('user_id', profile.user_id)
-          .single();
-
-        setFoundUser({
-          ...profile,
-          subscription: subscription || null
-        });
+        setFoundUser(profile);
       }
     } catch (error) {
       console.error('Error searching user:', error);
@@ -171,67 +161,7 @@ export const AdminUserManagement = () => {
     }
   };
 
-  const addUserToPremium = async (userId: string, userName: string) => {
-    try {
-      // Get user's email from auth or profile
-      const { data: user } = await supabase.auth.admin.getUserById(userId);
-      const email = user.user?.email;
-
-      if (!email) {
-        console.error('No email found for user');
-        return;
-      }
-
-      const { error } = await supabase
-        .from('subscribers')
-        .upsert({
-          user_id: userId,
-          email: email,
-          subscribed: true,
-          subscription_tier: 'Admin Premium',
-          subscription_end: null, // No expiry for admin-granted premium
-          updated_at: new Date().toISOString(),
-        }, { onConflict: 'user_id' });
-
-      if (error) throw error;
-
-      console.log(`${userName} har lagts till i premium`);
-      
-      // Refresh found user data
-      if (foundUser && foundUser.user_id === userId) {
-        await searchUserByGolfId();
-      }
-    } catch (error) {
-      console.error('Error adding user to premium:', error);
-      console.log("Kunde inte lägga till användaren i premium");
-    }
-  };
-
-  const removeUserFromPremium = async (userId: string, userName: string) => {
-    try {
-      const { error } = await supabase
-        .from('subscribers')
-        .update({
-          subscribed: false,
-          subscription_tier: null,
-          subscription_end: null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('user_id', userId);
-
-      if (error) throw error;
-
-      console.log(`${userName} har tagits bort från premium`);
-      
-      // Refresh found user data
-      if (foundUser && foundUser.user_id === userId) {
-        await searchUserByGolfId();
-      }
-    } catch (error) {
-      console.error('Error removing user from premium:', error);
-      console.log("Kunde inte ta bort användaren från premium");
-    }
-  };
+  // Premium functionality removed - payments handled by Apple
 
   if (loading) {
     return (
@@ -289,37 +219,18 @@ export const AdminUserManagement = () => {
                     <h3 className="font-medium">{foundUser.name || 'Namnlös användare'}</h3>
                     <p className="text-sm text-muted-foreground">Golf-ID: {foundUser.golf_id}</p>
                     <div className="mt-2">
-                      {foundUser.subscription?.subscribed ? (
-                        <Badge className="bg-green-100 text-green-800">
-                          <Crown className="w-3 h-3 mr-1" />
-                          Premium ({foundUser.subscription.subscription_tier})
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary">
-                          Inte premium
-                        </Badge>
-                      )}
+                      <Badge variant="secondary">
+                        Betalningar hanteras av Apple
+                      </Badge>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Premium funktionalitet tillgänglig via Apple In-App Purchase
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    {foundUser.subscription?.subscribed ? (
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => removeUserFromPremium(foundUser.user_id, foundUser.name)}
-                      >
-                        Ta bort premium
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        onClick={() => addUserToPremium(foundUser.user_id, foundUser.name)}
-                        className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600"
-                      >
-                        <Crown className="w-4 h-4 mr-2" />
-                        Lägg till premium
-                      </Button>
-                    )}
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Premium-hantering sker via Apple App Store
+                    </p>
                   </div>
                 </div>
               </CardContent>

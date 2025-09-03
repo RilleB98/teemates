@@ -3,8 +3,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Star, Users, Crown } from "lucide-react";
 import { useState } from "react";
-import { useSubscription } from "@/hooks/useSubscription";
-import { PremiumUpgradeModal } from "./PremiumUpgradeModal";
 import { CourseSwipeModal } from "./CourseSwipeModal";
 
 interface CourseCardProps {
@@ -22,15 +20,9 @@ export const CourseCard = ({
   activeUsers,
   onSwipeClick
 }: CourseCardProps) => {
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [showSwipeModal, setShowSwipeModal] = useState(false);
-  const { isSubscribed } = useSubscription();
 
   const handleSwipeClick = () => {
-    if (!isSubscribed) {
-      setShowPremiumModal(true);
-      return;
-    }
     setShowSwipeModal(true);
     onSwipeClick?.();
   };
@@ -68,28 +60,14 @@ export const CourseCard = ({
           <Button 
             variant="default" 
             size="sm" 
-            className={`flex-1 text-sm sm:text-base touch-target ${!isSubscribed ? 'bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600' : ''}`}
+            className="flex-1 text-sm sm:text-base touch-target"
             onClick={handleSwipeClick}
           >
-            {isSubscribed ? (
-              <>
-                <Users className="w-4 h-4 mr-2" />
-                Swipa här
-              </>
-            ) : (
-              <>
-                <Crown className="w-4 h-4 mr-2" />
-                Premium
-              </>
-            )}
+            <Users className="w-4 h-4 mr-2" />
+            Swipa här
           </Button>
         </div>
       </div>
-
-      <PremiumUpgradeModal
-        isOpen={showPremiumModal}
-        onClose={() => setShowPremiumModal(false)}
-      />
 
       <CourseSwipeModal
         isOpen={showSwipeModal}

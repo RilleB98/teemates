@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
-import { useSubscription } from './useSubscription';
+
 
 export function useSwipeLimit() {
   const { user } = useAuth();
-  const { isSubscribed } = useSubscription();
+  const isSubscribed = true; // Premium functionality available to all users
   const [swipeCount, setSwipeCount] = useState(0);
   const [loading, setLoading] = useState(true);
   

@@ -12,8 +12,6 @@ import { supabase } from "@/integrations/supabase/client";
 
 import { CreateGameSuggestion } from "@/components/CreateGameSuggestion";
 import { useFriends } from "@/hooks/useFriends";
-import { useSubscription } from "@/hooks/useSubscription";
-import { PremiumUpgradeModal } from "./PremiumUpgradeModal";
 
 interface GameSuggestion {
   id: string;
@@ -46,12 +44,10 @@ interface GameSuggestion {
 export const GameSuggestionsList = () => {
   
   const { friends } = useFriends();
-  const { isSubscribed } = useSubscription();
   const [suggestions, setSuggestions] = useState<GameSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [selectedSuggestion, setSelectedSuggestion] = useState<GameSuggestion | null>(null);
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
@@ -104,12 +100,6 @@ export const GameSuggestionsList = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Check subscription status first
-      if (!isSubscribed) {
-        setSuggestions([]);
-        setLoading(false);
-        return;
-      }
 
       // Extract friend IDs from the useFriends hook
       const friendIds = friends.map(friend => friend.friend_id);
@@ -434,29 +424,6 @@ export const GameSuggestionsList = () => {
     );
   }
 
-  if (!isSubscribed) {
-    return (
-      <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl">
-        <CardContent className="p-8 text-center space-y-4">
-          <Crown className="w-12 h-12 mx-auto mb-4 text-yellow-500" />
-          <h3 className="text-lg font-semibold text-golf-premium mb-2">Premium krävs</h3>
-          <p className="text-muted-foreground mb-4">
-            Du behöver en Premium-prenumeration för att se och delta i spelförslag.
-          </p>
-          <Button
-            onClick={() => {
-              console.log('Premium button clicked');
-              setShowPremiumModal(true);
-            }}
-            className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white"
-          >
-            <Crown className="w-4 h-4 mr-2" />
-            Skaffa Premium
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
 
   if (suggestions.length === 0) {
     return (
@@ -711,10 +678,6 @@ export const GameSuggestionsList = () => {
         </DialogContent>
       </Dialog>
 
-      <PremiumUpgradeModal
-        isOpen={showPremiumModal}
-        onClose={() => setShowPremiumModal(false)}
-      />
     </>
   );
 };

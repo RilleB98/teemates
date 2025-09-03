@@ -41,11 +41,8 @@ export const AdminGolf = () => {
         .not('handicap', 'is', null)
         .not('home_city', 'is', null);
 
-      // Get premium users count
-      const { count: premiumUsers } = await supabase
-        .from('subscribers')
-        .select('*', { count: 'exact', head: true })
-        .eq('subscribed', true);
+      // Premium functionality removed - payments handled by Apple
+      const premiumUsers = 0;
 
       // Calculate incomplete profiles
       const incompleteProfiles = (totalUsers || 0) - (activeProfiles || 0);

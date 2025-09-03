@@ -9,10 +9,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
-import { useSubscription } from "@/hooks/useSubscription";
+
 import { supabase } from "@/integrations/supabase/client";
 
-import { PremiumUpgradeModal } from "./PremiumUpgradeModal";
+
 interface NavLinkProps {
   icon: React.ElementType;
   label: string;
@@ -57,7 +57,7 @@ export const Navigation = ({
   onMessagesClick
 }: NavigationProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  
   const {
     user,
     loading
@@ -68,7 +68,7 @@ export const Navigation = ({
   const {
     isAdmin
   } = useUserRole();
-  const { isSubscribed } = useSubscription();
+  
   const messageCount = useUnreadMessages();
   const location = useLocation();
   const formatBadgeCount = useCallback((count: number) => {
@@ -177,19 +177,6 @@ export const Navigation = ({
                            Admin
                          </Link>
                        </Button>}
-                     <Button 
-                       variant="outline" 
-                       className={`w-full justify-start ${isSubscribed ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-none' : ''}`}
-                       onClick={() => {
-                         if (!isSubscribed) {
-                           setShowPremiumModal(true);
-                         }
-                         setIsMobileMenuOpen(false);
-                       }}
-                     >
-                       <Crown className="w-4 h-4 mr-3" />
-                       {isSubscribed ? 'Premium aktiv' : 'Skaffa Premium'}
-                     </Button>
                   </div>
                 </div>
               </SheetContent>
@@ -198,9 +185,5 @@ export const Navigation = ({
         </div>
       </div>
 
-      <PremiumUpgradeModal
-        isOpen={showPremiumModal}
-        onClose={() => setShowPremiumModal(false)}
-      />
     </nav>;
 };
