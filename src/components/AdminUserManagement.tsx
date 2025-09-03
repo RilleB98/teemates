@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Shield, ShieldOff, Users } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Shield, ShieldOff, Users, Crown, Search, UserPlus } from "lucide-react";
 
 interface User {
   id: string;
@@ -17,7 +17,10 @@ interface User {
 export const AdminUserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  const [golfIdSearch, setGolfIdSearch] = useState('');
+  const [foundUser, setFoundUser] = useState<any>(null);
+  const [searchLoading, setSearchLoading] = useState(false);
+  
 
   useEffect(() => {
     fetchUsers();
@@ -56,11 +59,6 @@ export const AdminUserManagement = () => {
       setUsers(usersWithRoles);
     } catch (error) {
       console.error('Error fetching users:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte hämta användare",
-        variant: "destructive"
-      });
     } finally {
       setLoading(false);
     }
@@ -78,10 +76,7 @@ export const AdminUserManagement = () => {
 
         if (error) throw error;
 
-        toast({
-          title: "Framgång",
-          description: "Admin-behörighet borttagen",
-        });
+        console.log("Admin-behörighet borttagen");
       } else {
         // Add admin role
         const { error } = await supabase
@@ -90,21 +85,120 @@ export const AdminUserManagement = () => {
 
         if (error) throw error;
 
-        toast({
-          title: "Framgång",
-          description: "Admin-behörighet tillagd",
-        });
+        console.log("Admin-behörighet tillagd");
       }
 
       // Refresh the users list
       fetchUsers();
     } catch (error) {
       console.error('Error toggling admin role:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte ändra admin-behörighet",
-        variant: "destructive"
-      });
+    }
+  };
+
+  const searchUserByGolfId = async () => {
+    if (!golfIdSearch.trim()) return;
+    
+    setSearchLoading(true);
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select(`
+          user_id,
+          name,
+          golf_id,
+          email:user_id (
+            email
+          )
+        `)
+        .eq('golf_id', golfIdSearch.trim())
+        .single();
+
+      if (error) {
+        console.error('Search error:', error);
+        setFoundUser(null);
+        return;
+      }
+
+      if (profile) {
+        // Get current subscription status
+        const { data: subscription } = await supabase
+          .from('subscribers')
+          .select('*')
+          .eq('user_id', profile.user_id)
+          .single();
+
+        setFoundUser({
+          ...profile,
+          subscription: subscription || null
+        });
+      }
+    } catch (error) {
+      console.error('Error searching user:', error);
+      setFoundUser(null);
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  const addUserToPremium = async (userId: string, userName: string) => {
+    try {
+      // Get user's email from auth or profile
+      const { data: user } = await supabase.auth.admin.getUserById(userId);
+      const email = user.user?.email;
+
+      if (!email) {
+        console.error('No email found for user');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('subscribers')
+        .upsert({
+          user_id: userId,
+          email: email,
+          subscribed: true,
+          subscription_tier: 'Admin Premium',
+          subscription_end: null, // No expiry for admin-granted premium
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' });
+
+      if (error) throw error;
+
+      console.log(`${userName} har lagts till i premium`);
+      
+      // Refresh found user data
+      if (foundUser && foundUser.user_id === userId) {
+        await searchUserByGolfId();
+      }
+    } catch (error) {
+      console.error('Error adding user to premium:', error);
+      console.log("Kunde inte lägga till användaren i premium");
+    }
+  };
+
+  const removeUserFromPremium = async (userId: string, userName: string) => {
+    try {
+      const { error } = await supabase
+        .from('subscribers')
+        .update({
+          subscribed: false,
+          subscription_tier: null,
+          subscription_end: null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      console.log(`${userName} har tagits bort från premium`);
+      
+      // Refresh found user data
+      if (foundUser && foundUser.user_id === userId) {
+        await searchUserByGolfId();
+      }
+    } catch (error) {
+      console.error('Error removing user from premium:', error);
+      console.log("Kunde inte ta bort användaren från premium");
     }
   };
 
@@ -127,6 +221,89 @@ export const AdminUserManagement = () => {
   }
 
   return (
+    <div className="space-y-6">
+      {/* Premium Management Card */}
+      <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-primary flex items-center gap-2">
+            <Crown className="h-5 w-5" />
+            Premium-hantering
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Sök användare via Golf-ID och lägg till i premium
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex gap-2">
+            <Input
+              placeholder="Ange Golf-ID..."
+              value={golfIdSearch}
+              onChange={(e) => setGolfIdSearch(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && searchUserByGolfId()}
+            />
+            <Button 
+              onClick={searchUserByGolfId}
+              disabled={searchLoading || !golfIdSearch.trim()}
+            >
+              <Search className="w-4 h-4 mr-2" />
+              Sök
+            </Button>
+          </div>
+
+          {foundUser && (
+            <Card className="border">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-medium">{foundUser.name || 'Namnlös användare'}</h3>
+                    <p className="text-sm text-muted-foreground">Golf-ID: {foundUser.golf_id}</p>
+                    <div className="mt-2">
+                      {foundUser.subscription?.subscribed ? (
+                        <Badge className="bg-green-100 text-green-800">
+                          <Crown className="w-3 h-3 mr-1" />
+                          Premium ({foundUser.subscription.subscription_tier})
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary">
+                          Inte premium
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    {foundUser.subscription?.subscribed ? (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => removeUserFromPremium(foundUser.user_id, foundUser.name)}
+                      >
+                        Ta bort premium
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        onClick={() => addUserToPremium(foundUser.user_id, foundUser.name)}
+                        className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600"
+                      >
+                        <Crown className="w-4 h-4 mr-2" />
+                        Lägg till premium
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {golfIdSearch && !foundUser && !searchLoading && (
+            <div className="text-center py-4 text-muted-foreground">
+              Ingen användare hittades med Golf-ID: {golfIdSearch}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Admin Management Card */}
     <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl">
       <CardHeader>
         <CardTitle className="text-lg font-semibold text-primary flex items-center gap-2">
@@ -197,5 +374,6 @@ export const AdminUserManagement = () => {
         </div>
       </CardContent>
     </Card>
+    </div>
   );
 };

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { useUserRole } from './useUserRole';
 
 interface SubscriptionContextType {
   isSubscribed: boolean;
@@ -15,6 +16,7 @@ const SubscriptionContext = createContext<SubscriptionContextType | undefined>(u
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
+  const { isAdmin } = useUserRole();
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<string | null>(null);
   const [subscriptionEnd, setSubscriptionEnd] = useState<Date | null>(null);
@@ -30,6 +32,15 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     }
 
     try {
+      // If user is admin, they automatically get premium
+      if (isAdmin) {
+        setIsSubscribed(true);
+        setSubscriptionTier('Admin');
+        setSubscriptionEnd(null); // No expiry for admin
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('subscribers')
         .select('*')
@@ -87,7 +98,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     refreshSubscription();
-  }, [user?.email]);
+  }, [user?.email, isAdmin]); // Also refresh when admin status changes
 
   return (
     <SubscriptionContext.Provider value={{
