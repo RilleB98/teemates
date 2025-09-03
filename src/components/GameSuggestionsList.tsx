@@ -462,49 +462,6 @@ export const GameSuggestionsList = () => {
 
                   return (
                     <>
-                      {/* Three-dot menu for owners and participants */}
-                      {(isOwner || isParticipant) && (
-                        <div className="flex justify-end">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              {isOwner ? (
-                                <>
-                                  <DropdownMenuItem onClick={() => editSuggestion(selectedSuggestion.id)}>
-                                    <Edit className="mr-2 h-4 w-4" />
-                                    Redigera
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem 
-                                    onClick={() => {
-                                      deleteSuggestion(selectedSuggestion.id);
-                                      setModalOpen(false);
-                                    }}
-                                    className="text-red-600"
-                                  >
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Ta bort
-                                  </DropdownMenuItem>
-                                </>
-                              ) : (
-                                <DropdownMenuItem 
-                                  onClick={() => {
-                                    leaveGame(selectedSuggestion.id);
-                                    setModalOpen(false);
-                                  }}
-                                  className="text-red-600"
-                                >
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  Lämna spelförslag
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      )}
 
                       {/* Course and Time Info */}
                       <div className="flex items-center justify-between">
@@ -584,9 +541,52 @@ export const GameSuggestionsList = () => {
                       {/* Participants */}
                       {participants.length > 0 && (
                         <div>
-                          <div className="flex items-center gap-2 mb-2">
-                            <Users className="w-4 h-4 text-golf-green" />
-                            <span className="text-sm font-medium">Anmälda ({participants.filter(p => p.status === 'accepted').length + 1}/{selectedSuggestion.max_players})</span>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <Users className="w-4 h-4 text-golf-green" />
+                              <span className="text-sm font-medium">Anmälda ({participants.filter(p => p.status === 'accepted').length + 1}/{selectedSuggestion.max_players})</span>
+                            </div>
+                            {/* Three-dot menu for owners and participants */}
+                            {(isOwner || isParticipant) && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  {isOwner ? (
+                                    <>
+                                      <DropdownMenuItem onClick={() => editSuggestion(selectedSuggestion.id)}>
+                                        <Edit className="mr-2 h-4 w-4" />
+                                        Redigera
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem 
+                                        onClick={() => {
+                                          deleteSuggestion(selectedSuggestion.id);
+                                          setModalOpen(false);
+                                        }}
+                                        className="text-red-600"
+                                      >
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Ta bort
+                                      </DropdownMenuItem>
+                                    </>
+                                  ) : (
+                                    <DropdownMenuItem 
+                                      onClick={() => {
+                                        leaveGame(selectedSuggestion.id);
+                                        setModalOpen(false);
+                                      }}
+                                      className="text-red-600"
+                                    >
+                                      <Trash2 className="mr-2 h-4 w-4" />
+                                      Lämna spelförslag
+                                    </DropdownMenuItem>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            )}
                           </div>
                           <div className="flex flex-wrap gap-2">
                             <Badge variant="outline" className="bg-golf-green text-white">
