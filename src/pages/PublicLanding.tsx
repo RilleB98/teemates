@@ -1,8 +1,19 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Flag, Users, MessageCircle, MapPin, Download, Smartphone } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const PublicLanding = () => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && user) {
+      navigate("/app");
+    }
+  }, [user, loading, navigate]);
   return (
     <div className="min-h-screen bg-gradient-to-br from-golf-green via-background to-golf-green-light">
       {/* Header with App Download CTA */}
