@@ -46,10 +46,26 @@ const App = () => {
                 </WebViewGuard>
               } />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/courses" element={<Courses />} />
-              <Route path="/friends" element={<Friends />} />
-              <Route path="/messages" element={<Messages />} />
-              <Route path="/admin/golf" element={<AdminGolf />} />
+              <Route path="/courses" element={
+                <ProtectedRoute>
+                  <Courses />
+                </ProtectedRoute>
+              } />
+              <Route path="/friends" element={
+                <ProtectedRoute>
+                  <Friends />
+                </ProtectedRoute>
+              } />
+              <Route path="/messages" element={
+                <ProtectedRoute>
+                  <Messages />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/golf" element={
+                <ProtectedRoute>
+                  <AdminGolf />
+                </ProtectedRoute>
+              } />
               <Route path="/profile" element={
                 <ProtectedRoute>
                   <Profile />
