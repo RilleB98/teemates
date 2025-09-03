@@ -11,10 +11,13 @@ export const usePushNotifications = () => {
   useEffect(() => {
     console.log('🚀 usePushNotifications: Starting initialization');
     console.log('📱 Is native platform:', Capacitor.isNativePlatform());
+    console.log('🌐 Platform info:', Capacitor.getPlatform());
     console.log('👤 User exists:', !!user);
+    console.log('👤 User ID:', user?.id);
     
     if (!Capacitor.isNativePlatform() || !user) {
       console.log('❌ Skipping push notifications - not native platform or no user');
+      console.log('❌ Details: native =', Capacitor.isNativePlatform(), ', user =', !!user);
       return;
     }
 
