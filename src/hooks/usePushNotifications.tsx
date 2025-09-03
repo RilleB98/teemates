@@ -47,13 +47,13 @@ export const usePushNotifications = () => {
       try {
         const { error } = await supabase
           .from('profiles')
-          .upsert({ 
-            user_id: user.id, 
+          .update({ 
             push_token: token.value 
-          });
+          })
+          .eq('user_id', user.id);
         
         if (error) {
-          console.error('❌ Error storing push token:', error);
+          console.error('❌ Kunde inte spara token i Supabase:', error);
         } else {
           console.log('✅ Push token saved successfully for user:', user.id);
         }
