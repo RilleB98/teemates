@@ -20,7 +20,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useSubscription } from "@/hooks/useSubscription";
-import { PremiumUpgradeModal } from "./PremiumUpgradeModal";
 
 const gameSuggestionSchema = z.object({
   golfCourseId: z.string().min(1, "Välj en golfbana"),
@@ -51,7 +50,6 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
   const { user } = useAuth();
   const navigate = useNavigate();
   const { isSubscribed } = useSubscription();
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [golfCourses, setGolfCourses] = useState<Array<{ id: string; name: string; location: string }>>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -312,16 +310,12 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
             Du behöver en Premium-prenumeration för att skapa och se spelförslag.
           </p>
           <Button
-            onClick={() => setShowPremiumModal(true)}
             className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white"
+            disabled
           >
             <Crown className="w-4 h-4 mr-2" />
             Skaffa Premium
           </Button>
-          <PremiumUpgradeModal
-            isOpen={showPremiumModal}
-            onClose={() => setShowPremiumModal(false)}
-          />
         </CardContent>
       </Card>
     );
@@ -511,11 +505,6 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
           </form>
         </Form>
       </CardContent>
-      
-      <PremiumUpgradeModal
-        isOpen={showPremiumModal}
-        onClose={() => setShowPremiumModal(false)}
-      />
     </Card>
   );
 };

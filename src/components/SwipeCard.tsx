@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { UserProfile } from '@/hooks/useSwipeProfiles';
 import { useSwipeLimit } from '@/hooks/useSwipeLimit';
-import { PremiumUpgradeModal } from './PremiumUpgradeModal';
 
 interface SwipeCardProps {
   profile: UserProfile;
@@ -19,7 +18,6 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const { canSwipe, incrementSwipeCount } = useSwipeLimit();
 
@@ -57,7 +55,6 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
 
   const handleSwipeLeft = async () => {
     if (!canSwipe()) {
-      setShowPremiumModal(true);
       return;
     }
 
@@ -76,7 +73,6 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
 
   const handleSwipeRight = async () => {
     if (!canSwipe()) {
-      setShowPremiumModal(true);
       return;
     }
 
@@ -298,11 +294,6 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
           <Heart className="h-4 sm:h-5 w-4 sm:w-5 text-green-500" />
         </Button>
       </div>
-
-      <PremiumUpgradeModal
-        isOpen={showPremiumModal}
-        onClose={() => setShowPremiumModal(false)}
-      />
     </div>
   );
 };

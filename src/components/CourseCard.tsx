@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Star, Users, Crown } from "lucide-react";
 import { useState } from "react";
 import { useSubscription } from "@/hooks/useSubscription";
-import { PremiumUpgradeModal } from "./PremiumUpgradeModal";
 import { CourseSwipeModal } from "./CourseSwipeModal";
 
 interface CourseCardProps {
@@ -22,13 +21,11 @@ export const CourseCard = ({
   activeUsers,
   onSwipeClick
 }: CourseCardProps) => {
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [showSwipeModal, setShowSwipeModal] = useState(false);
   const { isSubscribed } = useSubscription();
 
   const handleSwipeClick = () => {
     if (!isSubscribed) {
-      setShowPremiumModal(true);
       return;
     }
     setShowSwipeModal(true);
@@ -85,11 +82,6 @@ export const CourseCard = ({
           </Button>
         </div>
       </div>
-
-      <PremiumUpgradeModal
-        isOpen={showPremiumModal}
-        onClose={() => setShowPremiumModal(false)}
-      />
 
       <CourseSwipeModal
         isOpen={showSwipeModal}
