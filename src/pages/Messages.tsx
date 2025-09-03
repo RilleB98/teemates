@@ -12,7 +12,9 @@ import { useGroupChats } from "@/hooks/useGroupChats";
 import { useUnreadMessagesByFriend } from "@/hooks/useUnreadMessagesByFriend";
 import { useLatestMessages } from "@/hooks/useLatestMessages";
 import { useAuth } from "@/hooks/useAuth";
-import { MessageCircle, Users, ChevronRight } from "lucide-react";
+import { MessageCircle, Users, ChevronRight, Bell } from "lucide-react";
+import { PushNotifications } from '@capacitor/push-notifications';
+import { Capacitor } from '@capacitor/core';
 
 export const Messages = () => {
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
@@ -23,6 +25,29 @@ export const Messages = () => {
   const { unreadByFriend, refetchUnreadCounts } = useUnreadMessagesByFriend();
   const latestMessages = useLatestMessages();
   const { user } = useAuth();
+
+  const testPushNotifications = async () => {
+    console.log('🧪 Testing push notifications...');
+    console.log('📱 Platform:', Capacitor.getPlatform());
+    console.log('🏠 Is native:', Capacitor.isNativePlatform());
+    console.log('👤 User:', user?.id);
+    
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const permStatus = await PushNotifications.requestPermissions();
+        console.log('📋 Permission status:', permStatus);
+        
+        if (permStatus.receive === 'granted') {
+          await PushNotifications.register();
+          console.log('✅ Registered for push notifications');
+        }
+      } catch (error) {
+        console.error('❌ Error testing push notifications:', error);
+      }
+    } else {
+      console.log('⚠️ Not on native platform');
+    }
+  };
 
   // If a private chat is selected
   if (selectedFriend) {
@@ -65,6 +90,14 @@ export const Messages = () => {
             <p className="text-gray-600">
               Chatta privat med dina vänner
             </p>
+          </div>
+
+          {/* Debug button for testing push notifications */}
+          <div className="flex justify-center mb-4">
+            <Button onClick={testPushNotifications} variant="outline" size="sm">
+              <Bell className="w-4 h-4 mr-2" />
+              Test Push Notifications
+            </Button>
           </div>
 
           
