@@ -9,25 +9,33 @@ export const usePushNotifications = () => {
   const { user } = useAuth();
 
   useEffect(() => {
+    console.log('🚀 usePushNotifications: Starting initialization');
+    console.log('📱 Is native platform:', Capacitor.isNativePlatform());
+    console.log('👤 User exists:', !!user);
+    
     if (!Capacitor.isNativePlatform() || !user) {
+      console.log('❌ Skipping push notifications - not native platform or no user');
       return;
     }
 
     const initializePushNotifications = async () => {
       try {
+        console.log('🔔 Requesting push notification permissions...');
         // Request permission to use push notifications
         // iOS will prompt user and return if they granted permission or not
         // Android will just grant without prompting
         const permStatus = await PushNotifications.requestPermissions();
+        console.log('📋 Permission status:', permStatus);
         
         if (permStatus.receive === 'granted') {
+          console.log('✅ Permission granted, registering...');
           // Register with Apple / Google to receive push via APNS/FCM
           await PushNotifications.register();
         } else {
-          console.log('Push notification permission denied');
+          console.log('❌ Push notification permission denied');
         }
       } catch (error) {
-        console.error('Error initializing push notifications:', error);
+        console.error('❌ Error initializing push notifications:', error);
       }
     };
 
