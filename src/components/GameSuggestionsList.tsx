@@ -519,7 +519,6 @@ export const GameSuggestionsList = () => {
                                 className="h-8 w-8 rounded-full p-0 border-dashed border-2 border-gray-300 hover:border-golf-green"
                                 onClick={() => {
                                   joinGame(selectedSuggestion.id);
-                                  setModalOpen(false);
                                 }}
                               >
                                 <Plus className="h-4 w-4 text-gray-400 hover:text-golf-green" />
@@ -567,7 +566,6 @@ export const GameSuggestionsList = () => {
                                       <DropdownMenuItem 
                                         onClick={() => {
                                           deleteSuggestion(selectedSuggestion.id);
-                                          setModalOpen(false);
                                         }}
                                         className="text-red-600"
                                       >
@@ -579,7 +577,6 @@ export const GameSuggestionsList = () => {
                                     <DropdownMenuItem 
                                       onClick={async () => {
                                         await leaveGame(selectedSuggestion.id);
-                                        setModalOpen(false);
                                       }}
                                       className="text-red-600"
                                     >
