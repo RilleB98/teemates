@@ -13,14 +13,16 @@ const WebViewGuard = ({ children }: WebViewGuardProps) => {
       const userAgent = navigator.userAgent.toLowerCase();
       const currentUrl = window.location.href;
       
-      console.log('WebViewGuard Debug:');
-      console.log('User Agent:', userAgent);
-      console.log('Current URL:', currentUrl);
+      console.log('🔍 WebViewGuard Debug:');
+      console.log('🔍 User Agent:', userAgent);
+      console.log('🔍 Current URL:', currentUrl);
+      console.log('🔍 Window width:', window.innerWidth);
+      console.log('🔍 Screen width:', screen.width);
       
-      // Check if device is iOS mobile
-      const isIOS = /iphone|ipod/.test(userAgent) && !(window as any).MSStream;
+      // Check if device is iOS mobile (iPhone or iPod only, not iPad)
+      const isIOS = (/iphone|ipod/.test(userAgent)) && !(window as any).MSStream;
       
-      // Check if device is Android mobile
+      // Check if device is Android mobile (not tablet)
       const isAndroid = /android/.test(userAgent) && /mobile/.test(userAgent);
       
       // Check if running in Capacitor environment (our mobile app)
@@ -28,15 +30,20 @@ const WebViewGuard = ({ children }: WebViewGuardProps) => {
                             window.location.protocol === 'capacitor:' ||
                             (window as any).Capacitor !== undefined;
       
-      const isMobileDevice = isIOS || isAndroid || isCapacitorApp;
+      // Additional check: if URL has forceHideBadge, it might be our mobile app
+      const urlParams = new URLSearchParams(window.location.search);
+      const hasForceHideBadge = urlParams.has('forceHideBadge');
       
-      console.log('Mobile Detection Results:');
-      console.log('Is iOS:', isIOS);
-      console.log('Is Android:', isAndroid);
-      console.log('Is Capacitor App:', isCapacitorApp);
-      console.log('Is Mobile Device:', isMobileDevice);
+      const isMobileDevice = isIOS || isAndroid || isCapacitorApp || hasForceHideBadge;
       
-      // Allow only if it's a mobile device (iOS or Android)
+      console.log('🔍 Mobile Detection Results:');
+      console.log('🔍 Is iOS:', isIOS);
+      console.log('🔍 Is Android:', isAndroid);
+      console.log('🔍 Is Capacitor App:', isCapacitorApp);
+      console.log('🔍 Has ForceHideBadge:', hasForceHideBadge);
+      console.log('🔍 Final Is Mobile Device:', isMobileDevice);
+      
+      // Block all non-mobile access
       setIsWebView(isMobileDevice);
     };
 
