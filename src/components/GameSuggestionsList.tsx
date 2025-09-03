@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { CreateGameSuggestion } from "@/components/CreateGameSuggestion";
 import { useFriends } from "@/hooks/useFriends";
 import { useSubscription } from "@/hooks/useSubscription";
+import { PremiumUpgradeModal } from "./PremiumUpgradeModal";
 
 interface GameSuggestion {
   id: string;
@@ -50,6 +51,7 @@ export const GameSuggestionsList = () => {
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [selectedSuggestion, setSelectedSuggestion] = useState<GameSuggestion | null>(null);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
@@ -466,8 +468,8 @@ export const GameSuggestionsList = () => {
             Du behöver en Premium-prenumeration för att se och delta i spelförslag.
           </p>
           <Button
+            onClick={() => setShowPremiumModal(true)}
             className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white"
-            disabled
           >
             <Crown className="w-4 h-4 mr-2" />
             Skaffa Premium
@@ -730,6 +732,10 @@ export const GameSuggestionsList = () => {
         </DialogContent>
       </Dialog>
 
+      <PremiumUpgradeModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+      />
     </>
   );
 };
