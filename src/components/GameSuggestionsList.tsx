@@ -188,8 +188,10 @@ export const GameSuggestionsList = () => {
   const refreshSelectedSuggestion = async (suggestionId: string) => {
     if (selectedSuggestion && selectedSuggestion.id === suggestionId) {
       try {
+        console.log('Refreshing selected suggestion:', suggestionId);
+        
         // Fetch the updated suggestion directly from the database
-        const { data: updatedSuggestion } = await supabase
+        const { data: updatedSuggestion, error: suggestionError } = await supabase
           .from('round_suggestions')
           .select(`
             *,
@@ -197,11 +199,18 @@ export const GameSuggestionsList = () => {
             profiles:user_id (name, avatar_url)
           `)
           .eq('id', suggestionId)
-          .single();
+          .maybeSingle();
+
+        if (suggestionError) {
+          console.error('Error fetching suggestion:', suggestionError);
+          return;
+        }
 
         if (updatedSuggestion) {
+          console.log('Fetched updated suggestion:', updatedSuggestion);
+          
           // Get updated participants
-          const { data: participants } = await supabase
+          const { data: participants, error: participantsError } = await supabase
             .from('round_suggestion_participants')
             .select(`
               *,
@@ -209,18 +218,28 @@ export const GameSuggestionsList = () => {
             `)
             .eq('round_suggestion_id', suggestionId);
 
+          if (participantsError) {
+            console.error('Error fetching participants:', participantsError);
+            return;
+          }
+
+          console.log('Fetched participants:', participants);
+
           // Update the selected suggestion with fresh data
           const refreshedSuggestion = {
             ...updatedSuggestion,
             participants: participants || []
           } as any;
           
+          console.log('Setting refreshed suggestion:', refreshedSuggestion);
           setSelectedSuggestion(refreshedSuggestion);
           
           // Also update in the suggestions list
           setSuggestions(prev => prev.map(s => 
             s.id === suggestionId ? refreshedSuggestion : s
           ));
+          
+          console.log('Selected suggestion updated successfully');
         }
       } catch (error) {
         console.error('Error refreshing selected suggestion:', error);
