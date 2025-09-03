@@ -210,10 +210,17 @@ export const GameSuggestionsList = () => {
             .eq('round_suggestion_id', suggestionId);
 
           // Update the selected suggestion with fresh data
-          setSelectedSuggestion({
+          const refreshedSuggestion = {
             ...updatedSuggestion,
             participants: participants || []
-          } as any);
+          } as any;
+          
+          setSelectedSuggestion(refreshedSuggestion);
+          
+          // Also update in the suggestions list
+          setSuggestions(prev => prev.map(s => 
+            s.id === suggestionId ? refreshedSuggestion : s
+          ));
         }
       } catch (error) {
         console.error('Error refreshing selected suggestion:', error);
