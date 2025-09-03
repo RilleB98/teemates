@@ -347,15 +347,24 @@ export const GameSuggestionsList = () => {
         description: "Du har avanmält dig från rundan och gruppchatten.",
       });
 
-      // Update lists first, then refresh selected suggestion with delay
+      // Update main list and force modal refresh by closing/reopening
       await fetchGameSuggestions();
       
-      // Add delay to ensure database changes are propagated
-      setTimeout(async () => {
-        await refreshSelectedSuggestion(suggestionId);
-      }, 1000);
+      // Close modal and reopen with fresh data
+      setModalOpen(false);
       
-      console.log('Leave game completed, updates scheduled');
+      setTimeout(async () => {
+        // Get fresh data and reopen modal
+        await fetchGameSuggestions();
+        const refreshedSuggestions = suggestions;
+        const updatedSuggestion = refreshedSuggestions.find(s => s.id === suggestionId);
+        if (updatedSuggestion) {
+          setSelectedSuggestion(updatedSuggestion);
+          setModalOpen(true);
+        }
+      }, 300);
+      
+      console.log('Leave game completed, modal will refresh');
     } catch (error) {
       console.error('Error leaving round:', error);
       toast({
