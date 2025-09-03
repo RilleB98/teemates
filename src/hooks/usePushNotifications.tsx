@@ -33,18 +33,24 @@ export const usePushNotifications = () => {
 
     // On success, we should be able to receive notifications
     PushNotifications.addListener('registration', async (token: Token) => {
-      console.log('Push registration success, token: ' + token.value);
+      console.log('🔔 Push registration success, token: ' + token.value);
       
       // Store the token in the user's profile for sending notifications
       try {
-        await supabase
+        const { error } = await supabase
           .from('profiles')
           .upsert({ 
             user_id: user.id, 
             push_token: token.value 
           });
+        
+        if (error) {
+          console.error('❌ Error storing push token:', error);
+        } else {
+          console.log('✅ Push token saved successfully for user:', user.id);
+        }
       } catch (error) {
-        console.error('Error storing push token:', error);
+        console.error('❌ Error storing push token:', error);
       }
     });
 
