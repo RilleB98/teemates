@@ -150,10 +150,6 @@ export const Auth = () => {
       <div className="w-full max-w-sm xs:max-w-md animate-slide-up">
         {/* Header */}
         <div className="text-center mb-6 xs:mb-8">
-          <Link to="/" className="inline-flex items-center text-golf-green hover:text-golf-green/80 transition-spring mb-4 xs:mb-6 text-sm xs:text-base">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Tillbaka till startsidan
-          </Link>
           <div className="flex items-center justify-center space-x-2 xs:space-x-3 mb-3 xs:mb-4">
             <div className="w-10 h-10 xs:w-12 xs:h-12 bg-gradient-golf rounded-full flex items-center justify-center shadow-golf animate-float overflow-hidden">
               <img src={teeMatesLogo} alt="teeMates logo" className="w-full h-full object-cover" />
