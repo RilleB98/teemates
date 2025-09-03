@@ -12,10 +12,8 @@ import { useGroupChats } from "@/hooks/useGroupChats";
 import { useUnreadMessagesByFriend } from "@/hooks/useUnreadMessagesByFriend";
 import { useLatestMessages } from "@/hooks/useLatestMessages";
 import { useAuth } from "@/hooks/useAuth";
-import { MessageCircle, Users, ChevronRight, Bell } from "lucide-react";
+import { MessageCircle, Users, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
-import { PushNotifications } from '@capacitor/push-notifications';
-import { Capacitor } from '@capacitor/core';
 
 export const Messages = () => {
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
@@ -27,32 +25,6 @@ export const Messages = () => {
   const latestMessages = useLatestMessages();
   const { user } = useAuth();
 
-  const testPushNotifications = async () => {
-    toast.info('🧪 Testing push notifications...');
-    
-    const platform = Capacitor.getPlatform();
-    const isNative = Capacitor.isNativePlatform();
-    
-    toast.info(`📱 Platform: ${platform}, Native: ${isNative}`);
-    
-    if (isNative) {
-      try {
-        const permStatus = await PushNotifications.requestPermissions();
-        toast.info(`📋 Permission: ${permStatus.receive}`);
-        
-        if (permStatus.receive === 'granted') {
-          await PushNotifications.register();
-          toast.success('✅ Registered for push notifications!');
-        } else {
-          toast.error('❌ Permission denied');
-        }
-      } catch (error) {
-        toast.error(`❌ Error: ${error}`);
-      }
-    } else {
-      toast.warning('⚠️ Not on native platform');
-    }
-  };
 
   // If a private chat is selected
   if (selectedFriend) {
@@ -97,15 +69,6 @@ export const Messages = () => {
             </p>
           </div>
 
-          {/* Debug button for testing push notifications */}
-          <div className="flex justify-center mb-4">
-            <Button onClick={testPushNotifications} variant="outline" size="sm">
-              <Bell className="w-4 h-4 mr-2" />
-              Test Push Notifications
-            </Button>
-          </div>
-
-          
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
