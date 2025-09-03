@@ -449,7 +449,10 @@ export const GameSuggestionsList = () => {
                       {selectedSuggestion.profiles.name?.charAt(0) || 'U'}
                     </AvatarFallback>
                   </Avatar>
-                  <span>{selectedSuggestion.profiles.name} föreslår en runda</span>
+                  <div className="flex flex-col">
+                    <span className="font-medium">{selectedSuggestion.profiles.name}</span>
+                    <span className="text-sm text-muted-foreground">föreslår en runda</span>
+                  </div>
                 </DialogTitle>
               </DialogHeader>
 
