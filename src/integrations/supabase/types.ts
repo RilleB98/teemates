@@ -422,6 +422,42 @@ export type Database = {
           },
         ]
       }
+      subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          stripe_customer_id: string | null
+          subscribed: boolean
+          subscription_end: string | null
+          subscription_tier: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          stripe_customer_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          stripe_customer_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_photos: {
         Row: {
           created_at: string
@@ -470,6 +506,33 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_swipe_counts: {
+        Row: {
+          created_at: string
+          id: string
+          last_reset_date: string
+          swipe_count: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_reset_date?: string
+          swipe_count?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_reset_date?: string
+          swipe_count?: number
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
