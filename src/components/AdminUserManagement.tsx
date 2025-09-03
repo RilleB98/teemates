@@ -100,7 +100,11 @@ export const AdminUserManagement = () => {
     
     setSearchLoading(true);
     try {
-      const { data: profile, error } = await supabase
+      // First try to search by golf_id
+      let profile = null;
+      let error = null;
+
+      const { data: golfIdProfile, error: golfIdError } = await supabase
         .from('profiles')
         .select(`
           user_id,
@@ -111,9 +115,34 @@ export const AdminUserManagement = () => {
           )
         `)
         .eq('golf_id', golfIdSearch.trim())
-        .single();
+        .maybeSingle();
 
-      if (error) {
+      if (golfIdProfile) {
+        profile = golfIdProfile;
+      } else {
+        // If no golf_id match, try searching by name (case-insensitive)
+        const { data: nameProfile, error: nameError } = await supabase
+          .from('profiles')
+          .select(`
+            user_id,
+            name,
+            golf_id,
+            email:user_id (
+              email
+            )
+          `)
+          .ilike('name', `%${golfIdSearch.trim()}%`)
+          .limit(1)
+          .maybeSingle();
+
+        if (nameProfile) {
+          profile = nameProfile;
+        } else {
+          error = nameError;
+        }
+      }
+
+      if (error && !profile) {
         console.error('Search error:', error);
         setFoundUser(null);
         return;
@@ -230,13 +259,13 @@ export const AdminUserManagement = () => {
             Premium-hantering
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Sök användare via Golf-ID och lägg till i premium
+            Sök användare via Golf-ID eller namn
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex gap-2">
             <Input
-              placeholder="Ange Golf-ID..."
+              placeholder="Ange Golf-ID eller namn..."
               value={golfIdSearch}
               onChange={(e) => setGolfIdSearch(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && searchUserByGolfId()}
