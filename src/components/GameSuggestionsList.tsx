@@ -347,8 +347,15 @@ export const GameSuggestionsList = () => {
         description: "Du har avanmält dig från rundan och gruppchatten.",
       });
 
+      // Update lists first, then refresh selected suggestion with delay
       await fetchGameSuggestions();
-      await refreshSelectedSuggestion(suggestionId);
+      
+      // Add delay to ensure database changes are propagated
+      setTimeout(async () => {
+        await refreshSelectedSuggestion(suggestionId);
+      }, 1000);
+      
+      console.log('Leave game completed, updates scheduled');
     } catch (error) {
       console.error('Error leaving round:', error);
       toast({
