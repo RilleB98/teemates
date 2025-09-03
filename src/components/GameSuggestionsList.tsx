@@ -604,25 +604,10 @@ export const GameSuggestionsList = () => {
                       )}
 
                       {/* Action Button */}
-                      {!isOwner && (
-                        <>
-                          {isParticipant ? (
-                            <Button
-                              variant="outline"
-                              onClick={() => {
-                                leaveGame(selectedSuggestion.id);
-                                setModalOpen(false);
-                              }}
-                              className="w-full"
-                            >
-                              Avanmäl dig
-                            </Button>
-                          ) : spotsLeft > 0 ? null : (
-                            <Button disabled className="w-full">
-                              Fullbokad
-                            </Button>
-                          )}
-                        </>
+                      {!isOwner && spotsLeft === 0 && (
+                        <Button disabled className="w-full">
+                          Fullbokad
+                        </Button>
                       )}
                     </>
                   );
