@@ -9,48 +9,38 @@ const WebViewGuard = ({ children }: WebViewGuardProps) => {
   const [isWebView, setIsWebView] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const checkWebView = () => {
+    const checkMobileDevice = () => {
       const userAgent = navigator.userAgent.toLowerCase();
-      const urlParams = new URLSearchParams(window.location.search);
       const currentUrl = window.location.href;
       
       console.log('WebViewGuard Debug:');
       console.log('User Agent:', userAgent);
       console.log('Current URL:', currentUrl);
-      console.log('URL Params:', Object.fromEntries(urlParams));
-      console.log('Protocol:', window.location.protocol);
       
-      // Check for webview indicators
-      const hasWebViewParam = urlParams.has('webview') || urlParams.has('forceHideBadge');
-      const isCapacitorWebView = userAgent.includes('capacitor') || 
-                                userAgent.includes('wkwebview') || 
-                                userAgent.includes('ionic') ||
-                                userAgent.includes('android') ||
-                                userAgent.includes('iphone') ||
-                                window.location.protocol === 'capacitor:' ||
-                                // Check if running in Capacitor environment
-                                (window as any).Capacitor !== undefined;
+      // Check if device is iOS mobile
+      const isIOS = /iphone|ipod/.test(userAgent) && !(window as any).MSStream;
       
-      // Also check for common webview patterns
-      const isEmbeddedWebView = userAgent.includes('embedded') ||
-                               userAgent.includes('webview') ||
-                               // Check for missing features that indicate webview
-                               !window.history.length ||
-                               (window.navigator as any).standalone === true;
+      // Check if device is Android mobile
+      const isAndroid = /android/.test(userAgent) && /mobile/.test(userAgent);
       
-      const isWebViewResult = hasWebViewParam || isCapacitorWebView || isEmbeddedWebView;
+      // Check if running in Capacitor environment (our mobile app)
+      const isCapacitorApp = userAgent.includes('capacitor') || 
+                            window.location.protocol === 'capacitor:' ||
+                            (window as any).Capacitor !== undefined;
       
-      console.log('WebView Detection Results:');
-      console.log('Has WebView Param:', hasWebViewParam);
-      console.log('Is Capacitor WebView:', isCapacitorWebView);
-      console.log('Is Embedded WebView:', isEmbeddedWebView);
-      console.log('Final Result:', isWebViewResult);
+      const isMobileDevice = isIOS || isAndroid || isCapacitorApp;
       
-      // Allow if it's a webview or has special parameters
-      setIsWebView(isWebViewResult);
+      console.log('Mobile Detection Results:');
+      console.log('Is iOS:', isIOS);
+      console.log('Is Android:', isAndroid);
+      console.log('Is Capacitor App:', isCapacitorApp);
+      console.log('Is Mobile Device:', isMobileDevice);
+      
+      // Allow only if it's a mobile device (iOS or Android)
+      setIsWebView(isMobileDevice);
     };
 
-    checkWebView();
+    checkMobileDevice();
   }, []);
 
   if (isWebView === null) {
