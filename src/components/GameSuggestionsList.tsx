@@ -442,16 +442,16 @@ export const GameSuggestionsList = () => {
           {selectedSuggestion && (
             <>
               <DialogHeader>
-                <DialogTitle className="flex items-center justify-center gap-3 text-center">
+                <DialogTitle className="flex items-center relative">
                   <Avatar className="h-10 w-10">
                     <AvatarImage src={selectedSuggestion.profiles.avatar_url} />
                     <AvatarFallback>
                       {selectedSuggestion.profiles.name?.charAt(0) || 'U'}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex flex-col">
-                    <span className="font-medium">{selectedSuggestion.profiles.name}</span>
-                    <span className="text-sm text-muted-foreground">föreslår en runda</span>
+                  <div className="flex flex-col text-center absolute left-1/2 transform -translate-x-1/2">
+                    <span className="font-medium text-lg">{selectedSuggestion.profiles.name}</span>
+                    <span className="text-base text-muted-foreground">föreslår en runda</span>
                   </div>
                 </DialogTitle>
               </DialogHeader>
