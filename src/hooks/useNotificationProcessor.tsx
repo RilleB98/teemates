@@ -41,7 +41,19 @@ export const useNotificationProcessor = () => {
             const sender = senders?.find(s => s.user_id === notification.sender_id);
             const senderName = sender?.name || 'Någon';
             
-            // Send push notification
+            // For web testing - show toast notification instead of push
+            if (!notification.processed) {
+              console.log(`Push notification would be sent: ${senderName} - ${notification.message_content}`);
+              
+              // Show toast notification for web testing
+              const { toast } = await import('@/hooks/use-toast');
+              toast({
+                title: `Nytt meddelande från ${senderName}`,
+                description: notification.message_content,
+              });
+            }
+            
+            // Send push notification (only works on native)
             await sendNotification(
               user.id,
               `Nytt meddelande från ${senderName}`,

@@ -17,10 +17,12 @@ import { AdminOnlyRoute } from "./components/AdminOnlyRoute";
 import NotFound from "./pages/NotFound";
 import WebViewGuard from "./components/WebViewGuard";
 import { useNotificationProcessor } from "./hooks/useNotificationProcessor";
+import { usePushNotifications } from "./hooks/usePushNotifications";
 
 // Component to handle notifications
 const NotificationHandler = () => {
-  useNotificationProcessor();
+  usePushNotifications(); // Initialize push notifications
+  useNotificationProcessor(); // Process notification queue
   return null;
 };
 
