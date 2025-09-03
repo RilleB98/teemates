@@ -290,13 +290,11 @@ export const GameSuggestionsList = () => {
         description: "Du har anmält dig till rundan och gruppchatten.",
       });
 
-      // Force immediate update of both lists and selected suggestion
-      await Promise.all([
-        fetchGameSuggestions(),
-        refreshSelectedSuggestion(suggestionId)
-      ]);
+      // Update main list and close modal to return to main view
+      await fetchGameSuggestions();
+      setModalOpen(false);
       
-      console.log('Join game completed, lists updated');
+      console.log('Join game completed, returning to main view');
     } catch (error) {
       console.error('Error joining round:', error);
       const errorMessage = error instanceof Error ? error.message : 'Kunde inte anmäla dig till rundan.';
@@ -347,24 +345,11 @@ export const GameSuggestionsList = () => {
         description: "Du har avanmält dig från rundan och gruppchatten.",
       });
 
-      // Update main list and force modal refresh by closing/reopening
+      // Update main list and close modal to return to main view
       await fetchGameSuggestions();
-      
-      // Close modal and reopen with fresh data
       setModalOpen(false);
       
-      setTimeout(async () => {
-        // Get fresh data and reopen modal
-        await fetchGameSuggestions();
-        const refreshedSuggestions = suggestions;
-        const updatedSuggestion = refreshedSuggestions.find(s => s.id === suggestionId);
-        if (updatedSuggestion) {
-          setSelectedSuggestion(updatedSuggestion);
-          setModalOpen(true);
-        }
-      }, 300);
-      
-      console.log('Leave game completed, modal will refresh');
+      console.log('Leave game completed, returning to main view');
     } catch (error) {
       console.error('Error leaving round:', error);
       toast({
@@ -482,6 +467,7 @@ export const GameSuggestionsList = () => {
         {suggestions.map((suggestion) => {
           const participants = suggestion.participants || [];
           const spotsLeft = suggestion.max_players - participants.filter(p => p.status === 'accepted').length - 1;
+          const isUserSignedUp = participants.some(p => p.user_id === currentUserId && p.status === 'accepted');
 
           return (
             <Card 
@@ -511,11 +497,18 @@ export const GameSuggestionsList = () => {
                     </div>
                   </div>
                   
-                  {spotsLeft <= 0 && (
-                    <Badge variant="secondary" className="bg-red-100 text-red-800">
-                      Fullbokad
-                    </Badge>
-                  )}
+                  <div className="flex flex-col gap-2">
+                    {isUserSignedUp && (
+                      <Badge className="bg-green-600 text-white text-xs px-2 py-1">
+                        Anmäld
+                      </Badge>
+                    )}
+                    {spotsLeft <= 0 && (
+                      <Badge variant="secondary" className="bg-red-100 text-red-800 text-xs px-2 py-1">
+                        Fullbokad
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
             </Card>
