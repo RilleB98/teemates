@@ -104,7 +104,7 @@ export const Navigation = ({
             {/* Centered Large Swipe Button */}
             <Link to="/app">
               <div className="w-18 h-18 sm:w-20 sm:h-20 lg:w-22 lg:h-22 bg-gradient-golf rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-lg">
-                <span className="text-white font-bold text-xs sm:text-sm lg:text-base text-center leading-tight">Find your<br />TeeMate</span>
+                <span className="text-white font-bold text-[10px] sm:text-xs lg:text-sm text-center leading-tight px-1">Find your<br />TeeMate</span>
               </div>
             </Link>
             
