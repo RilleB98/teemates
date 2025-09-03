@@ -508,7 +508,7 @@ export const GameSuggestionsList = () => {
                 {(() => {
                   const isOwner = selectedSuggestion.user_id === currentUserId;
                   const participants = selectedSuggestion.participants || [];
-                  const isParticipant = participants.some(p => p.user_id === currentUserId);
+                  const isParticipant = participants.some(p => p.user_id === currentUserId && p.status === 'accepted');
                   const spotsLeft = selectedSuggestion.max_players - participants.filter(p => p.status === 'accepted').length - 1;
 
                   return (
