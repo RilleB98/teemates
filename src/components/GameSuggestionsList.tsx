@@ -442,7 +442,7 @@ export const GameSuggestionsList = () => {
           {selectedSuggestion && (
             <>
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-3">
+                <DialogTitle className="flex items-center justify-center gap-3 text-center">
                   <Avatar className="h-10 w-10">
                     <AvatarImage src={selectedSuggestion.profiles.avatar_url} />
                     <AvatarFallback>
