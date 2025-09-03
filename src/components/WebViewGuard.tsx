@@ -12,16 +12,42 @@ const WebViewGuard = ({ children }: WebViewGuardProps) => {
     const checkWebView = () => {
       const userAgent = navigator.userAgent.toLowerCase();
       const urlParams = new URLSearchParams(window.location.search);
+      const currentUrl = window.location.href;
+      
+      console.log('WebViewGuard Debug:');
+      console.log('User Agent:', userAgent);
+      console.log('Current URL:', currentUrl);
+      console.log('URL Params:', Object.fromEntries(urlParams));
+      console.log('Protocol:', window.location.protocol);
       
       // Check for webview indicators
       const hasWebViewParam = urlParams.has('webview') || urlParams.has('forceHideBadge');
       const isCapacitorWebView = userAgent.includes('capacitor') || 
                                 userAgent.includes('wkwebview') || 
                                 userAgent.includes('ionic') ||
-                                window.location.protocol === 'capacitor:';
+                                userAgent.includes('android') ||
+                                userAgent.includes('iphone') ||
+                                window.location.protocol === 'capacitor:' ||
+                                // Check if running in Capacitor environment
+                                (window as any).Capacitor !== undefined;
+      
+      // Also check for common webview patterns
+      const isEmbeddedWebView = userAgent.includes('embedded') ||
+                               userAgent.includes('webview') ||
+                               // Check for missing features that indicate webview
+                               !window.history.length ||
+                               (window.navigator as any).standalone === true;
+      
+      const isWebViewResult = hasWebViewParam || isCapacitorWebView || isEmbeddedWebView;
+      
+      console.log('WebView Detection Results:');
+      console.log('Has WebView Param:', hasWebViewParam);
+      console.log('Is Capacitor WebView:', isCapacitorWebView);
+      console.log('Is Embedded WebView:', isEmbeddedWebView);
+      console.log('Final Result:', isWebViewResult);
       
       // Allow if it's a webview or has special parameters
-      setIsWebView(hasWebViewParam || isCapacitorWebView);
+      setIsWebView(isWebViewResult);
     };
 
     checkWebView();
