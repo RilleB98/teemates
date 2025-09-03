@@ -184,6 +184,17 @@ export const GameSuggestionsList = () => {
     }
   };
 
+  
+  const refreshSelectedSuggestion = async (suggestionId: string) => {
+    if (selectedSuggestion && selectedSuggestion.id === suggestionId) {
+      // Find the updated suggestion from the suggestions state
+      const updatedSuggestion = suggestions.find(s => s.id === suggestionId);
+      if (updatedSuggestion) {
+        setSelectedSuggestion(updatedSuggestion);
+      }
+    }
+  };
+
   const joinGame = async (suggestionId: string) => {
     if (!currentUserId) return;
 
@@ -227,7 +238,8 @@ export const GameSuggestionsList = () => {
         description: "Du har anmält dig till rundan och gruppchatten.",
       });
 
-      fetchGameSuggestions();
+      await fetchGameSuggestions();
+      await refreshSelectedSuggestion(suggestionId);
     } catch (error) {
       console.error('Error joining round:', error);
       toast({
@@ -277,7 +289,8 @@ export const GameSuggestionsList = () => {
         description: "Du har avanmält dig från rundan och gruppchatten.",
       });
 
-      fetchGameSuggestions();
+      await fetchGameSuggestions();
+      await refreshSelectedSuggestion(suggestionId);
     } catch (error) {
       console.error('Error leaving round:', error);
       toast({
