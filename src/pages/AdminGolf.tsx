@@ -1,7 +1,7 @@
 import { Navigation } from "@/components/Navigation";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, Users, UserCheck, UserX } from "lucide-react";
+import { AlertTriangle, Users, UserCheck, UserX, Crown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminUserManagement } from "@/components/AdminUserManagement";
@@ -11,7 +11,8 @@ export const AdminGolf = () => {
   const [userStats, setUserStats] = useState({
     totalUsers: 0,
     activeProfiles: 0,
-    incompleteProfiles: 0
+    incompleteProfiles: 0,
+    premiumUsers: 0
   });
   const [statsLoading, setStatsLoading] = useState(true);
 
@@ -40,13 +41,20 @@ export const AdminGolf = () => {
         .not('handicap', 'is', null)
         .not('home_city', 'is', null);
 
+      // Get premium users count
+      const { count: premiumUsers } = await supabase
+        .from('subscribers')
+        .select('*', { count: 'exact', head: true })
+        .eq('subscribed', true);
+
       // Calculate incomplete profiles
       const incompleteProfiles = (totalUsers || 0) - (activeProfiles || 0);
 
       setUserStats({
         totalUsers: totalUsers || 0,
         activeProfiles: activeProfiles || 0,
-        incompleteProfiles
+        incompleteProfiles,
+        premiumUsers: premiumUsers || 0
       });
     } catch (error) {
       console.error('Error fetching user stats:', error);
@@ -104,7 +112,7 @@ export const AdminGolf = () => {
             <p className="text-white/80 text-lg">Översikt över appens användare</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {/* Total Users */}
             <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -137,6 +145,24 @@ export const AdminGolf = () => {
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Användare med fullständig profil
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Premium Users */}
+            <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Premium-användare
+                </CardTitle>
+                <Crown className="h-4 w-4 text-yellow-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-yellow-600">
+                  {statsLoading ? "..." : userStats.premiumUsers}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Användare med aktiv prenumeration
                 </p>
               </CardContent>
             </Card>
