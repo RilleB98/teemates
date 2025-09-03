@@ -272,8 +272,10 @@ export const GameSuggestionsList = () => {
       });
 
       await fetchGameSuggestions();
-      // Small delay to ensure database has updated
-      setTimeout(() => refreshSelectedSuggestion(suggestionId), 100);
+      // Force refresh the selected suggestion with longer delay
+      setTimeout(async () => {
+        await refreshSelectedSuggestion(suggestionId);
+      }, 500);
     } catch (error) {
       console.error('Error joining round:', error);
       const errorMessage = error instanceof Error ? error.message : 'Kunde inte anmäla dig till rundan.';
