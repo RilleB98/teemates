@@ -13,6 +13,7 @@ import { PublicLanding } from "./pages/PublicLanding";
 import { AuthProvider } from "./hooks/useAuth";
 import { AdminGolf } from "./pages/AdminGolf";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { AdminOnlyRoute } from "./components/AdminOnlyRoute";
 import NotFound from "./pages/NotFound";
 import WebViewGuard from "./components/WebViewGuard";
 
@@ -40,9 +41,9 @@ const App = () => {
               <Route path="/" element={<PublicLanding />} />
               <Route path="/app" element={
                 <WebViewGuard>
-                  <ProtectedRoute>
+                  <AdminOnlyRoute>
                     <SwipeMatch />
-                  </ProtectedRoute>
+                  </AdminOnlyRoute>
                 </WebViewGuard>
               } />
               <Route path="/auth" element={<Auth />} />
