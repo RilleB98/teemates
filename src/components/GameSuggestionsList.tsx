@@ -605,7 +605,7 @@ export const GameSuggestionsList = () => {
 
                       {/* Action Button */}
                       {!isOwner && (
-                        <div className="pt-2">
+                        <>
                           {isParticipant ? (
                             <Button
                               variant="outline"
@@ -622,7 +622,7 @@ export const GameSuggestionsList = () => {
                               Fullbokad
                             </Button>
                           )}
-                        </div>
+                        </>
                       )}
                     </>
                   );
