@@ -230,19 +230,30 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
         console.log('Member added successfully:', memberData);
 
         // Create round suggestion with group chat reference
-        console.log('About to create round suggestion');
-        const { error } = await supabase
+        console.log('About to create round suggestion with data:', {
+          user_id: authData.user.id,
+          group_chat_id: groupChat.id,
+          ...suggestionData
+        });
+        
+        const { data: roundSuggestionData, error } = await supabase
           .from('round_suggestions')
           .insert({
             user_id: authData.user.id,
             group_chat_id: groupChat.id,
             ...suggestionData
-          });
+          })
+          .select();
 
         if (error) {
-          console.error('Round suggestion creation failed:', error);
+          console.error('Round suggestion creation failed with error:', error);
+          console.error('Error code:', error.code);
+          console.error('Error message:', error.message);
+          console.error('Error details:', error.details);
           throw error;
         }
+        
+        console.log('Round suggestion created successfully:', roundSuggestionData);
 
         console.log('Round suggestion and group chat created successfully');
 
