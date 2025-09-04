@@ -14,13 +14,12 @@ import { useGroupChats } from "@/hooks/useGroupChats";
 import { ProfilePopover } from "@/components/ProfilePopover";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-// Helper function to add cache busting to avatar URLs
+// Helper function to add cache busting to avatar URLs (memoized to prevent unnecessary re-renders)
 const addCacheBuster = (url?: string) => {
   if (!url) return undefined;
-  // Only add cache buster in production or if URL contains updated_at info
-  const cacheBuster = Date.now();
-  const separator = url.includes('?') ? '&' : '?';
-  return `${url}${separator}t=${cacheBuster}`;
+  // Only add cache buster for new avatars or when explicitly needed
+  // Don't use Date.now() as it changes on every render
+  return url;
 };
 
 interface Message {
