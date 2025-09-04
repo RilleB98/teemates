@@ -271,7 +271,18 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
         hint: error?.hint,
         code: error?.code
       });
-      console.log("Fel vid skapande av spelförslag:", error);
+      
+      // Show specific error messages to help debug
+      if (error?.code === '42P17') {
+        console.log("RLS recursion error detected");
+      } else if (error?.code === '23505') {
+        console.log("Duplicate key violation");
+      } else if (error?.code === 'PGRST116') {
+        console.log("No rows returned when expected");
+      }
+      
+      // Don't reset form on error so user can try again
+      console.log("Fel vid skapande av spelförslag:", error?.message || error);
     } finally {
       setIsLoading(false);
     }
