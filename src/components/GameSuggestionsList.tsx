@@ -556,59 +556,51 @@ export const GameSuggestionsList = () => {
                         </div>
                       </div>
 
-                      {/* Profile Icons */}
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8 border-2 border-golf-green">
-                          <AvatarImage src={selectedSuggestion.profiles.avatar_url} />
-                          <AvatarFallback className="bg-golf-green text-white text-xs">
-                            {selectedSuggestion.profiles.name?.charAt(0) || 'U'}
-                          </AvatarFallback>
-                        </Avatar>
+                       {/* Profile Icons */}
+                       <div className="flex items-center justify-between">
+                         <div className="flex items-center gap-3">
+                           <Avatar className="h-8 w-8 border-2 border-golf-green">
+                             <AvatarImage src={selectedSuggestion.profiles.avatar_url} />
+                             <AvatarFallback className="bg-golf-green text-white text-xs">
+                               {selectedSuggestion.profiles.name?.charAt(0) || 'U'}
+                             </AvatarFallback>
+                           </Avatar>
 
-                        {participants
-                          .filter(p => p.status === 'accepted')
-                          .map((participant) => (
-                            <Avatar key={participant.id} className="h-8 w-8 border-2 border-green-500">
-                              <AvatarImage src={participant.profiles.avatar_url} />
-                              <AvatarFallback className="bg-green-500 text-white text-xs">
-                                {participant.profiles.name?.charAt(0) || 'U'}
-                              </AvatarFallback>
-                            </Avatar>
-                          ))}
+                           {participants
+                             .filter(p => p.status === 'accepted')
+                             .map((participant) => (
+                               <Avatar key={participant.id} className="h-8 w-8 border-2 border-green-500">
+                                 <AvatarImage src={participant.profiles.avatar_url} />
+                                 <AvatarFallback className="bg-green-500 text-white text-xs">
+                                   {participant.profiles.name?.charAt(0) || 'U'}
+                                 </AvatarFallback>
+                               </Avatar>
+                             ))}
 
-                        {Array.from({ length: spotsLeft }, (_, index) => (
-                          <div key={`empty-${index}`} className="relative">
-                            {!isOwner && !isParticipant ? (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 w-8 rounded-full p-0 border-dashed border-2 border-gray-300 hover:border-golf-green"
-                                onClick={() => {
-                                  joinGame(selectedSuggestion.id);
-                                }}
-                              >
-                                <Plus className="h-4 w-4 text-gray-400 hover:text-golf-green" />
-                              </Button>
-                            ) : (
-                              <div className="h-8 w-8 rounded-full border-dashed border-2 border-gray-300 flex items-center justify-center">
-                                <Plus className="h-4 w-4 text-gray-300" />
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                           {Array.from({ length: spotsLeft }, (_, index) => (
+                             <div key={`empty-${index}`} className="relative">
+                               {!isOwner && !isParticipant ? (
+                                 <Button
+                                   variant="outline"
+                                   size="sm"
+                                   className="h-8 w-8 rounded-full p-0 border-dashed border-2 border-gray-300 hover:border-golf-green"
+                                   onClick={() => {
+                                     joinGame(selectedSuggestion.id);
+                                   }}
+                                 >
+                                   <Plus className="h-4 w-4 text-gray-400 hover:text-golf-green" />
+                                 </Button>
+                               ) : (
+                                 <div className="h-8 w-8 rounded-full border-dashed border-2 border-gray-300 flex items-center justify-center">
+                                   <Plus className="h-4 w-4 text-gray-300" />
+                                 </div>
+                               )}
+                             </div>
+                           ))}
+                         </div>
 
-                      {/* Message */}
-                      {selectedSuggestion.message && (
-                        <div className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg">
-                          <MessageSquare className="w-4 h-4 text-golf-green mt-0.5" />
-                          <p className="text-sm text-gray-700">{selectedSuggestion.message}</p>
-                        </div>
-                      )}
-
-                       {/* Three-dot menu for owners and participants */}
-                       {(isOwner || isParticipant) && (
-                         <div className="flex justify-end">
+                         {/* Three-dot menu for owners and participants */}
+                         {(isOwner || isParticipant) && (
                            <DropdownMenu>
                              <DropdownMenuTrigger asChild>
                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -645,8 +637,17 @@ export const GameSuggestionsList = () => {
                                )}
                              </DropdownMenuContent>
                            </DropdownMenu>
-                         </div>
-                       )}
+                         )}
+                       </div>
+
+                      {/* Message */}
+                      {selectedSuggestion.message && (
+                        <div className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg">
+                          <MessageSquare className="w-4 h-4 text-golf-green mt-0.5" />
+                          <p className="text-sm text-gray-700">{selectedSuggestion.message}</p>
+                        </div>
+                      )}
+
 
                        {/* Participants */}
                        {(participants.length > 0 || isOwner) && (
