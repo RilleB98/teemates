@@ -52,6 +52,7 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
   const [golfCourses, setGolfCourses] = useState<Array<{ id: string; name: string; location: string }>>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showCourseSearch, setShowCourseSearch] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const isEditMode = !!suggestionId;
 
   // Redirect to auth if not logged in
@@ -369,7 +370,7 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Datum</FormLabel>
-                    <Popover>
+                    <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
@@ -380,7 +381,7 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
                             )}
                           >
                             {field.value ? (
-                              format(field.value, "PPP", { locale: sv })
+                              format(field.value, "d MMM", { locale: sv })
                             ) : (
                               <span>Välj datum</span>
                             )}
@@ -392,7 +393,10 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
                         <Calendar
                           mode="single"
                           selected={field.value}
-                          onSelect={field.onChange}
+                          onSelect={(date) => {
+                            field.onChange(date);
+                            setDatePickerOpen(false);
+                          }}
                           disabled={(date) => date < new Date()}
                           initialFocus
                           locale={sv}
