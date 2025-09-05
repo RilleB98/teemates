@@ -49,6 +49,7 @@ export const GameSuggestionsList = () => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [selectedSuggestion, setSelectedSuggestion] = useState<GameSuggestion | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     fetchGameSuggestions();
@@ -382,15 +383,26 @@ export const GameSuggestionsList = () => {
 
       // Spelförslaget och gruppchatten har tagits bort.
 
-      fetchGameSuggestions();
+      // Update main list and close modal to return to main view
+      await fetchGameSuggestions();
+      setModalOpen(false);
+      
+      console.log('Delete suggestion completed, returning to main view');
     } catch (error) {
       console.error('Error deleting suggestion:', error);
       console.log("Kunde inte ta bort spelförslaget.");
     }
   };
 
-  const editSuggestion = (suggestionId: string) => {
-    // Redigeringsfunktionen kommer snart!
+  const editSuggestion = (suggestion: GameSuggestion) => {
+    setSelectedSuggestion(suggestion);
+    setEditMode(true);
+  };
+
+  const handleEditSuccess = () => {
+    setEditMode(false);
+    setSelectedSuggestion(null);
+    fetchGameSuggestions();
   };
 
   const formatTimeInterval = (timeString: string) => {
@@ -610,7 +622,7 @@ export const GameSuggestionsList = () => {
                              <DropdownMenuContent align="end">
                                {isOwner ? (
                                  <>
-                                   <DropdownMenuItem onClick={() => editSuggestion(selectedSuggestion.id)}>
+                                   <DropdownMenuItem onClick={() => editSuggestion(selectedSuggestion)}>
                                      <Edit className="mr-2 h-4 w-4" />
                                      Redigera
                                    </DropdownMenuItem>
@@ -676,6 +688,25 @@ export const GameSuggestionsList = () => {
                  })()}
               </div>
             </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Mode Dialog */}
+      <Dialog open={editMode} onOpenChange={setEditMode}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          {selectedSuggestion && editMode && (
+            <CreateGameSuggestion
+              suggestionId={selectedSuggestion.id}
+              initialData={{
+                course: selectedSuggestion.golf_course_id,
+                date: new Date(selectedSuggestion.suggested_date),
+                time: selectedSuggestion.suggested_time.slice(0, 5),
+                maxPlayers: selectedSuggestion.max_players,
+                message: selectedSuggestion.message || ""
+              }}
+              onSuccess={handleEditSuccess}
+            />
           )}
         </DialogContent>
       </Dialog>
