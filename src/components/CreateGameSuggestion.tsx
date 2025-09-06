@@ -80,6 +80,7 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
   useEffect(() => {
     if (isEditMode && initialData) {
       console.log('Resetting form with initialData:', initialData);
+      console.log('Resetting time specifically:', initialData.time);
       form.reset({
         golfCourseId: initialData.course || "",
         date: initialData.date || undefined,
@@ -88,7 +89,7 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
         message: initialData.message || "",
       });
     }
-  }, [isEditMode, initialData, form]);
+  }, [isEditMode, initialData]);
 
   // Load initial golf course data for edit mode
   useEffect(() => {
@@ -170,6 +171,9 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
         message: data.message || null,
         max_players: data.maxPlayers,
       };
+
+      console.log('suggestionData being sent to database:', suggestionData);
+      console.log('data.time specifically:', data.time, typeof data.time);
 
       if (isEditMode && suggestionId) {
         // Update existing suggestion
