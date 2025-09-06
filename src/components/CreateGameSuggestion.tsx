@@ -81,10 +81,15 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
     if (isEditMode && initialData) {
       console.log('Resetting form with initialData:', initialData);
       console.log('Resetting time specifically:', initialData.time);
+      
+      // Convert start time to time slot format for the select (e.g., "09:30" -> "09:30-10:00")
+      const timeSlot = timeSlots.find(slot => slot.startsWith(initialData.time)) || initialData.time;
+      console.log('Converted time slot:', timeSlot);
+      
       form.reset({
         golfCourseId: initialData.course || "",
         date: initialData.date || undefined,
-        time: initialData.time || "",
+        time: timeSlot,
         maxPlayers: initialData.maxPlayers || 4,
         message: initialData.message || "",
       });
@@ -164,16 +169,20 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
         throw new Error("Du måste logga in för att skapa spelförslag. Gå till inloggningssidan och logga in först.");
       }
 
+      // Extract just the start time from the time slot (e.g., "20:00-20:30" -> "20:00")
+      const startTime = data.time.includes('-') ? data.time.split('-')[0] : data.time;
+
       const suggestionData = {
         golf_course_id: data.golfCourseId,
         suggested_date: format(data.date, 'yyyy-MM-dd'),
-        suggested_time: data.time,
+        suggested_time: startTime,
         message: data.message || null,
         max_players: data.maxPlayers,
       };
 
       console.log('suggestionData being sent to database:', suggestionData);
       console.log('data.time specifically:', data.time, typeof data.time);
+      console.log('startTime extracted:', startTime);
 
       if (isEditMode && suggestionId) {
         // Update existing suggestion
