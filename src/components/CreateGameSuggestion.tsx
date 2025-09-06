@@ -76,6 +76,20 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
     },
   });
 
+  // Reset form with initial data in edit mode
+  useEffect(() => {
+    if (isEditMode && initialData) {
+      console.log('Resetting form with initialData:', initialData);
+      form.reset({
+        golfCourseId: initialData.course || "",
+        date: initialData.date || undefined,
+        time: initialData.time || "",
+        maxPlayers: initialData.maxPlayers || 4,
+        message: initialData.message || "",
+      });
+    }
+  }, [isEditMode, initialData, form]);
+
   // Load initial golf course data for edit mode
   useEffect(() => {
     if (isEditMode && initialData?.course) {
@@ -175,6 +189,7 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
         console.log('Round suggestion updated successfully');
 
         // Spelförslag uppdaterat!
+        onSuccess?.();
       } else {
         // Create new suggestion with group chat
         console.log('Creating game suggestion with data:', {
