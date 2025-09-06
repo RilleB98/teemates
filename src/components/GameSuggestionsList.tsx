@@ -260,6 +260,9 @@ export const GameSuggestionsList = () => {
         .eq('id', suggestionId)
         .single();
 
+      console.log('joinGame: suggestion data:', suggestion);
+      console.log('joinGame: group_chat_id:', suggestion?.group_chat_id);
+
       // Join the game
       const { error } = await supabase
         .from('round_suggestion_participants')
@@ -273,6 +276,7 @@ export const GameSuggestionsList = () => {
 
       // Join the group chat if it exists
       if (suggestion?.group_chat_id) {
+        console.log('joinGame: Attempting to join group chat:', suggestion.group_chat_id);
         const { error: chatError } = await supabase
           .from('group_chat_members')
           .insert({
@@ -284,7 +288,11 @@ export const GameSuggestionsList = () => {
         if (chatError) {
           console.error('Error joining group chat:', chatError);
           // Don't fail the whole operation if chat join fails
+        } else {
+          console.log('joinGame: Successfully joined group chat');
         }
+      } else {
+        console.log('joinGame: No group_chat_id found, skipping group chat join');
       }
 
       // Du har anmält dig till rundan och gruppchatten.
