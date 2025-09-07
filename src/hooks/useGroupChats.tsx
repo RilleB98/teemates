@@ -19,6 +19,7 @@ export interface GroupChatMember {
   profile?: {
     name: string;
     avatar_url?: string;
+    home_club?: string;
   };
 }
 
@@ -124,7 +125,7 @@ export const useGroupChats = () => {
       const userIds = members.map(m => m.user_id);
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('user_id, name, avatar_url')
+        .select('user_id, name, avatar_url, home_club')
         .in('user_id', userIds);
 
       if (profilesError) throw profilesError;
