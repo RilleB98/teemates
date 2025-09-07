@@ -409,6 +409,7 @@ export const GameSuggestionsList = () => {
 
   const handleEditSuccess = () => {
     setEditMode(false);
+    setModalOpen(false);
     setSelectedSuggestion(null);
     fetchGameSuggestions();
   };
