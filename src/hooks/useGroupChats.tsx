@@ -192,8 +192,8 @@ export const useGroupChats = () => {
   useEffect(() => {
     fetchGroupChats();
 
-    // Set up real-time subscription
-    const channel = supabase
+    // Set up real-time subscription for group chats
+    const groupChatsChannel = supabase
       .channel('group-chats-updates')
       .on(
         'postgres_changes',
@@ -208,8 +208,25 @@ export const useGroupChats = () => {
       )
       .subscribe();
 
+    // Set up real-time subscription for group chat members
+    const membersChannel = supabase
+      .channel('group-chat-members-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'group_chat_members'
+        },
+        () => {
+          fetchGroupChats();
+        }
+      )
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(groupChatsChannel);
+      supabase.removeChannel(membersChannel);
     };
   }, [user]);
 
