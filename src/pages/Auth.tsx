@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Target, Mail, Lock, User, ArrowLeft, Apple } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-
+import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 import { useNavigate, Link } from "react-router-dom";
 import teeMatesLogo from "@/assets/teemates-icon.png";
 export const Auth = () => {
@@ -120,37 +121,60 @@ export const Auth = () => {
   const handleAppleSignIn = async () => {
     setLoading(true);
     try {
-      console.log('Starting Apple sign-in...');
-      const {
-        data,
-        error
-      } = await supabase.auth.signInWithOAuth({
-        provider: 'apple',
-        options: {
-          redirectTo: `${window.location.origin}/`,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent'
+      console.log('🍎 Starting Apple sign-in...');
+      
+      // Check if we're on native platform
+      if (Capacitor.isNativePlatform()) {
+        console.log('🍎 Native platform detected - using Browser plugin');
+        
+        // Use Capacitor Browser for OAuth on native platforms
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'apple',
+          options: {
+            redirectTo: `${window.location.origin}/auth?ios_redirect=true`,
           }
+        });
+        
+        if (error) {
+          console.error('❌ Apple OAuth error:', error);
+          setLoading(false);
+          return;
         }
-      });
-      console.log('Apple OAuth response:', {
-        data,
-        error
-      });
-      if (error) {
-        console.log("Apple sign-in error:", error);
-        setLoading(false);
-      } else if (data?.url) {
-        console.log('Redirecting to Apple OAuth URL:', data.url);
-        // OAuth provider should handle the redirect
-        window.location.href = data.url;
+        
+        if (data?.url) {
+          console.log('🍎 Opening OAuth URL in browser:', data.url);
+          await Browser.open({ 
+            url: data.url,
+            windowName: '_self'
+          });
+        }
       } else {
-        console.log("No URL returned from Apple OAuth");
-        setLoading(false);
+        console.log('🌐 Web platform - using standard OAuth');
+        // Standard web OAuth
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'apple',
+          options: {
+            redirectTo: `${window.location.origin}/`,
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'consent'
+            }
+          }
+        });
+        
+        if (error) {
+          console.log("❌ Apple sign-in error:", error);
+          setLoading(false);
+        } else if (data?.url) {
+          console.log('🌐 Redirecting to Apple OAuth URL:', data.url);
+          window.location.href = data.url;
+        } else {
+          console.log("❌ No URL returned from Apple OAuth");
+          setLoading(false);
+        }
       }
     } catch (err) {
-      console.log("Unexpected error during Apple sign-in:", err);
+      console.log("❌ Unexpected error during Apple sign-in:", err);
       setLoading(false);
     }
   };
