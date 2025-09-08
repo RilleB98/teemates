@@ -22,7 +22,8 @@ export const Auth = () => {
       }
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
-        navigate("/");
+        console.log("🚀 Auth: User detected, redirecting to /app");
+        navigate("/app");
       }
     });
 
@@ -33,7 +34,8 @@ export const Auth = () => {
       }
     }) => {
       if (session?.user) {
-        navigate("/");
+        console.log("🚀 Auth: Existing session detected, redirecting to /app");
+        navigate("/app");
       }
     });
     return () => subscription.unsubscribe();
