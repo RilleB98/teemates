@@ -182,6 +182,9 @@ export const useGroupChats = () => {
         .eq('user_id', userId);
 
       if (error) throw error;
+      
+      // Refresh the group chats list immediately
+      await fetchGroupChats();
       return true;
     } catch (error) {
       console.error('Error removing member from group:', error);
