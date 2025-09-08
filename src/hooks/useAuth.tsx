@@ -29,17 +29,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     let isMounted = true;
+    let pollingActive = true;
 
-    const initAuth = async () => {
-      console.log("🚀 Starting auth initialization...");
+    const waitForIOSSession = async (maxAttempts = 15, interval = 300) => {
+      console.log(`🔍 Starting iOS session polling (${maxAttempts} attempts, ${interval}ms interval)...`);
       
-      try {
-        // Step 1: Check URL hash for OAuth tokens first
-        const urlHash = window.location.hash;
-        console.log("🔗 Checking URL hash:", urlHash);
+      for (let attempt = 1; attempt <= maxAttempts && pollingActive && isMounted; attempt++) {
+        console.log(`🔍 Attempt ${attempt}/${maxAttempts} - Checking for iOS session...`);
         
+        // Check URL hash first (highest priority)
+        const urlHash = window.location.hash;
         if (urlHash && urlHash.includes('access_token')) {
-          console.log("🎯 Found auth tokens in URL hash - processing...");
+          console.log("🎯 Found auth tokens in URL hash on attempt " + attempt);
           const hashParams = new URLSearchParams(urlHash.substring(1));
           const accessToken = hashParams.get('access_token');
           const refreshToken = hashParams.get('refresh_token');
@@ -47,41 +48,43 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           if (accessToken) {
             console.log("🔧 Setting session from URL tokens...");
             
-            const { data, error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken || ''
-            });
-            
-            if (!error && data.session && isMounted) {
-              console.log("✅ Session successfully set from URL tokens");
-              console.log("👤 User ID:", data.session.user?.id);
+            try {
+              const { data, error } = await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken || ''
+              });
               
-              // Wait for session to be fully established
-              await new Promise(resolve => setTimeout(resolve, 200));
-              
-              setSession(data.session);
-              setUser(data.session.user);
-              setLoading(false);
-              
-              // Clean URL after successful auth
-              window.history.replaceState({}, document.title, window.location.pathname);
-              console.log("🧹 URL cleaned after successful auth");
-              console.log("✅ Auth complete via URL tokens - ready for routing");
-              return; // Exit early - session is set
-            } else {
-              console.error("❌ Failed to set session from URL tokens:", error);
+              if (!error && data.session && isMounted) {
+                console.log("✅ Session successfully set from URL tokens");
+                console.log("👤 User ID:", data.session.user?.id);
+                
+                // Wait for session to be fully established
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                setSession(data.session);
+                setUser(data.session.user);
+                pollingActive = false;
+                
+                // Clean URL after successful auth
+                window.history.replaceState({}, document.title, window.location.pathname);
+                console.log("🧹 URL cleaned after successful auth");
+                console.log("✅ Auth complete via URL tokens - ready for routing");
+                return true; // Success
+              } else {
+                console.error("❌ Failed to set session from URL tokens:", error);
+              }
+            } catch (e) {
+              console.error("❌ Error setting session from URL tokens:", e);
             }
           }
         }
         
-        // Step 2: Check localStorage for iOS-injected session
-        console.log("🔍 Checking localStorage for iOS session...");
-        console.log("📱 All localStorage keys:", Object.keys(localStorage));
-        
+        // Check localStorage for iOS injection
         const savedSession = localStorage.getItem('sb-fzhmvraztypgemyrguxw-auth-token');
+        console.log(`📱 localStorage keys on attempt ${attempt}:`, Object.keys(localStorage));
         
         if (savedSession) {
-          console.log("📱 Found iOS session in localStorage - processing...");
+          console.log(`📱 Found iOS session in localStorage on attempt ${attempt}`);
           
           try {
             const parsed = JSON.parse(savedSession);
@@ -97,14 +100,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 console.log("👤 User ID:", data.session.user?.id);
                 
                 // Wait for session to be fully established
-                await new Promise(resolve => setTimeout(resolve, 200));
+                await new Promise(resolve => setTimeout(resolve, 100));
                 
                 setSession(data.session);
                 setUser(data.session.user);
-                setLoading(false);
+                pollingActive = false;
                 
                 console.log("✅ Auth complete via iOS localStorage - ready for routing");
-                return; // Exit early - session is set
+                return true; // Success
               } else {
                 console.error("❌ Failed to set session from iOS localStorage:", error);
               }
@@ -114,22 +117,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           } catch (e) {
             console.error("❌ Failed to parse iOS session data:", e);
           }
-        } else {
-          console.log("📭 No iOS session found in localStorage");
         }
         
-        // Step 3: Check for existing Supabase session as fallback
-        console.log("🔄 Checking for existing Supabase session...");
-        const { data } = await supabase.auth.getSession();
+        // Wait before next attempt (unless it's the last one)
+        if (attempt < maxAttempts && pollingActive) {
+          console.log(`⏳ No session found, waiting ${interval}ms before attempt ${attempt + 1}...`);
+          await new Promise(resolve => setTimeout(resolve, interval));
+        }
+      }
+      
+      console.log("❌ iOS session polling completed - no session found");
+      return false; // No session found
+    };
+
+    const initAuth = async () => {
+      console.log("🚀 Starting auth initialization...");
+      
+      try {
+        // Step 1: Wait for iOS to inject session (with polling)
+        const sessionFound = await waitForIOSSession();
         
-        if (data.session && isMounted) {
-          console.log("✅ Found existing Supabase session");
-          console.log("👤 User ID:", data.session.user?.id);
-          setSession(data.session);
-          setUser(data.session.user);
-        } else {
-          console.log("❌ No existing session found - user needs to login");
-          if (isMounted) {
+        if (!sessionFound && isMounted) {
+          // Step 2: Check for existing Supabase session as fallback
+          console.log("🔄 Checking for existing Supabase session...");
+          const { data } = await supabase.auth.getSession();
+          
+          if (data.session) {
+            console.log("✅ Found existing Supabase session");
+            console.log("👤 User ID:", data.session.user?.id);
+            setSession(data.session);
+            setUser(data.session.user);
+          } else {
+            console.log("❌ No existing session found - user needs to login");
             setSession(null);
             setUser(null);
           }
@@ -142,8 +161,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(null);
         }
       } finally {
-        // Always set loading to false at the end, regardless of outcome
+        // Always set loading to false at the end
         if (isMounted) {
+          pollingActive = false;
           setLoading(false);
           console.log("✅ Auth initialization complete - ready for routing decisions");
         }
@@ -167,6 +187,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     return () => {
       isMounted = false;
+      pollingActive = false;
       subscription.unsubscribe();
     };
   }, []);
