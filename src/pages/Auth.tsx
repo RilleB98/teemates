@@ -107,11 +107,9 @@ export const Auth = () => {
       }
       
       if (data?.url) {
-        console.log('🍎 Opening Apple OAuth in browser:', data.url);
-        await Browser.open({ 
-          url: data.url,
-          windowName: '_self'
-        });
+        console.log('🍎 DEBUG: Redirecting to Apple OAuth URL:', data.url);
+        // Use window.location.href instead of Browser.open for proper redirect
+        window.location.href = data.url;
       } else {
         console.log("❌ No URL returned from Apple OAuth");
         setLoading(false);
