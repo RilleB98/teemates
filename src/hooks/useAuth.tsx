@@ -29,21 +29,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     let isInitializing = true;
+    let checkCount = 0;
+
+    const checkLocalStorageMultipleTimes = async () => {
+      const maxChecks = 5;
+      console.log("🔍 Starting iOS session check sequence...");
+      
+      while (checkCount < maxChecks && isInitializing) {
+        checkCount++;
+        console.log(`🔍 Check #${checkCount}/${maxChecks} - Checking localStorage for iOS session...`);
+        console.log("📱 All localStorage keys:", Object.keys(localStorage));
+        console.log("🕐 Current timestamp:", Date.now());
+        
+        const raw = localStorage.getItem("sb-fzhmvraztypgemyrguxw-auth-token");
+        if (raw) {
+          console.log("🎉 Found iOS session data on check #" + checkCount);
+          return raw;
+        }
+        
+        if (checkCount < maxChecks) {
+          console.log(`⏳ No session found, waiting 300ms before check #${checkCount + 1}...`);
+          await new Promise(resolve => setTimeout(resolve, 300));
+        }
+      }
+      
+      console.log("❌ No iOS session found after " + maxChecks + " attempts");
+      return null;
+    };
 
     const restoreIOSSession = async () => {
-      console.log("🔍 Checking iOS session...");
-      console.log("📱 All localStorage keys:", Object.keys(localStorage));
-      console.log("🕐 Current timestamp:", Date.now());
-      
-      // Wait a bit to ensure iOS has injected the session
-      await new Promise(resolve => setTimeout(resolve, 200));
-      console.log("⏰ After 200ms delay, checking again...");
-      
       try {
-        const raw = localStorage.getItem("sb-fzhmvraztypgemyrguxw-auth-token");
+        const raw = await checkLocalStorageMultipleTimes();
 
         if (raw) {
-          console.log("📱 Found iOS session data in localStorage");
+          console.log("📱 Found iOS session data - attempting to parse...");
           const parsed = JSON.parse(raw);
           
           if (parsed.currentSession) {
@@ -64,8 +83,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           } else {
             console.log("⚠️ iOS session data found but no currentSession");
           }
-        } else {
-          console.log("📭 No iOS session data found in localStorage");
         }
 
         // Fallback to regular session check
@@ -82,12 +99,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(null);
         }
         
-        return false; // No iOS session found
+        return false;
         
       } catch (err) {
         console.error("❌ Error during iOS session restoration:", err);
         
-        // Fallback to regular session check on error
         try {
           const { data } = await supabase.auth.getSession();
           setSession(data.session);
@@ -107,11 +123,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    // Set up auth state listener - but ignore initial session during iOS restore
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("🔄 onAuthStateChange:", event, !!session);
       
-      // Don't interfere during initial iOS session restoration
       if (!isInitializing) {
         setSession(session);
         setUser(session?.user ?? null);
