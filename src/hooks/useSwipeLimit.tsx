@@ -5,7 +5,7 @@ import { useAuth } from './useAuth';
 
 export function useSwipeLimit() {
   const { user } = useAuth();
-  const isSubscribed = true; // Premium functionality available to all users
+  const isSubscribed = false; // Set to false to enable premium features
   const [swipeCount, setSwipeCount] = useState(0);
   const [loading, setLoading] = useState(true);
   
