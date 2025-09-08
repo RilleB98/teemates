@@ -28,68 +28,51 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('🔄 Auth state change:', event, !!session);
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
-    // Check for iOS WebView injected session first
-    const checkIosSession = async () => {
+    const initAuth = async () => {
+      // 1. First, try to read iOS-injected session
       const savedSession = localStorage.getItem('sb-fzhmvraztypgemyrguxw-auth-token');
       
       if (savedSession) {
         try {
           const parsed = JSON.parse(savedSession);
           
-          if (parsed.currentSession) {
-            console.log('🍎 Found iOS WebView session, restoring...');
+          if (parsed?.currentSession) {
+            console.log('🍎 Found iOS WebView session, restoring...', parsed);
             const { data, error } = await supabase.auth.setSession(parsed.currentSession);
             
             if (error) {
-              console.error('❌ setSession error', error);
-              // Fall back to regular session check
-              supabase.auth.getSession().then(({ data: { session } }) => {
-                setSession(session);
-                setUser(session?.user ?? null);
-                setLoading(false);
-              });
+              console.error('❌ Failed to set iOS session:', error);
             } else {
-              console.log('✅ Session restored from iOS WebView', data);
-              // Session will be updated via onAuthStateChange
-            }
-          } else {
-            // No currentSession in saved data, check regular session
-            supabase.auth.getSession().then(({ data: { session } }) => {
-              setSession(session);
-              setUser(session?.user ?? null);
+              console.log('✅ iOS session set successfully');
+              setSession(data.session);
+              setUser(data.session?.user ?? null);
               setLoading(false);
-            });
+              return; // Exit early, we have our session
+            }
           }
         } catch (e) {
-          console.error('❌ Failed to parse savedSession', e);
-          // Fall back to regular session check
-          supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-            setUser(session?.user ?? null);
-            setLoading(false);
-          });
+          console.error('❌ Could not parse iOS session:', e);
         }
-      } else {
-        // No saved session, check for existing session normally
-        supabase.auth.getSession().then(({ data: { session } }) => {
-          setSession(session);
-          setUser(session?.user ?? null);
-          setLoading(false);
-        });
       }
+
+      // 2. Fallback - get current session
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+      setUser(data.session?.user ?? null);
+      setLoading(false);
     };
 
-    checkIosSession();
+    // 3. Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log('🔄 Auth state change:', event, !!session);
+        setSession(session);
+        setUser(session?.user ?? null);
+        // Don't set loading to false here, let initAuth handle it
+      }
+    );
+
+    initAuth();
 
     return () => subscription.unsubscribe();
   }, []);
