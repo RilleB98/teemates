@@ -167,19 +167,23 @@ export const Auth = () => {
                   </Button>
                 </form>
 
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-muted-foreground/20" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">eller</span>
-                  </div>
-                </div>
+                {Capacitor.isNativePlatform() && (
+                  <>
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t border-muted-foreground/20" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-card px-2 text-muted-foreground">eller</span>
+                      </div>
+                    </div>
 
-                <Button onClick={handleAppleSignIn} variant="outline" className="w-full h-10 xs:h-11 border-muted-foreground/20 bg-black text-white hover:bg-black/90 transition-all duration-300 text-sm xs:text-base font-medium" disabled={loading}>
-                  <Apple className="w-4 h-4 mr-2" />
-                  Logga in med Apple
-                </Button>
+                    <Button onClick={handleAppleSignIn} variant="outline" className="w-full h-10 xs:h-11 border-muted-foreground/20 bg-black text-white hover:bg-black/90 transition-all duration-300 text-sm xs:text-base font-medium" disabled={loading}>
+                      <Apple className="w-4 h-4 mr-2" />
+                      Logga in med Apple
+                    </Button>
+                  </>
+                )}
               </TabsContent>
               
               <TabsContent value="signup" className="space-y-4 xs:space-y-6">
