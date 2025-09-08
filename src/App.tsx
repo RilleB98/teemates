@@ -52,9 +52,9 @@ const App = () => {
               <Route path="/" element={<PublicLanding />} />
               <Route path="/app" element={
                 <WebViewGuard>
-                  <AdminOnlyRoute>
+                  <ProtectedRoute>
                     <SwipeMatch />
-                  </AdminOnlyRoute>
+                  </ProtectedRoute>
                 </WebViewGuard>
               } />
               <Route path="/auth" element={<Auth />} />
