@@ -12,6 +12,11 @@ const config: CapacitorConfig = {
   ios: {
     scheme: 'TeeMates',
     contentInset: 'automatic'
+  },
+  plugins: {
+    Browser: {
+      androidScheme: 'https'
+    }
   }
 };
 
