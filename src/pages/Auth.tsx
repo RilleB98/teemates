@@ -90,14 +90,13 @@ export const Auth = () => {
   const handleAppleSignIn = async () => {
     setLoading(true);
     try {
-      console.log('🍎 DEBUG: Starting iOS Apple sign-in...');
+      console.log('🍎 DEBUG: Starting Apple sign-in...');
       
-      // iOS webview-optimized Apple OAuth
+      // Standard Apple OAuth - let Supabase handle the redirect
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'apple',
         options: {
           redirectTo: `${window.location.origin}/app`,
-          skipBrowserRedirect: true,
         }
       });
       
