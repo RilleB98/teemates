@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'TeeMates',
   webDir: 'dist',
   server: {
-    url: 'https://teemates.app/app?forceHideBadge=true',
+    url: 'https://teemates.app/app?ios_redirect=true&forceHideBadge=true',
     cleartext: true
   },
   bundledWebRuntime: false

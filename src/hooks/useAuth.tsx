@@ -37,6 +37,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       for (let attempt = 1; attempt <= maxAttempts && pollingActive && isMounted; attempt++) {
         console.log(`🔍 Attempt ${attempt}/${maxAttempts} - Checking for iOS session...`);
+        console.log(`🔗 URL search params: ${window.location.search}`);
+        console.log(`🔗 URL hash: ${window.location.hash}`);
+        
+        // Check URL search parameters for iOS redirect flag
+        const urlParams = new URLSearchParams(window.location.search);
+        const isIOSRedirect = urlParams.get('ios_redirect');
+        if (isIOSRedirect) {
+          console.log("🍎 iOS redirect detected via URL parameter");
+        }
         
         // Check URL hash first (highest priority)
         const urlHash = window.location.hash;
