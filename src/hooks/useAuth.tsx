@@ -32,9 +32,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const restoreIOSSession = async () => {
       console.log("🔍 Checking iOS session...");
+      console.log("📱 All localStorage keys:", Object.keys(localStorage));
+      console.log("🕐 Current timestamp:", Date.now());
       
       // Wait a bit to ensure iOS has injected the session
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise(resolve => setTimeout(resolve, 200));
+      console.log("⏰ After 200ms delay, checking again...");
       
       try {
         const raw = localStorage.getItem("sb-fzhmvraztypgemyrguxw-auth-token");
