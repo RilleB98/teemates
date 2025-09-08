@@ -28,6 +28,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log("🚀 useAuth useEffect STARTED - mounting auth logic");
     let isMounted = true;
     let pollingActive = true;
 
