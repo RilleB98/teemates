@@ -28,164 +28,125 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let isInitializing = true;
-    let checkCount = 0;
+    let isInitialized = false;
 
-    const checkURLParams = () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const hash = window.location.hash;
-      console.log("🔗 Checking URL params for auth tokens...");
-      console.log("🔗 Search params:", window.location.search);
-      console.log("🔗 Hash:", hash);
-      
-      // Check for access_token in hash (common OAuth pattern)
-      if (hash && hash.includes('access_token')) {
-        console.log("🎯 Found access_token in URL hash!");
-        const hashParams = new URLSearchParams(hash.substring(1));
-        const accessToken = hashParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token');
-        if (accessToken) {
-          console.log("🔧 Setting session from URL tokens...");
-          return { access_token: accessToken, refresh_token: refreshToken };
-        }
-      }
-      
-      return null;
-    };
-
-    const checkLocalStorageMultipleTimes = async () => {
-      const maxChecks = 5;
-      console.log("🔍 Starting iOS session check sequence...");
-      
-      // First check URL params
-      const urlTokens = checkURLParams();
-      if (urlTokens) {
-        return { fromURL: true, tokens: urlTokens };
-      }
-      
-      while (checkCount < maxChecks && isInitializing) {
-        checkCount++;
-        console.log(`🔍 Check #${checkCount}/${maxChecks} - Checking localStorage for iOS session...`);
-        console.log("📱 All localStorage keys:", Object.keys(localStorage));
-        console.log("🕐 Current timestamp:", Date.now());
-        
-        const raw = localStorage.getItem("sb-fzhmvraztypgemyrguxw-auth-token");
-        if (raw) {
-          console.log("🎉 Found iOS session data on check #" + checkCount);
-          return raw;
-        }
-        
-        if (checkCount < maxChecks) {
-          console.log(`⏳ No session found, waiting 300ms before check #${checkCount + 1}...`);
-          await new Promise(resolve => setTimeout(resolve, 300));
-        }
-      }
-      
-      console.log("❌ No iOS session found after " + maxChecks + " attempts");
-      return null;
-    };
-
-    const restoreIOSSession = async () => {
+    const initAuth = async () => {
       try {
-        const result = await checkLocalStorageMultipleTimes();
-
-        if (result) {
-          if (typeof result === 'object' && result.fromURL) {
-            // Handle URL tokens
-            console.log("🔧 Restoring session from URL tokens...");
+        console.log("🚀 Starting auth initialization...");
+        
+        // Check for auth tokens in URL (iOS redirect pattern)
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlHash = window.location.hash;
+        
+        console.log("🔗 URL search:", window.location.search);
+        console.log("🔗 URL hash:", urlHash);
+        console.log("📱 All localStorage keys:", Object.keys(localStorage));
+        
+        let sessionRestored = false;
+        
+        // Method 1: Check URL hash for tokens (standard OAuth)
+        if (urlHash && urlHash.includes('access_token')) {
+          console.log("🎯 Found auth tokens in URL hash");
+          const hashParams = new URLSearchParams(urlHash.substring(1));
+          const accessToken = hashParams.get('access_token');
+          const refreshToken = hashParams.get('refresh_token');
+          
+          if (accessToken) {
+            console.log("🔧 Setting session from URL hash tokens...");
             const { data, error } = await supabase.auth.setSession({
-              access_token: result.tokens.access_token,
-              refresh_token: result.tokens.refresh_token || ''
+              access_token: accessToken,
+              refresh_token: refreshToken || ''
             });
             
-            if (error) {
-              console.error("❌ Failed to restore session from URL tokens:", error);
-            } else {
-              console.log("✅ Session restored from URL tokens");
-              console.log("👤 User ID:", data.session?.user?.id);
+            if (!error && data.session) {
+              console.log("✅ Session restored from URL hash");
               setSession(data.session);
-              setUser(data.session?.user ?? null);
-              setLoading(false);
-              isInitializing = false;
-              return true;
-            }
-          } else if (typeof result === 'string') {
-            // Handle localStorage data
-            console.log("📱 Found iOS session data - attempting to parse...");
-            const parsed = JSON.parse(result);
-            
-            if (parsed.currentSession) {
-              console.log("🔧 Restoring iOS session via supabase.auth.setSession()...");
-              const { data, error } = await supabase.auth.setSession(parsed.currentSession);
+              setUser(data.session.user);
+              sessionRestored = true;
               
-              if (error) {
-                console.error("❌ Failed to restore iOS session:", error);
-              } else {
-                console.log("✅ iOS session restored via supabase.auth.setSession()");
-                console.log("👤 User ID:", data.session?.user?.id);
-                setSession(data.session);
-                setUser(data.session?.user ?? null);
-                setLoading(false);
-                isInitializing = false;
-                return true;
-              }
+              // Clean URL
+              window.history.replaceState({}, document.title, window.location.pathname);
             } else {
-              console.log("⚠️ iOS session data found but no currentSession");
+              console.error("❌ Failed to set session from URL hash:", error);
             }
           }
         }
-
-        // Fallback to regular session check
-        console.log("🔄 Fallback: checking regular Supabase session...");
-        const { data } = await supabase.auth.getSession();
         
-        if (data.session) {
-          console.log("✅ Found existing Supabase session");
-          setSession(data.session);
-          setUser(data.session?.user ?? null);
-        } else {
-          console.log("❌ No session found anywhere - user needs to login");
-          setSession(null);
-          setUser(null);
+        // Method 2: Check localStorage (iOS injection)
+        if (!sessionRestored) {
+          console.log("🔍 Checking localStorage for iOS session...");
+          const savedSession = localStorage.getItem('sb-fzhmvraztypgemyrguxw-auth-token');
+          
+          if (savedSession) {
+            console.log("📱 Found iOS session in localStorage");
+            try {
+              const parsed = JSON.parse(savedSession);
+              if (parsed?.currentSession) {
+                console.log("🔧 Restoring iOS localStorage session...");
+                const { data, error } = await supabase.auth.setSession(parsed.currentSession);
+                
+                if (!error && data.session) {
+                  console.log("✅ iOS localStorage session restored");
+                  setSession(data.session);
+                  setUser(data.session.user);
+                  sessionRestored = true;
+                } else {
+                  console.error("❌ Failed to restore iOS session:", error);
+                }
+              }
+            } catch (e) {
+              console.error("❌ Failed to parse iOS session:", e);
+            }
+          } else {
+            console.log("📭 No iOS session in localStorage");
+          }
         }
         
-        return false;
-        
-      } catch (err) {
-        console.error("❌ Error during iOS session restoration:", err);
-        
-        try {
+        // Method 3: Check existing Supabase session
+        if (!sessionRestored) {
+          console.log("🔄 Checking existing Supabase session...");
           const { data } = await supabase.auth.getSession();
-          setSession(data.session);
-          setUser(data.session?.user ?? null);
-        } catch (fallbackError) {
-          console.error("❌ Fallback session check also failed:", fallbackError);
+          
+          if (data.session) {
+            console.log("✅ Found existing Supabase session");
+            setSession(data.session);
+            setUser(data.session.user);
+            sessionRestored = true;
+          } else {
+            console.log("❌ No existing session found");
+          }
+        }
+        
+        // Final state
+        if (!sessionRestored) {
+          console.log("❌ No session restored - user needs to login");
           setSession(null);
           setUser(null);
         }
-        return false;
+        
+      } catch (error) {
+        console.error("❌ Auth initialization error:", error);
+        setSession(null);
+        setUser(null);
       } finally {
-        if (isInitializing) {
+        if (!isInitialized) {
           setLoading(false);
-          isInitializing = false;
-          console.log("✅ Auth initialization complete - ready for routing decisions");
+          isInitialized = true;
+          console.log("✅ Auth initialization complete");
         }
       }
     };
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("🔄 onAuthStateChange:", event, !!session);
-      
-      if (!isInitializing) {
+      console.log("🔄 Auth state change:", event, !!session);
+      if (isInitialized) {
         setSession(session);
         setUser(session?.user ?? null);
-      } else {
-        console.log("⏸️ Ignoring auth state change during iOS session restoration");
       }
     });
 
-    restoreIOSSession();
+    initAuth();
 
     return () => subscription.unsubscribe();
   }, []);
