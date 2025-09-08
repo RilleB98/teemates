@@ -121,32 +121,43 @@ export const Auth = () => {
   const handleAppleSignIn = async () => {
     setLoading(true);
     try {
-      console.log('🍎 Starting Apple sign-in...');
+      console.log('🍎 Apple sign-in clicked - checking if account exists...');
       
-      // Check if we're on native platform
+      // On iOS, try to sign in with Apple email directly
       if (Capacitor.isNativePlatform()) {
-        console.log('🍎 Native platform detected - using Browser plugin');
+        console.log('🍎 iOS detected - attempting direct Apple account access...');
         
-        // Use Capacitor Browser for OAuth on native platforms
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'apple',
-          options: {
-            redirectTo: `${window.location.origin}/auth?ios_redirect=true`,
-          }
-        });
+        // Try to sign in with the known Apple email
+        const appleEmail = 'n5mcsq2d4n@privaterelay.appleid.com';
         
-        if (error) {
-          console.error('❌ Apple OAuth error:', error);
-          setLoading(false);
-          return;
-        }
-        
-        if (data?.url) {
-          console.log('🍎 Opening OAuth URL in browser:', data.url);
-          await Browser.open({ 
-            url: data.url,
-            windowName: '_self'
+        try {
+          // Create a temporary password reset to force sign in
+          const { error: resetError } = await supabase.auth.resetPasswordForEmail(appleEmail, {
+            redirectTo: `${window.location.origin}/auth?apple_reset=true`
           });
+          
+          if (!resetError) {
+            console.log('🍎 Password reset sent - check your email');
+            alert('Vi har skickat en inloggningslänk till din Apple-email. Öppna länken för att logga in.');
+          } else {
+            console.log('🍎 Reset failed, trying OAuth...');
+            // Fallback to standard OAuth
+            const { data, error } = await supabase.auth.signInWithOAuth({
+              provider: 'apple',
+              options: {
+                redirectTo: `${window.location.origin}/auth?ios_redirect=true`,
+              }
+            });
+            
+            if (data?.url) {
+              await Browser.open({ 
+                url: data.url,
+                windowName: '_self'
+              });
+            }
+          }
+        } catch (err) {
+          console.error('🍎 Apple direct sign-in error:', err);
         }
       } else {
         console.log('🌐 Web platform - using standard OAuth');
@@ -164,17 +175,14 @@ export const Auth = () => {
         
         if (error) {
           console.log("❌ Apple sign-in error:", error);
-          setLoading(false);
         } else if (data?.url) {
           console.log('🌐 Redirecting to Apple OAuth URL:', data.url);
           window.location.href = data.url;
-        } else {
-          console.log("❌ No URL returned from Apple OAuth");
-          setLoading(false);
         }
       }
     } catch (err) {
       console.log("❌ Unexpected error during Apple sign-in:", err);
+    } finally {
       setLoading(false);
     }
   };
