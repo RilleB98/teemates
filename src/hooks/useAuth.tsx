@@ -28,11 +28,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let isInitialized = false;
+    let sessionProcessing = false;
 
     const initAuth = async () => {
       try {
         console.log("🚀 Starting auth initialization...");
+        sessionProcessing = true;
         
         // Check for auth tokens in URL (iOS redirect pattern)
         const urlParams = new URLSearchParams(window.location.search);
@@ -53,19 +54,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           
           if (accessToken) {
             console.log("🔧 Setting session from URL hash tokens...");
+            console.log("⏳ Waiting for setSession to complete...");
+            
             const { data, error } = await supabase.auth.setSession({
               access_token: accessToken,
               refresh_token: refreshToken || ''
             });
             
             if (!error && data.session) {
-              console.log("✅ Session restored from URL hash");
+              console.log("✅ Session restored from URL hash - waiting for state update...");
+              console.log("👤 User ID:", data.session.user?.id);
+              
+              // Wait a bit for auth state to stabilize
+              await new Promise(resolve => setTimeout(resolve, 100));
+              
               setSession(data.session);
               setUser(data.session.user);
               sessionRestored = true;
               
               // Clean URL
               window.history.replaceState({}, document.title, window.location.pathname);
+              console.log("🧹 URL cleaned after successful auth");
             } else {
               console.error("❌ Failed to set session from URL hash:", error);
             }
@@ -83,10 +92,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               const parsed = JSON.parse(savedSession);
               if (parsed?.currentSession) {
                 console.log("🔧 Restoring iOS localStorage session...");
+                console.log("⏳ Waiting for setSession to complete...");
+                
                 const { data, error } = await supabase.auth.setSession(parsed.currentSession);
                 
                 if (!error && data.session) {
-                  console.log("✅ iOS localStorage session restored");
+                  console.log("✅ iOS localStorage session restored - waiting for state update...");
+                  console.log("👤 User ID:", data.session.user?.id);
+                  
+                  // Wait a bit for auth state to stabilize
+                  await new Promise(resolve => setTimeout(resolve, 100));
+                  
                   setSession(data.session);
                   setUser(data.session.user);
                   sessionRestored = true;
@@ -129,20 +145,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(null);
         setUser(null);
       } finally {
-        if (!isInitialized) {
-          setLoading(false);
-          isInitialized = true;
-          console.log("✅ Auth initialization complete");
-        }
+        // Only set loading to false after ALL session processing is complete
+        sessionProcessing = false;
+        setLoading(false);
+        console.log("✅ Auth initialization complete - ready for routing decisions");
       }
     };
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("🔄 Auth state change:", event, !!session);
-      if (isInitialized) {
+      
+      // Only update state if not currently processing session restoration
+      if (!sessionProcessing) {
         setSession(session);
         setUser(session?.user ?? null);
+      } else {
+        console.log("⏸️ Ignoring auth state change during session processing");
       }
     });
 
