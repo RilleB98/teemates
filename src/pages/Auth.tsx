@@ -16,24 +16,32 @@ export const Auth = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   useEffect(() => {
+    console.log("🍎 DEBUG: Auth page useEffect starting...");
+    console.log("🍎 DEBUG: Current URL:", window.location.href);
+    
     // Check for existing session first
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("🍎 DEBUG: Initial session check:", { hasSession: !!session, hasUser: !!session?.user });
       if (session?.user) {
-        console.log("🍎 Auth: Existing session detected, redirecting to /app");
+        console.log("🍎 DEBUG: Existing session detected, redirecting to /app");
         navigate("/app");
       }
     });
 
     // Set up auth state listener for immediate redirects
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("🍎 Auth state change:", event, !!session);
+      console.log("🍎 DEBUG: Auth page - auth state change:", event, !!session);
+      console.log("🍎 DEBUG: Session user:", session?.user?.id);
       if (session?.user) {
-        console.log("🍎 Auth: User authenticated, redirecting to /app");
+        console.log("🍎 DEBUG: User authenticated, redirecting to /app");
         navigate("/app");
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log("🧹 DEBUG: Auth page cleanup");
+      subscription.unsubscribe();
+    };
   }, [navigate]);
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();

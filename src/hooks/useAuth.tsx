@@ -28,7 +28,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log("🍎 iOS Auth: Starting initialization...");
+    console.log("🚀 DEBUG: useAuth starting...");
+    console.log("🚀 DEBUG: window.location.href:", window.location.href);
+    console.log("🚀 DEBUG: window.location.hash:", window.location.hash);
+    console.log("🚀 DEBUG: window.location.search:", window.location.search);
     let isMounted = true;
 
     // Parse tokens directly from URL fragments for iOS OAuth redirects
@@ -36,67 +39,78 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const hash = window.location.hash;
       const search = window.location.search;
       
-      console.log("🍎 Checking URL for auth tokens...");
-      console.log("🔍 Hash:", hash);
-      console.log("🔍 Search:", search);
+      console.log("🔍 DEBUG: parseTokensFromURL called");
+      console.log("🔍 DEBUG: Hash:", hash);
+      console.log("🔍 DEBUG: Search:", search);
+      console.log("🔍 DEBUG: Full URL:", window.location.href);
       
       // Check for access_token in URL fragment (#access_token=...)
       if (hash.includes('access_token=')) {
-        console.log("✅ Found access_token in URL fragment");
+        console.log("✅ DEBUG: Found access_token in URL fragment");
         const params = new URLSearchParams(hash.substring(1));
         const accessToken = params.get('access_token');
         const refreshToken = params.get('refresh_token');
         const expiresIn = params.get('expires_in');
         const tokenType = params.get('token_type');
         
+        console.log("🔍 DEBUG: Parsed tokens:", { accessToken: !!accessToken, refreshToken: !!refreshToken, expiresIn, tokenType });
+        
         if (accessToken) {
-          console.log("🍎 Setting session from URL tokens...");
+          console.log("🍎 DEBUG: Returning tokens for session establishment");
           return { accessToken, refreshToken, expiresIn, tokenType };
         }
       }
       
+      console.log("❌ DEBUG: No tokens found in URL");
       return null;
     };
 
     const establishSessionFromTokens = async (tokens: any) => {
       try {
-        console.log("🍎 Establishing session from tokens...");
+        console.log("🔥 DEBUG: establishSessionFromTokens called with:", { hasAccessToken: !!tokens.accessToken, hasRefreshToken: !!tokens.refreshToken });
         
         const { data, error } = await supabase.auth.setSession({
           access_token: tokens.accessToken,
           refresh_token: tokens.refreshToken || '',
         });
         
+        console.log("🔥 DEBUG: setSession result:", { hasSession: !!data.session, hasUser: !!data.session?.user, error: error?.message });
+        
         if (data.session && isMounted) {
-          console.log("✅ Session established from tokens");
+          console.log("✅ DEBUG: Session established successfully!");
+          console.log("✅ DEBUG: User ID:", data.session.user?.id);
           setSession(data.session);
           setUser(data.session.user);
           setLoading(false);
           
           // Clean URL
+          console.log("🧹 DEBUG: Cleaning URL...");
           window.history.replaceState({}, document.title, window.location.pathname);
           return true;
         }
         
         if (error) {
-          console.error("❌ Error setting session from tokens:", error);
+          console.error("❌ DEBUG: Error setting session from tokens:", error);
         }
         
         return false;
       } catch (error) {
-        console.error("❌ Error establishing session:", error);
+        console.error("❌ DEBUG: Exception in establishSessionFromTokens:", error);
         return false;
       }
     };
 
     const checkForExistingSession = async () => {
       try {
-        console.log("🍎 Checking for existing session...");
+        console.log("🔍 DEBUG: checkForExistingSession called");
         
         const { data, error } = await supabase.auth.getSession();
         
+        console.log("🔍 DEBUG: getSession result:", { hasSession: !!data.session, hasUser: !!data.session?.user, error: error?.message });
+        
         if (data.session && isMounted) {
-          console.log("✅ Found existing session");
+          console.log("✅ DEBUG: Found existing session!");
+          console.log("✅ DEBUG: User ID:", data.session.user?.id);
           setSession(data.session);
           setUser(data.session.user);
           setLoading(false);
@@ -104,31 +118,44 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
         
         if (error) {
-          console.error("❌ Error getting session:", error);
+          console.error("❌ DEBUG: Error getting session:", error);
         }
         
+        console.log("❌ DEBUG: No existing session found");
         return false;
       } catch (error) {
-        console.error("❌ Session check error:", error);
+        console.error("❌ DEBUG: Exception in checkForExistingSession:", error);
         return false;
       }
     };
 
     const initializeAuth = async () => {
+      console.log("🚀 DEBUG: initializeAuth starting...");
+      
       // First: Check if there are tokens in the URL (iOS OAuth redirect)
       const urlTokens = parseTokensFromURL();
       if (urlTokens) {
+        console.log("🔥 DEBUG: Found URL tokens, attempting to establish session...");
         const success = await establishSessionFromTokens(urlTokens);
-        if (success) return;
+        if (success) {
+          console.log("✅ DEBUG: Session established from URL tokens - auth complete!");
+          return;
+        } else {
+          console.log("❌ DEBUG: Failed to establish session from URL tokens");
+        }
       }
       
       // Second: Check for existing session
+      console.log("🔍 DEBUG: Checking for existing session...");
       const hasSession = await checkForExistingSession();
-      if (hasSession) return;
+      if (hasSession) {
+        console.log("✅ DEBUG: Found existing session - auth complete!");
+        return;
+      }
       
       // No session found - set loading to false
       if (isMounted) {
-        console.log("❌ No session found - user needs to login");
+        console.log("❌ DEBUG: No session found - user needs to login");
         setSession(null);
         setUser(null);
         setLoading(false);
@@ -137,12 +164,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Set up auth state listener (simplified for iOS)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("🍎 Auth state change:", event, !!session);
+      console.log("🔄 DEBUG: Auth state change:", event, !!session);
+      console.log("🔄 DEBUG: Session details:", { hasUser: !!session?.user, userId: session?.user?.id });
       
-      if (!isMounted) return;
+      if (!isMounted) {
+        console.log("🚫 DEBUG: Component unmounted, ignoring auth state change");
+        return;
+      }
       
       if (event === 'SIGNED_OUT') {
-        console.log("🚪 User signed out");
+        console.log("🚪 DEBUG: User signed out");
         setSession(null);
         setUser(null);
         setLoading(false);
@@ -150,7 +181,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       
       if (session) {
-        console.log("✅ New session established");
+        console.log("✅ DEBUG: New session established via auth state change");
         setSession(session);
         setUser(session.user);
         setLoading(false);
@@ -158,9 +189,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     // Initialize authentication
+    console.log("🚀 DEBUG: Calling initializeAuth...");
     initializeAuth();
 
     return () => {
+      console.log("🧹 DEBUG: useAuth cleanup");
       isMounted = false;
       subscription.unsubscribe();
     };
