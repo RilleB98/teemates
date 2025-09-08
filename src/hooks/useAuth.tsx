@@ -37,12 +37,58 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     );
 
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    // Check for iOS WebView injected session first
+    const checkIosSession = async () => {
+      const savedSession = localStorage.getItem('sb-fzhmvraztypgemyrguxw-auth-token');
+      
+      if (savedSession) {
+        try {
+          const parsed = JSON.parse(savedSession);
+          
+          if (parsed.currentSession) {
+            console.log('🍎 Found iOS WebView session, restoring...');
+            const { data, error } = await supabase.auth.setSession(parsed.currentSession);
+            
+            if (error) {
+              console.error('❌ setSession error', error);
+              // Fall back to regular session check
+              supabase.auth.getSession().then(({ data: { session } }) => {
+                setSession(session);
+                setUser(session?.user ?? null);
+                setLoading(false);
+              });
+            } else {
+              console.log('✅ Session restored from iOS WebView', data);
+              // Session will be updated via onAuthStateChange
+            }
+          } else {
+            // No currentSession in saved data, check regular session
+            supabase.auth.getSession().then(({ data: { session } }) => {
+              setSession(session);
+              setUser(session?.user ?? null);
+              setLoading(false);
+            });
+          }
+        } catch (e) {
+          console.error('❌ Failed to parse savedSession', e);
+          // Fall back to regular session check
+          supabase.auth.getSession().then(({ data: { session } }) => {
+            setSession(session);
+            setUser(session?.user ?? null);
+            setLoading(false);
+          });
+        }
+      } else {
+        // No saved session, check for existing session normally
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          setSession(session);
+          setUser(session?.user ?? null);
+          setLoading(false);
+        });
+      }
+    };
+
+    checkIosSession();
 
     return () => subscription.unsubscribe();
   }, []);
