@@ -92,27 +92,44 @@ export const Auth = () => {
     try {
       console.log('🍎 DEBUG: Starting Apple sign-in...');
       
-      // Standard Apple OAuth - let Supabase handle the redirect
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'apple',
-        options: {
-          redirectTo: `${window.location.origin}/app`,
+      if (Capacitor.isNativePlatform()) {
+        // For iOS app - open OAuth in external browser
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'apple',
+          options: {
+            redirectTo: `${window.location.origin}/app`,
+          }
+        });
+        
+        if (error) {
+          console.error('❌ Apple OAuth error:', error);
+          setLoading(false);
+          return;
         }
-      });
-      
-      if (error) {
-        console.error('❌ Apple OAuth error:', error);
-        setLoading(false);
-        return;
-      }
-      
-      if (data?.url) {
-        console.log('🍎 DEBUG: Got Apple OAuth URL, opening manually:', data.url);
-        // Use window.location.href for proper redirect in iOS webview
-        window.location.href = data.url;
+        
+        if (data?.url) {
+          console.log('🍎 DEBUG: Opening Apple OAuth in external browser:', data.url);
+          // Open in external browser for proper OAuth flow
+          await Browser.open({ url: data.url });
+        }
       } else {
-        console.log("❌ No URL returned from Apple OAuth");
-        setLoading(false);
+        // Web browser - standard flow
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'apple',
+          options: {
+            redirectTo: `${window.location.origin}/app`,
+          }
+        });
+        
+        if (error) {
+          console.error('❌ Apple OAuth error:', error);
+          setLoading(false);
+          return;
+        }
+        
+        if (data?.url) {
+          window.location.href = data.url;
+        }
       }
     } catch (err) {
       console.log("❌ Unexpected error during Apple sign-in:", err);
@@ -167,23 +184,19 @@ export const Auth = () => {
                   </Button>
                 </form>
 
-                {Capacitor.isNativePlatform() && (
-                  <>
-                    <div className="relative">
-                      <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t border-muted-foreground/20" />
-                      </div>
-                      <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-card px-2 text-muted-foreground">eller</span>
-                      </div>
-                    </div>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-muted-foreground/20" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">eller</span>
+                  </div>
+                </div>
 
-                    <Button onClick={handleAppleSignIn} variant="outline" className="w-full h-10 xs:h-11 border-muted-foreground/20 bg-black text-white hover:bg-black/90 transition-all duration-300 text-sm xs:text-base font-medium" disabled={loading}>
-                      <Apple className="w-4 h-4 mr-2" />
-                      Logga in med Apple
-                    </Button>
-                  </>
-                )}
+                <Button onClick={handleAppleSignIn} variant="outline" className="w-full h-10 xs:h-11 border-muted-foreground/20 bg-black text-white hover:bg-black/90 transition-all duration-300 text-sm xs:text-base font-medium" disabled={loading}>
+                  <Apple className="w-4 h-4 mr-2" />
+                  Logga in med Apple
+                </Button>
               </TabsContent>
               
               <TabsContent value="signup" className="space-y-4 xs:space-y-6">
