@@ -28,51 +28,83 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isInitComplete = false;
+
     const restoreIOSSession = async () => {
       try {
-        console.log("🔍 Kollar efter iOS-session i localStorage...");
+        console.log("🔍 Checking iOS session...");
         const raw = localStorage.getItem("sb-fzhmvraztypgemyrguxw-auth-token");
 
         if (raw) {
+          console.log("📱 Found iOS session data in localStorage");
           const parsed = JSON.parse(raw);
-          console.log("📥 Hittade iOS-session:", parsed);
-
+          
           if (parsed.currentSession) {
-            console.log("🔧 Återställer iOS-session med setSession...");
+            console.log("🔧 Restoring iOS session via supabase.auth.setSession()...");
             const { data, error } = await supabase.auth.setSession(parsed.currentSession);
+            
             if (error) {
-              console.error("❌ Kunde inte återställa iOS-session:", error);
+              console.error("❌ Failed to restore iOS session:", error);
+              console.log("❌ No iOS session found, will redirect to /auth");
             } else {
-              console.log("✅ Återställde iOS-session:", data);
+              console.log("✅ iOS session restored via supabase.auth.setSession()");
               setSession(data.session);
               setUser(data.session?.user ?? null);
+              isInitComplete = true;
+              setLoading(false);
+              return; // Early exit on success
             }
+          } else {
+            console.log("⚠️ iOS session data found but no currentSession");
           }
         } else {
-          console.log("📭 Ingen iOS-session hittades i localStorage");
-          // Fallback to regular session check
-          const { data } = await supabase.auth.getSession();
-          console.log("🔄 Fallback getSession result:", !!data.session);
+          console.log("📭 No iOS session data found in localStorage");
+        }
+
+        // Fallback to regular session check
+        console.log("🔄 Fallback: checking regular Supabase session...");
+        const { data } = await supabase.auth.getSession();
+        
+        if (data.session) {
+          console.log("✅ Found existing Supabase session");
           setSession(data.session);
           setUser(data.session?.user ?? null);
+        } else {
+          console.log("❌ No iOS session found, redirecting to /auth");
+          setSession(null);
+          setUser(null);
         }
+        
       } catch (err) {
-        console.error("❌ Fel vid parsing av iOS-session:", err);
+        console.error("❌ Error during iOS session restoration:", err);
+        console.log("❌ No iOS session found, redirecting to /auth");
+        
         // Fallback to regular session check on error
-        const { data } = await supabase.auth.getSession();
-        setSession(data.session);
-        setUser(data.session?.user ?? null);
+        try {
+          const { data } = await supabase.auth.getSession();
+          setSession(data.session);
+          setUser(data.session?.user ?? null);
+        } catch (fallbackError) {
+          console.error("❌ Fallback session check also failed:", fallbackError);
+          setSession(null);
+          setUser(null);
+        }
       } finally {
-        setLoading(false);
-        console.log("✅ Auth initialization complete");
+        if (!isInitComplete) {
+          setLoading(false);
+          console.log("✅ Auth initialization complete - ready for routing decisions");
+        }
       }
     };
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("🔄 onAuthStateChange:", event, !!session);
-      setSession(session);
-      setUser(session?.user ?? null);
+      // Only update state if initialization is complete to avoid race conditions
+      if (!isInitComplete || event !== 'INITIAL_SESSION') {
+        setSession(session);
+        setUser(session?.user ?? null);
+      }
     });
 
     restoreIOSSession();
