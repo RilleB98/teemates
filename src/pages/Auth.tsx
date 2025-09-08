@@ -49,7 +49,7 @@ export const Auth = () => {
       return;
     }
     setLoading(true);
-    const redirectUrl = 'https://teemates.app/app';
+    const redirectUrl = `${window.location.origin}/app`;
     const {
       error
     } = await supabase.auth.signUp({
@@ -92,11 +92,11 @@ export const Auth = () => {
     try {
       console.log('🍎 Starting iOS Apple sign-in...');
       
-      // iOS-optimized Apple OAuth
+      // iOS-optimized Apple OAuth with dynamic redirect
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'apple',
         options: {
-          redirectTo: 'https://teemates.app/app',
+          redirectTo: `${window.location.origin}/app`,
         }
       });
       
