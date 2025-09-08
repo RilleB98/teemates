@@ -28,11 +28,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let isInitComplete = false;
+    let isInitializing = true;
 
     const restoreIOSSession = async () => {
+      console.log("🔍 Checking iOS session...");
+      
+      // Wait a bit to ensure iOS has injected the session
+      await new Promise(resolve => setTimeout(resolve, 150));
+      
       try {
-        console.log("🔍 Checking iOS session...");
         const raw = localStorage.getItem("sb-fzhmvraztypgemyrguxw-auth-token");
 
         if (raw) {
@@ -45,14 +49,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             
             if (error) {
               console.error("❌ Failed to restore iOS session:", error);
-              console.log("❌ No iOS session found, will redirect to /auth");
             } else {
               console.log("✅ iOS session restored via supabase.auth.setSession()");
+              console.log("👤 User ID:", data.session?.user?.id);
               setSession(data.session);
               setUser(data.session?.user ?? null);
-              isInitComplete = true;
               setLoading(false);
-              return; // Early exit on success
+              isInitializing = false;
+              return true; // Success
             }
           } else {
             console.log("⚠️ iOS session data found but no currentSession");
@@ -70,14 +74,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setSession(data.session);
           setUser(data.session?.user ?? null);
         } else {
-          console.log("❌ No iOS session found, redirecting to /auth");
+          console.log("❌ No session found anywhere - user needs to login");
           setSession(null);
           setUser(null);
         }
         
+        return false; // No iOS session found
+        
       } catch (err) {
         console.error("❌ Error during iOS session restoration:", err);
-        console.log("❌ No iOS session found, redirecting to /auth");
         
         // Fallback to regular session check on error
         try {
@@ -89,21 +94,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setSession(null);
           setUser(null);
         }
+        return false;
       } finally {
-        if (!isInitComplete) {
+        if (isInitializing) {
           setLoading(false);
+          isInitializing = false;
           console.log("✅ Auth initialization complete - ready for routing decisions");
         }
       }
     };
 
-    // Set up auth state listener
+    // Set up auth state listener - but ignore initial session during iOS restore
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("🔄 onAuthStateChange:", event, !!session);
-      // Only update state if initialization is complete to avoid race conditions
-      if (!isInitComplete || event !== 'INITIAL_SESSION') {
+      
+      // Don't interfere during initial iOS session restoration
+      if (!isInitializing) {
         setSession(session);
         setUser(session?.user ?? null);
+      } else {
+        console.log("⏸️ Ignoring auth state change during iOS session restoration");
       }
     });
 
