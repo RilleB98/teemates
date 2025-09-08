@@ -96,7 +96,7 @@ export const Auth = () => {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'apple',
         options: {
-          redirectTo: `${window.location.origin}/app`,
+          redirectTo: `${window.location.origin}/auth`,
           skipBrowserRedirect: true,
         }
       });
