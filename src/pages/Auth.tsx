@@ -16,58 +16,19 @@ export const Auth = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   useEffect(() => {
-    const handleiOSRedirect = async () => {
-      console.log("🍎 Auth: Checking for iOS OAuth redirect...");
-      
-      // Check for iOS indicator in URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const isFromiOS = urlParams.get('ios_redirect') === 'true';
-      
-      if (isFromiOS) {
-        console.log("🍎 iOS redirect detected, checking for auth session...");
-        
-        // Wait for session to be established
-        let attempts = 0;
-        const maxAttempts = 10;
-        
-        const checkSession = async () => {
-          const { data: { session }, error } = await supabase.auth.getSession();
-          
-          if (session?.user) {
-            console.log("✅ iOS session found, redirecting to /app");
-            navigate("/app");
-            return;
-          }
-          
-          attempts++;
-          if (attempts < maxAttempts) {
-            console.log(`🔄 iOS session check attempt ${attempts}/${maxAttempts}`);
-            setTimeout(checkSession, 1000);
-          } else {
-            console.log("❌ iOS session not found after max attempts");
-          }
-        };
-        
-        checkSession();
-      }
-    };
-
     // Check for existing session first
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        console.log("🚀 Auth: Existing session detected, redirecting to /app");
+        console.log("🍎 Auth: Existing session detected, redirecting to /app");
         navigate("/app");
-      } else {
-        // Only check for iOS redirect if no existing session
-        handleiOSRedirect();
       }
     });
 
-    // Set up auth state listener
+    // Set up auth state listener for immediate redirects
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("🔄 Auth state change:", event, !!session);
+      console.log("🍎 Auth state change:", event, !!session);
       if (session?.user) {
-        console.log("🚀 Auth: User detected, redirecting to /app");
+        console.log("🍎 Auth: User authenticated, redirecting to /app");
         navigate("/app");
       }
     });
@@ -80,7 +41,7 @@ export const Auth = () => {
       return;
     }
     setLoading(true);
-    const redirectUrl = `${window.location.origin}/`;
+    const redirectUrl = 'https://teemates.app/app';
     const {
       error
     } = await supabase.auth.signUp({
@@ -113,65 +74,39 @@ export const Auth = () => {
     if (error) {
       console.log(error.message);
     } else {
-      // Inloggning lyckades
-      navigate("/");
+      // Inloggning lyckades - navigera till app
+      navigate("/app");
     }
     setLoading(false);
   };
   const handleAppleSignIn = async () => {
     setLoading(true);
     try {
-      console.log('🍎 Starting Apple sign-in...');
+      console.log('🍎 Starting iOS Apple sign-in...');
       
-      // Check if we're on native platform
-      if (Capacitor.isNativePlatform()) {
-        console.log('🍎 Native platform detected - using Browser plugin');
-        
-        // Use Capacitor Browser for OAuth on native platforms
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'apple',
-          options: {
-            redirectTo: `${window.location.origin}/auth?ios_redirect=true`,
-          }
+      // iOS-optimized Apple OAuth
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+        options: {
+          redirectTo: 'https://teemates.app/app',
+        }
+      });
+      
+      if (error) {
+        console.error('❌ Apple OAuth error:', error);
+        setLoading(false);
+        return;
+      }
+      
+      if (data?.url) {
+        console.log('🍎 Opening Apple OAuth in browser:', data.url);
+        await Browser.open({ 
+          url: data.url,
+          windowName: '_self'
         });
-        
-        if (error) {
-          console.error('❌ Apple OAuth error:', error);
-          setLoading(false);
-          return;
-        }
-        
-        if (data?.url) {
-          console.log('🍎 Opening OAuth URL in browser:', data.url);
-          await Browser.open({ 
-            url: data.url,
-            windowName: '_self'
-          });
-        }
       } else {
-        console.log('🌐 Web platform - using standard OAuth');
-        // Standard web OAuth
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'apple',
-          options: {
-            redirectTo: `${window.location.origin}/`,
-            queryParams: {
-              access_type: 'offline',
-              prompt: 'consent'
-            }
-          }
-        });
-        
-        if (error) {
-          console.log("❌ Apple sign-in error:", error);
-          setLoading(false);
-        } else if (data?.url) {
-          console.log('🌐 Redirecting to Apple OAuth URL:', data.url);
-          window.location.href = data.url;
-        } else {
-          console.log("❌ No URL returned from Apple OAuth");
-          setLoading(false);
-        }
+        console.log("❌ No URL returned from Apple OAuth");
+        setLoading(false);
       }
     } catch (err) {
       console.log("❌ Unexpected error during Apple sign-in:", err);

@@ -28,108 +28,137 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log("🚀 useAuth useEffect STARTED - mounting auth logic");
+    console.log("🍎 iOS Auth: Starting initialization...");
     let isMounted = true;
 
-    const forceSessionRefresh = async () => {
-      try {
-        console.log("🔄 Forcing session refresh...");
+    // Parse tokens directly from URL fragments for iOS OAuth redirects
+    const parseTokensFromURL = () => {
+      const hash = window.location.hash;
+      const search = window.location.search;
+      
+      console.log("🍎 Checking URL for auth tokens...");
+      console.log("🔍 Hash:", hash);
+      console.log("🔍 Search:", search);
+      
+      // Check for access_token in URL fragment (#access_token=...)
+      if (hash.includes('access_token=')) {
+        console.log("✅ Found access_token in URL fragment");
+        const params = new URLSearchParams(hash.substring(1));
+        const accessToken = params.get('access_token');
+        const refreshToken = params.get('refresh_token');
+        const expiresIn = params.get('expires_in');
+        const tokenType = params.get('token_type');
         
-        // Try to refresh the session
-        const { data, error } = await supabase.auth.refreshSession();
+        if (accessToken) {
+          console.log("🍎 Setting session from URL tokens...");
+          return { accessToken, refreshToken, expiresIn, tokenType };
+        }
+      }
+      
+      return null;
+    };
+
+    const establishSessionFromTokens = async (tokens: any) => {
+      try {
+        console.log("🍎 Establishing session from tokens...");
+        
+        const { data, error } = await supabase.auth.setSession({
+          access_token: tokens.accessToken,
+          refresh_token: tokens.refreshToken || '',
+        });
         
         if (data.session && isMounted) {
-          console.log("✅ Session refreshed successfully");
+          console.log("✅ Session established from tokens");
           setSession(data.session);
           setUser(data.session.user);
+          setLoading(false);
+          
+          // Clean URL
+          window.history.replaceState({}, document.title, window.location.pathname);
           return true;
         }
         
         if (error) {
-          console.log("❌ Session refresh failed:", error.message);
+          console.error("❌ Error setting session from tokens:", error);
         }
         
         return false;
       } catch (error) {
-        console.error("❌ Session refresh error:", error);
+        console.error("❌ Error establishing session:", error);
         return false;
       }
     };
 
-    const checkForSession = async () => {
+    const checkForExistingSession = async () => {
       try {
-        console.log("🚀 Starting comprehensive session check...");
+        console.log("🍎 Checking for existing session...");
         
-        // First, try to get existing session
-        console.log("🔄 Checking for existing Supabase session...");
         const { data, error } = await supabase.auth.getSession();
+        
+        if (data.session && isMounted) {
+          console.log("✅ Found existing session");
+          setSession(data.session);
+          setUser(data.session.user);
+          setLoading(false);
+          return true;
+        }
         
         if (error) {
           console.error("❌ Error getting session:", error);
         }
         
-        if (data.session && isMounted) {
-          console.log("✅ Found existing Supabase session");
-          console.log("👤 User ID:", data.session.user?.id);
-          setSession(data.session);
-          setUser(data.session.user);
-          return;
-        }
-        
-        console.log("❌ No existing session - trying refresh...");
-        const refreshed = await forceSessionRefresh();
-        
-        if (!refreshed) {
-          console.log("❌ No session found after refresh - user needs to login");
-          if (isMounted) {
-            setSession(null);
-            setUser(null);
-          }
-        }
-        
+        return false;
       } catch (error) {
         console.error("❌ Session check error:", error);
-        if (isMounted) {
-          setSession(null);
-          setUser(null);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-          console.log("✅ Session check complete");
-        }
+        return false;
       }
     };
 
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("🔄 Auth state change:", event, !!session);
+    const initializeAuth = async () => {
+      // First: Check if there are tokens in the URL (iOS OAuth redirect)
+      const urlTokens = parseTokensFromURL();
+      if (urlTokens) {
+        const success = await establishSessionFromTokens(urlTokens);
+        if (success) return;
+      }
+      
+      // Second: Check for existing session
+      const hasSession = await checkForExistingSession();
+      if (hasSession) return;
+      
+      // No session found - set loading to false
+      if (isMounted) {
+        console.log("❌ No session found - user needs to login");
+        setSession(null);
+        setUser(null);
+        setLoading(false);
+      }
+    };
+
+    // Set up auth state listener (simplified for iOS)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("🍎 Auth state change:", event, !!session);
+      
+      if (!isMounted) return;
       
       if (event === 'SIGNED_OUT') {
         console.log("🚪 User signed out");
-        if (isMounted) {
-          setSession(null);
-          setUser(null);
-        }
+        setSession(null);
+        setUser(null);
+        setLoading(false);
         return;
       }
       
       if (session) {
-        console.log("👤 New session user ID:", session.user?.id);
-        if (isMounted) {
-          setSession(session);
-          setUser(session.user);
-          if (loading) {
-            setLoading(false);
-          }
-        }
-      } else if (event === 'INITIAL_SESSION' && !session) {
-        console.log("🔄 No initial session - trying refresh...");
-        await forceSessionRefresh();
+        console.log("✅ New session established");
+        setSession(session);
+        setUser(session.user);
+        setLoading(false);
       }
     });
 
-    checkForSession();
+    // Initialize authentication
+    initializeAuth();
 
     return () => {
       isMounted = false;
