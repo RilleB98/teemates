@@ -29,37 +29,61 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const initAuth = async () => {
+      console.log('🚀 Starting auth initialization...');
+      
       // 1. First, try to read iOS-injected session
       const savedSession = localStorage.getItem('sb-fzhmvraztypgemyrguxw-auth-token');
+      console.log('🔍 Checking for iOS session in localStorage...', !!savedSession);
       
       if (savedSession) {
+        console.log('📱 Found saved session data:', savedSession.substring(0, 100) + '...');
         try {
           const parsed = JSON.parse(savedSession);
+          console.log('📋 Parsed session structure:', {
+            hasCurrentSession: !!parsed?.currentSession,
+            hasExpiresAt: !!parsed?.expiresAt,
+            keys: Object.keys(parsed || {})
+          });
           
           if (parsed?.currentSession) {
-            console.log('🍎 Found iOS WebView session, restoring...', parsed);
+            console.log('🍎 Found iOS WebView session, attempting to restore...');
             const { data, error } = await supabase.auth.setSession(parsed.currentSession);
             
             if (error) {
               console.error('❌ Failed to set iOS session:', error);
             } else {
-              console.log('✅ iOS session set successfully');
+              console.log('✅ iOS session set successfully!', {
+                hasSession: !!data.session,
+                hasUser: !!data.session?.user,
+                userId: data.session?.user?.id
+              });
               setSession(data.session);
               setUser(data.session?.user ?? null);
               setLoading(false);
               return; // Exit early, we have our session
             }
+          } else {
+            console.log('⚠️ No currentSession found in parsed data');
           }
         } catch (e) {
           console.error('❌ Could not parse iOS session:', e);
         }
+      } else {
+        console.log('📭 No iOS session found in localStorage');
       }
 
       // 2. Fallback - get current session
+      console.log('🔄 Falling back to getSession...');
       const { data } = await supabase.auth.getSession();
+      console.log('📡 getSession result:', {
+        hasSession: !!data.session,
+        hasUser: !!data.session?.user,
+        userId: data.session?.user?.id
+      });
       setSession(data.session);
       setUser(data.session?.user ?? null);
       setLoading(false);
+      console.log('✅ Auth initialization complete');
     };
 
     // 3. Set up auth state listener
