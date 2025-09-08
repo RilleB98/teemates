@@ -139,49 +139,11 @@ export const Auth = () => {
             <CardTitle className="text-center text-golf-premium text-lg xs:text-xl">Kom igång</CardTitle>
           </CardHeader>
           <CardContent className="p-4 xs:p-6 pt-0">
-            <Tabs defaultValue="signin" className="w-full">
+            <Tabs defaultValue="signup" className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-4 xs:mb-6 bg-muted/50 p-1 rounded-lg">
-                <TabsTrigger value="signin" className="text-xs xs:text-sm font-medium rounded-md">Logga in</TabsTrigger>
                 <TabsTrigger value="signup" className="text-xs xs:text-sm font-medium rounded-md">Registrera</TabsTrigger>
+                <TabsTrigger value="signin" className="text-xs xs:text-sm font-medium rounded-md">Logga in</TabsTrigger>
               </TabsList>
-              
-              <TabsContent value="signin" className="space-y-4 xs:space-y-6">
-                <form onSubmit={handleSignIn} className="space-y-3 xs:space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-email" className="text-sm xs:text-base font-medium">E-postadress</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input id="signin-email" type="email" placeholder="din@email.se" className="pl-10 h-10 xs:h-11 bg-background/50 border-muted-foreground/20 focus:border-golf-green transition-all duration-200" value={email} onChange={e => setEmail(e.target.value)} required />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-password" className="text-sm xs:text-base font-medium">Lösenord</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input id="signin-password" type="password" placeholder="Ditt lösenord" className="pl-10 h-10 xs:h-11 bg-background/50 border-muted-foreground/20 focus:border-golf-green transition-all duration-200" value={password} onChange={e => setPassword(e.target.value)} required />
-                    </div>
-                  </div>
-                  
-                  <Button type="submit" className="w-full h-10 xs:h-11 bg-gradient-golf hover:shadow-golf transition-all duration-300 text-sm xs:text-base font-medium" disabled={loading}>
-                    {loading ? "Loggar in..." : "Logga in"}
-                  </Button>
-                </form>
-
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-muted-foreground/20" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">eller</span>
-                  </div>
-                </div>
-
-                <Button onClick={handleAppleSignIn} variant="outline" className="w-full h-10 xs:h-11 border-muted-foreground/20 bg-black text-white hover:bg-black/90 transition-all duration-300 text-sm xs:text-base font-medium" disabled={loading}>
-                  <Apple className="w-4 h-4 mr-2" />
-                  Logga in med Apple
-                </Button>
-              </TabsContent>
               
               <TabsContent value="signup" className="space-y-4 xs:space-y-6">
                 <form onSubmit={handleSignUp} className="space-y-3 xs:space-y-4">
@@ -208,6 +170,45 @@ export const Auth = () => {
                   </Button>
                 </form>
               </TabsContent>
+              
+              <TabsContent value="signin" className="space-y-4 xs:space-y-6">
+                <form onSubmit={handleSignIn} className="space-y-3 xs:space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-email" className="text-sm xs:text-base font-medium">E-postadress</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input id="signin-email" type="email" placeholder="din@email.se" className="pl-10 h-10 xs:h-11 bg-background/50 border-muted-foreground/20 focus:border-golf-green transition-all duration-200" value={email} onChange={e => setEmail(e.target.value)} required />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-password" className="text-sm xs:text-base font-medium">Lösenord</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input id="signin-password" type="password" placeholder="Ditt lösenord" className="pl-10 h-10 xs:h-11 bg-background/50 border-muted-foreground/20 focus:border-golf-green transition-all duration-200" value={password} onChange={e => setPassword(e.target.value)} required />
+                    </div>
+                  </div>
+                  
+                  <Button type="submit" className="w-full h-10 xs:h-11 bg-gradient-golf hover:shadow-golf transition-all duration-300 text-sm xs:text-base font-medium" disabled={loading}>
+                    {loading ? "Loggar in..." : "Logga in"}
+                  </Button>
+                </form>
+                
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-muted-foreground/20" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">eller</span>
+                  </div>
+                </div>
+
+                <Button onClick={handleAppleSignIn} variant="outline" className="w-full h-10 xs:h-11 border-muted-foreground/20 bg-black text-white hover:bg-black/90 transition-all duration-300 text-sm xs:text-base font-medium" disabled={loading}>
+                  <Apple className="w-4 h-4 mr-2" />
+                  Logga in med Apple
+                </Button>
+              </TabsContent>
+              
             </Tabs>
           </CardContent>
         </Card>
