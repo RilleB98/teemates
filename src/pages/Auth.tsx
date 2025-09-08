@@ -15,29 +15,62 @@ export const Auth = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   useEffect(() => {
-    // Check if user is already logged in
-    const {
-      data: {
-        subscription
+    const handleiOSRedirect = async () => {
+      console.log("🍎 Auth: Checking for iOS OAuth redirect...");
+      
+      // Check for iOS indicator in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const isFromiOS = urlParams.get('ios_redirect') === 'true';
+      
+      if (isFromiOS) {
+        console.log("🍎 iOS redirect detected, checking for auth session...");
+        
+        // Wait for session to be established
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        const checkSession = async () => {
+          const { data: { session }, error } = await supabase.auth.getSession();
+          
+          if (session?.user) {
+            console.log("✅ iOS session found, redirecting to /app");
+            navigate("/app");
+            return;
+          }
+          
+          attempts++;
+          if (attempts < maxAttempts) {
+            console.log(`🔄 iOS session check attempt ${attempts}/${maxAttempts}`);
+            setTimeout(checkSession, 1000);
+          } else {
+            console.log("❌ iOS session not found after max attempts");
+          }
+        };
+        
+        checkSession();
       }
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    };
+
+    // Check for existing session first
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        console.log("🚀 Auth: Existing session detected, redirecting to /app");
+        navigate("/app");
+      } else {
+        // Only check for iOS redirect if no existing session
+        handleiOSRedirect();
+      }
+    });
+
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("🔄 Auth state change:", event, !!session);
       if (session?.user) {
         console.log("🚀 Auth: User detected, redirecting to /app");
         navigate("/app");
       }
     });
 
-    // Check for existing session
-    supabase.auth.getSession().then(({
-      data: {
-        session
-      }
-    }) => {
-      if (session?.user) {
-        console.log("🚀 Auth: Existing session detected, redirecting to /app");
-        navigate("/app");
-      }
-    });
     return () => subscription.unsubscribe();
   }, [navigate]);
   const handleSignUp = async (e: React.FormEvent) => {
