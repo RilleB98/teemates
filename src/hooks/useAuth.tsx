@@ -28,98 +28,54 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const initAuth = async () => {
-      console.log('🚀 Starting auth initialization...');
-      console.log('📱 Current localStorage keys:', Object.keys(localStorage));
-      
-      // Check what's actually in localStorage with detailed logging
-      const allKeys = Object.keys(localStorage);
-      console.log('🔍 All localStorage keys:', allKeys);
-      allKeys.forEach(key => {
-        if (key.includes('supabase') || key.includes('auth')) {
-          console.log(`🔑 Found auth-related key: ${key}`);
-        }
-      });
-      
-      // 1. First, try to read iOS-injected session with retry mechanism
-      let savedSession = localStorage.getItem('sb-fzhmvraztypgemyrguxw-auth-token');
-      console.log('🔍 Initial check for iOS session:', !!savedSession);
-      
-      // If no session found initially, wait a bit and try again (iOS might inject after page load)
-      if (!savedSession) {
-        console.log('⏳ No iOS session found initially, waiting 100ms and retrying...');
-        await new Promise(resolve => setTimeout(resolve, 100));
-        savedSession = localStorage.getItem('sb-fzhmvraztypgemyrguxw-auth-token');
-        console.log('🔍 Retry check for iOS session:', !!savedSession);
-      }
-      
-      if (savedSession) {
-        console.log('📱 Found saved session data (first 200 chars):', savedSession.substring(0, 200) + '...');
-        try {
-          const parsed = JSON.parse(savedSession);
-          console.log('📋 Parsed session structure:', {
-            hasCurrentSession: !!parsed?.currentSession,
-            hasExpiresAt: !!parsed?.expiresAt,
-            keys: Object.keys(parsed || {}),
-            currentSessionKeys: parsed?.currentSession ? Object.keys(parsed.currentSession) : []
-          });
-          
-          if (parsed?.currentSession) {
-            console.log('🍎 Found iOS WebView session, attempting to restore...');
-            console.log('🔧 About to call supabase.auth.setSession()');
-            
+    const restoreIOSSession = async () => {
+      try {
+        console.log("🔍 Kollar efter iOS-session i localStorage...");
+        const raw = localStorage.getItem("sb-fzhmvraztypgemyrguxw-auth-token");
+
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          console.log("📥 Hittade iOS-session:", parsed);
+
+          if (parsed.currentSession) {
+            console.log("🔧 Återställer iOS-session med setSession...");
             const { data, error } = await supabase.auth.setSession(parsed.currentSession);
-            
             if (error) {
-              console.error('❌ Failed to set iOS session:', error);
+              console.error("❌ Kunde inte återställa iOS-session:", error);
             } else {
-              console.log('✅ iOS session set successfully!', {
-                hasSession: !!data.session,
-                hasUser: !!data.session?.user,
-                userId: data.session?.user?.id,
-                accessToken: data.session?.access_token ? 'present' : 'missing'
-              });
+              console.log("✅ Återställde iOS-session:", data);
               setSession(data.session);
               setUser(data.session?.user ?? null);
-              setLoading(false);
-              console.log('🎯 Early exit: iOS session restored, loading complete');
-              return; // Exit early, we have our session
             }
-          } else {
-            console.log('⚠️ No currentSession found in parsed data');
           }
-        } catch (e) {
-          console.error('❌ Could not parse iOS session:', e);
+        } else {
+          console.log("📭 Ingen iOS-session hittades i localStorage");
+          // Fallback to regular session check
+          const { data } = await supabase.auth.getSession();
+          console.log("🔄 Fallback getSession result:", !!data.session);
+          setSession(data.session);
+          setUser(data.session?.user ?? null);
         }
-      } else {
-        console.log('📭 No iOS session found in localStorage after retry');
+      } catch (err) {
+        console.error("❌ Fel vid parsing av iOS-session:", err);
+        // Fallback to regular session check on error
+        const { data } = await supabase.auth.getSession();
+        setSession(data.session);
+        setUser(data.session?.user ?? null);
+      } finally {
+        setLoading(false);
+        console.log("✅ Auth initialization complete");
       }
-
-      // 2. Fallback - get current session
-      console.log('🔄 Falling back to getSession...');
-      const { data } = await supabase.auth.getSession();
-      console.log('📡 getSession result:', {
-        hasSession: !!data.session,
-        hasUser: !!data.session?.user,
-        userId: data.session?.user?.id
-      });
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
-      setLoading(false);
-      console.log('✅ Auth initialization complete');
     };
 
-    // 3. Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('🔄 Auth state change:', event, !!session);
-        setSession(session);
-        setUser(session?.user ?? null);
-        // Don't set loading to false here, let initAuth handle it
-      }
-    );
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("🔄 onAuthStateChange:", event, !!session);
+      setSession(session);
+      setUser(session?.user ?? null);
+    });
 
-    initAuth();
+    restoreIOSSession();
 
     return () => subscription.unsubscribe();
   }, []);
