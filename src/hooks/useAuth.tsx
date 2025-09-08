@@ -31,11 +31,51 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     console.log("🚀 useAuth useEffect STARTED - mounting auth logic");
     let isMounted = true;
 
-    const initAuth = async () => {
+    const checkForSession = async () => {
       try {
-        console.log("🚀 Starting auth initialization...");
+        console.log("🚀 Starting session check...");
         
-        // Check for existing Supabase session immediately
+        // First clear any potentially corrupted session
+        console.log("🧹 Clearing any existing auth state...");
+        await supabase.auth.signOut({ scope: 'local' });
+        
+        // Check URL for Apple OAuth tokens
+        const urlParams = new URLSearchParams(window.location.search);
+        const hash = window.location.hash;
+        
+        console.log("🔍 URL params:", urlParams.toString());
+        console.log("🔍 Hash:", hash);
+        
+        const accessToken = urlParams.get('access_token') || 
+                           (hash.includes('access_token=') ? 
+                            hash.split('access_token=')[1]?.split('&')[0] : null);
+        
+        const refreshToken = urlParams.get('refresh_token') ||
+                            (hash.includes('refresh_token=') ? 
+                             hash.split('refresh_token=')[1]?.split('&')[0] : null);
+        
+        if (accessToken && refreshToken) {
+          console.log("🎯 Found tokens in URL - setting session...");
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+          
+          if (error) {
+            console.error("❌ Error setting session from URL tokens:", error);
+          } else if (data.session) {
+            console.log("✅ Successfully set session from URL tokens");
+            if (isMounted) {
+              setSession(data.session);
+              setUser(data.session.user);
+            }
+            // Clean URL
+            window.history.replaceState({}, '', window.location.pathname);
+            return;
+          }
+        }
+        
+        // Check for existing session
         console.log("🔄 Checking for existing Supabase session...");
         const { data, error } = await supabase.auth.getSession();
         
@@ -46,11 +86,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (data.session && isMounted) {
           console.log("✅ Found existing Supabase session");
           console.log("👤 User ID:", data.session.user?.id);
-          console.log("🔑 Session expires at:", new Date(data.session.expires_at! * 1000));
           setSession(data.session);
           setUser(data.session.user);
         } else {
-          console.log("❌ No existing session found - user needs to login");
+          console.log("❌ No session found - user needs to login");
           if (isMounted) {
             setSession(null);
             setUser(null);
@@ -58,7 +97,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
         
       } catch (error) {
-        console.error("❌ Auth initialization error:", error);
+        console.error("❌ Session check error:", error);
         if (isMounted) {
           setSession(null);
           setUser(null);
@@ -66,12 +105,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } finally {
         if (isMounted) {
           setLoading(false);
-          console.log("✅ Auth initialization complete - ready for routing decisions");
+          console.log("✅ Session check complete");
         }
       }
     };
 
-    // Set up auth state listener for future changes
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("🔄 Auth state change:", event, !!session);
       if (session) {
@@ -82,14 +121,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // If we get a new session, make sure loading is false
         if (session && loading) {
           setLoading(false);
         }
       }
     });
 
-    initAuth();
+    checkForSession();
 
     return () => {
       isMounted = false;
