@@ -74,9 +74,9 @@ const App = () => {
                 </ProtectedRoute>
               } />
               <Route path="/admin/golf" element={
-                <ProtectedRoute>
+                <AdminOnlyRoute>
                   <AdminGolf />
-                </ProtectedRoute>
+                </AdminOnlyRoute>
               } />
               <Route path="/profile" element={
                 <ProtectedRoute>
