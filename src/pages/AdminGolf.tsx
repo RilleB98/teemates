@@ -19,6 +19,22 @@ export const AdminGolf = () => {
   useEffect(() => {
     if (isAdmin) {
       fetchUserStats();
+
+      // Lyssna på realtime-ändringar i profiles tabellen
+      const channel = supabase
+        .channel('admin_profiles_changes')
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'profiles' },
+          () => {
+            console.log('Profile updated, refreshing admin stats...');
+            fetchUserStats();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [isAdmin]);
 
