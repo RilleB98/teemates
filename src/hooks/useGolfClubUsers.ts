@@ -9,20 +9,18 @@ export const useGolfClubUsers = () => {
     const fetchClubUserCounts = async () => {
       try {
         const { data, error } = await supabase
-          .from('profiles')
-          .select('home_club')
-          .not('home_club', 'is', null);
+          .rpc('get_golf_club_user_counts');
 
         if (error) {
           console.error('Error fetching club users:', error);
           return;
         }
 
-        // Räkna användare per klubb
+        // Konvertera resultatet till rätt format
         const counts: Record<string, number> = {};
-        data?.forEach(profile => {
-          if (profile.home_club) {
-            counts[profile.home_club] = (counts[profile.home_club] || 0) + 1;
+        data?.forEach(row => {
+          if (row.home_club) {
+            counts[row.home_club] = Number(row.user_count);
           }
         });
 
