@@ -215,6 +215,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          sender_id: string | null
           updated_at: string
           user_id: string
         }
@@ -223,6 +224,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          sender_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -231,6 +233,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          sender_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -280,10 +283,12 @@ export type Database = {
           home_club: string | null
           id: string
           last_location: Json | null
+          last_swipe_reset: string | null
           location_enabled: boolean | null
           name: string | null
           push_token: string | null
           selected_course: Json | null
+          swipes_today: number | null
           updated_at: string
           user_id: string
         }
@@ -300,10 +305,12 @@ export type Database = {
           home_club?: string | null
           id?: string
           last_location?: Json | null
+          last_swipe_reset?: string | null
           location_enabled?: boolean | null
           name?: string | null
           push_token?: string | null
           selected_course?: Json | null
+          swipes_today?: number | null
           updated_at?: string
           user_id: string
         }
@@ -320,10 +327,12 @@ export type Database = {
           home_club?: string | null
           id?: string
           last_location?: Json | null
+          last_swipe_reset?: string | null
           location_enabled?: boolean | null
           name?: string | null
           push_token?: string | null
           selected_course?: Json | null
+          swipes_today?: number | null
           updated_at?: string
           user_id?: string
         }
