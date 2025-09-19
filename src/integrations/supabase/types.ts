@@ -593,6 +593,17 @@ export type Database = {
         Args: { _group_chat_id: string; _user_id: string }
         Returns: boolean
       }
+      search_profiles_by_golf_id: {
+        Args: { search_golf_id: string }
+        Returns: {
+          avatar_url: string
+          golf_id: string
+          handicap: number
+          home_club: string
+          name: string
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
