@@ -71,7 +71,7 @@ export const UserSearch = ({ onSendRequest, sentRequests, friends }: UserSearchP
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           <div className="w-32">
             <Input
               placeholder="010101"
@@ -81,6 +81,7 @@ export const UserSearch = ({ onSendRequest, sentRequests, friends }: UserSearchP
               maxLength={6}
             />
           </div>
+          <span className="text-muted-foreground">-</span>
           <div className="w-20">
             <Input
               placeholder="123"
