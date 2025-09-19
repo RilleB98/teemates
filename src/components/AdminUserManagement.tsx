@@ -21,6 +21,12 @@ export const AdminUserManagement = () => {
   const [lastDigits, setLastDigits] = useState('');
   const [foundUser, setFoundUser] = useState<any>(null);
   const [searchLoading, setSearchLoading] = useState(false);
+  
+  // Admin search states
+  const [adminDatepart, setAdminDatepart] = useState('');
+  const [adminLastDigits, setAdminLastDigits] = useState('');
+  const [foundAdminUser, setFoundAdminUser] = useState<any>(null);
+  const [adminSearchLoading, setAdminSearchLoading] = useState(false);
 
   console.log('AdminUserManagement - Current user is admin, checking subscription context...');
   
@@ -52,11 +58,14 @@ export const AdminUserManagement = () => {
 
       const adminUserIds = new Set(adminRoles?.map(role => role.user_id) || []);
 
-      const usersWithRoles = profiles?.map(profile => ({
+      // Only show admin users
+      const usersWithRoles = profiles?.filter(profile => 
+        adminUserIds.has(profile.user_id)
+      ).map(profile => ({
         id: profile.user_id,
         name: profile.name,
         user_id: profile.user_id,
-        isAdmin: adminUserIds.has(profile.user_id)
+        isAdmin: true
       })) || [];
 
       setUsers(usersWithRoles);
@@ -164,7 +173,66 @@ export const AdminUserManagement = () => {
     }
   };
 
-  // Premium functionality removed - payments handled by Apple
+  const searchAdminUser = async () => {
+    if (!adminDatepart.trim() || !adminLastDigits.trim()) return;
+    
+    const fullGolfId = `${adminDatepart.trim()}-${adminLastDigits.trim()}`;
+    
+    setAdminSearchLoading(true);
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('user_id, name, golf_id')
+        .eq('golf_id', fullGolfId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Search error:', error);
+        setFoundAdminUser(null);
+        return;
+      }
+
+      if (profile) {
+        // Check if user is already admin
+        const { data: existingRole } = await supabase
+          .from('user_roles')
+          .select('*')
+          .eq('user_id', profile.user_id)
+          .eq('role', 'admin')
+          .maybeSingle();
+
+        setFoundAdminUser({
+          ...profile,
+          isAlreadyAdmin: !!existingRole
+        });
+      } else {
+        setFoundAdminUser(null);
+      }
+    } catch (error) {
+      console.error('Error searching user:', error);
+      setFoundAdminUser(null);
+    } finally {
+      setAdminSearchLoading(false);
+    }
+  };
+
+  const makeUserAdmin = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('user_roles')
+        .insert([{ user_id: userId, role: 'admin' }]);
+
+      if (error) throw error;
+
+      console.log("Admin-behörighet tillagd");
+      setFoundAdminUser(null);
+      setAdminDatepart('');
+      setAdminLastDigits('');
+      fetchUsers(); // Refresh the admin list
+    } catch (error) {
+      console.error('Error making user admin:', error);
+    }
+  };
 
   if (loading) {
     return (
@@ -267,14 +335,102 @@ export const AdminUserManagement = () => {
       </Card>
 
       {/* Admin Management Card */}
+      <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-primary flex items-center gap-2">
+            <UserPlus className="h-5 w-5" />
+            Lägg till admin
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Sök användare för att ge admin-behörighet
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <div className="flex gap-2 items-center">
+              <div className="w-32">
+                <Input
+                  placeholder="010101"
+                  value={adminDatepart}
+                  onChange={(e) => setAdminDatepart(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && searchAdminUser()}
+                  maxLength={6}
+                />
+              </div>
+              <span className="text-muted-foreground">-</span>
+              <div className="w-20">
+                <Input
+                  placeholder="123"
+                  value={adminLastDigits}
+                  onChange={(e) => setAdminLastDigits(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && searchAdminUser()}
+                  maxLength={3}
+                />
+              </div>
+              <Button 
+                onClick={searchAdminUser}
+                disabled={adminSearchLoading || !adminDatepart.trim() || !adminLastDigits.trim()}
+              >
+                <Search className="w-4 h-4 mr-2" />
+                Sök
+              </Button>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Ange Golf-ID i två delar: datum (6 siffror) + sista 3 siffrorna
+            </div>
+          </div>
+
+          {foundAdminUser && (
+            <Card className="border">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-medium">{foundAdminUser.name || 'Namnlös användare'}</h3>
+                    <p className="text-sm text-muted-foreground">Golf-ID: {foundAdminUser.golf_id}</p>
+                    {foundAdminUser.isAlreadyAdmin && (
+                      <Badge variant="default" className="mt-2">
+                        <Shield className="w-3 h-3 mr-1" />
+                        Redan admin
+                      </Badge>
+                    )}
+                  </div>
+                  <div>
+                    {foundAdminUser.isAlreadyAdmin ? (
+                      <Button variant="secondary" disabled>
+                        Redan admin
+                      </Button>
+                    ) : (
+                      <Button 
+                        onClick={() => makeUserAdmin(foundAdminUser.user_id)}
+                        variant="default"
+                      >
+                        <Shield className="w-4 h-4 mr-2" />
+                        Gör till admin
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {(adminDatepart.trim() || adminLastDigits.trim()) && !foundAdminUser && !adminSearchLoading && (
+            <div className="text-center py-4 text-muted-foreground">
+              Ingen användare hittades med Golf-ID: {adminDatepart}-{adminLastDigits}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Current Admins Card */}
     <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl">
       <CardHeader>
         <CardTitle className="text-lg font-semibold text-primary flex items-center gap-2">
           <Users className="h-5 w-5" />
-          Användarhantering
+          Nuvarande admins
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Hantera admin-behörigheter för användare
+          Hantera befintliga admin-behörigheter
         </p>
       </CardHeader>
       <CardContent>
@@ -283,7 +439,6 @@ export const AdminUserManagement = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Namn</TableHead>
-                <TableHead>Status</TableHead>
                 <TableHead className="text-right">Åtgärder</TableHead>
               </TableRow>
             </TableHeader>
@@ -293,35 +448,14 @@ export const AdminUserManagement = () => {
                   <TableCell className="font-medium">
                     {user.name || 'Namnlös användare'}
                   </TableCell>
-                  <TableCell>
-                    {user.isAdmin ? (
-                      <Badge variant="default" className="bg-primary">
-                        <Shield className="w-3 h-3 mr-1" />
-                        Admin
-                      </Badge>
-                    ) : (
-                      <Badge variant="secondary">
-                        Användare
-                      </Badge>
-                    )}
-                  </TableCell>
                   <TableCell className="text-right">
                     <Button
-                      variant={user.isAdmin ? "destructive" : "default"}
+                      variant="destructive"
                       size="sm"
-                      onClick={() => toggleAdminRole(user.user_id, user.isAdmin)}
+                      onClick={() => toggleAdminRole(user.user_id, true)}
                     >
-                      {user.isAdmin ? (
-                        <>
-                          <ShieldOff className="w-4 h-4 mr-1" />
-                          Ta bort admin
-                        </>
-                      ) : (
-                        <>
-                          <Shield className="w-4 h-4 mr-1" />
-                          Gör till admin
-                        </>
-                      )}
+                      <ShieldOff className="w-4 h-4 mr-1" />
+                      Ta bort admin
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -331,7 +465,7 @@ export const AdminUserManagement = () => {
           
           {users.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
-              Inga användare hittades
+              Inga admins hittades
             </div>
           )}
         </div>
