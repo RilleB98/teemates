@@ -25,20 +25,23 @@ interface UserSearchProps {
 
 export const UserSearch = ({ onSendRequest, sentRequests, friends }: UserSearchProps) => {
   const { user } = useAuth();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [datepart, setDatepart] = useState('');
+  const [lastDigits, setLastDigits] = useState('');
   const [searchResults, setSearchResults] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(false);
 
   const searchUsers = async () => {
-    if (!searchTerm.trim() || !user) return;
+    if (!datepart.trim() || !lastDigits.trim() || !user) return;
 
+    const fullGolfId = `${datepart.trim()}-${lastDigits.trim()}`;
+    
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('user_id, name, avatar_url, handicap, home_club, golf_id')
         .neq('user_id', user.id)
-        .eq('golf_id', searchTerm.trim())
+        .eq('golf_id', fullGolfId)
         .limit(10);
 
       if (error) throw error;
@@ -67,20 +70,34 @@ export const UserSearch = ({ onSendRequest, sentRequests, friends }: UserSearchP
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Sök med Golf-ID (t.ex. 010101-123)..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyPress={handleKeyPress}
-            className="pl-10"
-          />
+      <div className="space-y-2">
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <Input
+              placeholder="Datum (t.ex. 981114)"
+              value={datepart}
+              onChange={(e) => setDatepart(e.target.value)}
+              onKeyPress={handleKeyPress}
+              maxLength={6}
+            />
+          </div>
+          <div className="w-20">
+            <Input
+              placeholder="023"
+              value={lastDigits}
+              onChange={(e) => setLastDigits(e.target.value)}
+              onKeyPress={handleKeyPress}
+              maxLength={3}
+            />
+          </div>
+          <Button onClick={searchUsers} disabled={loading || !datepart.trim() || !lastDigits.trim()}>
+            <Search className="h-4 w-4 mr-2" />
+            {loading ? 'Söker...' : 'Sök'}
+          </Button>
         </div>
-        <Button onClick={searchUsers} disabled={loading || !searchTerm.trim()}>
-          {loading ? 'Söker...' : 'Sök'}
-        </Button>
+        <div className="text-sm text-muted-foreground">
+          Ange Golf-ID i två delar: datum (6 siffror) + sista 3 siffrorna
+        </div>
       </div>
 
       {searchResults.length > 0 && (
@@ -141,9 +158,9 @@ export const UserSearch = ({ onSendRequest, sentRequests, friends }: UserSearchP
         </div>
       )}
 
-      {searchTerm.trim() && searchResults.length === 0 && !loading && (
+      {(datepart.trim() || lastDigits.trim()) && searchResults.length === 0 && !loading && (
         <div className="text-center py-8 text-muted-foreground">
-          Inga användare hittades för "{searchTerm}"
+          Inga användare hittades för "{datepart}-{lastDigits}"
         </div>
       )}
     </div>
