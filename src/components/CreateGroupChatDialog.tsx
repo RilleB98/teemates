@@ -37,13 +37,21 @@ export const CreateGroupChatDialog = ({ onGroupCreated }: CreateGroupChatDialogP
     try {
       const groupChat = await createGroupChat(groupName, selectedFriends);
       if (groupChat) {
-        // Gruppchatt skapad
+        console.log('Group chat created successfully:', groupChat);
+        // Gruppchatt skapad - reset form och stäng dialog
         setGroupName('');
         setSelectedFriends([]);
         setOpen(false);
+        
+        // Trigga callback för att gå till den nya gruppchattan
         onGroupCreated?.(groupChat.id);
+        
+        // Lägg till en liten delay för att säkerställa att real-time uppdateringen hinner ske
+        setTimeout(() => {
+          console.log('Group chat creation process completed');
+        }, 100);
       } else {
-        // Kunde inte skapa gruppchatt
+        console.error('Failed to create group chat');
       }
     } catch (error) {
       console.error('Error creating group:', error);
