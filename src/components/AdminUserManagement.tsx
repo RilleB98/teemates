@@ -17,7 +17,8 @@ interface User {
 export const AdminUserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [golfIdSearch, setGolfIdSearch] = useState('');
+  const [datepart, setDatepart] = useState('');
+  const [lastDigits, setLastDigits] = useState('');
   const [foundUser, setFoundUser] = useState<any>(null);
   const [searchLoading, setSearchLoading] = useState(false);
 
@@ -98,7 +99,9 @@ export const AdminUserManagement = () => {
   };
 
   const searchUserByGolfId = async () => {
-    if (!golfIdSearch.trim()) return;
+    if (!datepart.trim() || !lastDigits.trim()) return;
+    
+    const fullGolfId = `${datepart.trim()}-${lastDigits.trim()}`;
     
     setSearchLoading(true);
     try {
@@ -116,7 +119,7 @@ export const AdminUserManagement = () => {
             email
           )
         `)
-        .eq('golf_id', golfIdSearch.trim())
+        .eq('golf_id', fullGolfId)
         .maybeSingle();
 
       if (golfIdProfile) {
@@ -133,7 +136,7 @@ export const AdminUserManagement = () => {
               email
             )
           `)
-          .ilike('name', `%${golfIdSearch.trim()}%`)
+          .ilike('name', `%${fullGolfId}%`)
           .limit(1)
           .maybeSingle();
 
@@ -191,24 +194,42 @@ export const AdminUserManagement = () => {
             Premium-hantering
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Sök användare via Golf-ID eller namn
+            Sök användare via Golf-ID
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              placeholder="Ange Golf-ID eller namn..."
-              value={golfIdSearch}
-              onChange={(e) => setGolfIdSearch(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && searchUserByGolfId()}
-            />
-            <Button 
-              onClick={searchUserByGolfId}
-              disabled={searchLoading || !golfIdSearch.trim()}
-            >
-              <Search className="w-4 h-4 mr-2" />
-              Sök
-            </Button>
+          <div className="space-y-2">
+            <div className="flex gap-2 items-center">
+              <div className="w-32">
+                <Input
+                  placeholder="010101"
+                  value={datepart}
+                  onChange={(e) => setDatepart(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && searchUserByGolfId()}
+                  maxLength={6}
+                />
+              </div>
+              <span className="text-muted-foreground">-</span>
+              <div className="w-20">
+                <Input
+                  placeholder="123"
+                  value={lastDigits}
+                  onChange={(e) => setLastDigits(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && searchUserByGolfId()}
+                  maxLength={3}
+                />
+              </div>
+              <Button 
+                onClick={searchUserByGolfId}
+                disabled={searchLoading || !datepart.trim() || !lastDigits.trim()}
+              >
+                <Search className="w-4 h-4 mr-2" />
+                Sök
+              </Button>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Ange Golf-ID i två delar: datum (6 siffror) + sista 3 siffrorna
+            </div>
           </div>
 
           {foundUser && (
@@ -237,9 +258,9 @@ export const AdminUserManagement = () => {
             </Card>
           )}
 
-          {golfIdSearch && !foundUser && !searchLoading && (
+          {(datepart.trim() || lastDigits.trim()) && !foundUser && !searchLoading && (
             <div className="text-center py-4 text-muted-foreground">
-              Ingen användare hittades med Golf-ID: {golfIdSearch}
+              Ingen användare hittades med Golf-ID: {datepart}-{lastDigits}
             </div>
           )}
         </CardContent>
