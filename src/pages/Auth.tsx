@@ -9,12 +9,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { useNavigate, Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import teeMatesLogo from "@/assets/teemates-icon.png";
 export const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [resetEmailSent, setResetEmailSent] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
   useEffect(() => {
     console.log("🍎 DEBUG: Auth page useEffect starting...");
     console.log("🍎 DEBUG: Current URL:", window.location.href);
@@ -87,6 +90,38 @@ export const Auth = () => {
     }
     setLoading(false);
   };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        title: "E-postadress krävs",
+        description: "Ange din e-postadress för att återställa lösenordet",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth`,
+    });
+
+    if (error) {
+      toast({
+        title: "Fel",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      setResetEmailSent(true);
+      toast({
+        title: "E-post skickad!",
+        description: "Kontrollera din inkorg för instruktioner om lösenordsåterställning",
+      });
+    }
+    setLoading(false);
+  };
+
   const handleAppleSignIn = async () => {
     setLoading(true);
     try {
@@ -183,6 +218,23 @@ export const Auth = () => {
                     {loading ? "Loggar in..." : "Logga in"}
                   </Button>
                 </form>
+
+                <div className="text-center">
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    onClick={handleForgotPassword}
+                    disabled={loading}
+                    className="text-sm text-muted-foreground hover:text-golf-green transition-colors"
+                  >
+                    Glömt lösenord?
+                  </Button>
+                  {resetEmailSent && (
+                    <p className="text-xs text-golf-green mt-2">
+                      E-post skickad! Kontrollera din inkorg.
+                    </p>
+                  )}
+                </div>
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
