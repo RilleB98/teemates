@@ -72,9 +72,9 @@ export const UserSearch = ({ onSendRequest, sentRequests, friends }: UserSearchP
     <div className="space-y-4">
       <div className="space-y-2">
         <div className="flex gap-2">
-          <div className="flex-1">
+          <div className="w-32">
             <Input
-              placeholder="Datum (t.ex. 981114)"
+              placeholder="010101"
               value={datepart}
               onChange={(e) => setDatepart(e.target.value)}
               onKeyPress={handleKeyPress}
@@ -83,7 +83,7 @@ export const UserSearch = ({ onSendRequest, sentRequests, friends }: UserSearchP
           </div>
           <div className="w-20">
             <Input
-              placeholder="023"
+              placeholder="123"
               value={lastDigits}
               onChange={(e) => setLastDigits(e.target.value)}
               onKeyPress={handleKeyPress}
