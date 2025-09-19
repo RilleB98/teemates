@@ -38,11 +38,9 @@ export const UserSearch = ({ onSendRequest, sentRequests, friends }: UserSearchP
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('profiles')
-        .select('user_id, name, avatar_url, handicap, home_club, golf_id')
-        .neq('user_id', user.id)
-        .eq('golf_id', fullGolfId)
-        .limit(10);
+        .rpc('search_profiles_by_golf_id', { 
+          search_golf_id: fullGolfId 
+        });
 
       if (error) throw error;
 

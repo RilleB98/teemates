@@ -180,17 +180,18 @@ export const AdminUserManagement = () => {
     
     setAdminSearchLoading(true);
     try {
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('user_id, name, golf_id')
-        .eq('golf_id', fullGolfId)
-        .maybeSingle();
+      const { data: profiles, error } = await supabase
+        .rpc('search_profiles_by_golf_id', { 
+          search_golf_id: fullGolfId 
+        });
 
       if (error) {
         console.error('Search error:', error);
         setFoundAdminUser(null);
         return;
       }
+
+      const profile = profiles?.[0] || null;
 
       if (profile) {
         // Check if user is already admin
