@@ -570,6 +570,14 @@ export type Database = {
         Args: { user1_id: string; user2_id: string }
         Returns: string
       }
+      get_admin_user_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          active_profiles: number
+          incomplete_profiles: number
+          total_users: number
+        }[]
+      }
       get_golf_club_user_counts: {
         Args: Record<PropertyKey, never>
         Returns: {

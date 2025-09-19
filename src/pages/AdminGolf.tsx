@@ -26,33 +26,24 @@ export const AdminGolf = () => {
     try {
       setStatsLoading(true);
       
-      // Get total users from auth.users (we can count profiles instead since they're created for each user)
-      const { count: totalUsers } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
+      // Use the secure admin function to get accurate stats
+      const { data, error } = await supabase
+        .rpc('get_admin_user_stats');
 
-      // Get profiles with complete information
-      const { count: activeProfiles } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .not('name', 'is', null)
-        .not('birth_date', 'is', null)
-        .not('gender', 'is', null)
-        .not('handicap', 'is', null)
-        .not('home_city', 'is', null);
+      if (error) {
+        console.error('Error fetching user stats:', error);
+        return;
+      }
 
-      // Premium functionality removed - payments handled by Apple
-      const premiumUsers = 0;
-
-      // Calculate incomplete profiles
-      const incompleteProfiles = (totalUsers || 0) - (activeProfiles || 0);
-
-      setUserStats({
-        totalUsers: totalUsers || 0,
-        activeProfiles: activeProfiles || 0,
-        incompleteProfiles,
-        premiumUsers: premiumUsers || 0
-      });
+      const stats = data?.[0];
+      if (stats) {
+        setUserStats({
+          totalUsers: Number(stats.total_users || 0),
+          activeProfiles: Number(stats.active_profiles || 0),
+          incompleteProfiles: Number(stats.incomplete_profiles || 0),
+          premiumUsers: 0 // Premium functionality removed - payments handled by Apple
+        });
+      }
     } catch (error) {
       console.error('Error fetching user stats:', error);
     } finally {
