@@ -100,16 +100,16 @@ export const Friends = () => {
 
             <TabsContent value="friends-section">
               {/* Sub-navigation for Friends section */}
-              <Tabs defaultValue="search" className="space-y-3 sm:space-y-4">
+              <Tabs defaultValue="friends" className="space-y-3 sm:space-y-4">
                 <TabsList className="grid w-full grid-cols-3 bg-white/90 backdrop-blur-sm shadow-md border-0 h-9 sm:h-10">
-                  <TabsTrigger value="search" className="text-golf-premium data-[state=active]:bg-golf-green data-[state=active]:text-white text-xs sm:text-sm px-1">Sök</TabsTrigger>
+                  <TabsTrigger value="friends" className="text-golf-premium data-[state=active]:bg-golf-green data-[state=active]:text-white text-xs sm:text-sm px-1">Vänner</TabsTrigger>
                   <TabsTrigger value="requests" className="relative text-golf-premium data-[state=active]:bg-golf-green data-[state=active]:text-white text-xs sm:text-sm px-1">
                     Förfrågningar
                     {pendingRequests.length > 0 && (
                       <span className="absolute -top-1 -right-1 h-2 w-2 bg-primary rounded-full animate-pulse"></span>
                     )}
                   </TabsTrigger>
-                  <TabsTrigger value="friends" className="text-golf-premium data-[state=active]:bg-golf-green data-[state=active]:text-white text-xs sm:text-sm px-1">Vänner</TabsTrigger>
+                  <TabsTrigger value="search" className="text-golf-premium data-[state=active]:bg-golf-green data-[state=active]:text-white text-xs sm:text-sm px-1">Sök</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="search">
