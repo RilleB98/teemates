@@ -161,47 +161,21 @@ export const Auth = () => {
       if (data?.url) {
         console.log('🍎 DEBUG: Opening Apple OAuth URL:', data.url);
         
-        if (Capacitor.isNativePlatform()) {
-          // Open in Browser for native platforms with auto-close polling
+        if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios') {
+          // Use ASWebAuthenticationSession for iOS (auto-closes Safari)
+          try {
+            const WebAuth = (await import('../plugins/WebAuthPlugin')).default;
+            const result = await WebAuth.startWebAuth({ url: data.url });
+            console.log('🍎 DEBUG: WebAuth completed:', result);
+            // Session will be handled by the auth state listener
+          } catch (webAuthError) {
+            console.log('🍎 DEBUG: WebAuth failed, falling back to browser:', webAuthError);
+            // Fallback to browser method
+            await Browser.open({ url: data.url });
+          }
+        } else if (Capacitor.isNativePlatform()) {
+          // Android - use browser
           await Browser.open({ url: data.url });
-          
-          // Start polling to check for successful authentication
-          const pollForAuth = async () => {
-            let attempts = 0;
-            const maxAttempts = 30; // 30 seconds max
-            
-            const checkAuth = async () => {
-              attempts++;
-              try {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session?.user) {
-                  console.log('🍎 DEBUG: Authentication detected, closing browser');
-                  await Browser.close();
-                  setLoading(false);
-                  return true;
-                }
-              } catch (error) {
-                console.log('Auth check error:', error);
-              }
-              
-              if (attempts >= maxAttempts) {
-                console.log('🍎 DEBUG: Polling timeout, stopping');
-                setLoading(false);
-                return true;
-              }
-              
-              return false;
-            };
-            
-            const intervalId = setInterval(async () => {
-              const shouldStop = await checkAuth();
-              if (shouldStop) {
-                clearInterval(intervalId);
-              }
-            }, 1000);
-          };
-          
-          pollForAuth();
         } else {
           // Web browser - standard redirect
           window.location.href = data.url;
