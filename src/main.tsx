@@ -57,20 +57,23 @@ const processEarlyTokens = async () => {
   }
 };
 
-// Process tokens before React initialization (await for session establishment)
-await processEarlyTokens();
+// Process tokens before React initialization (wrapped in async IIFE)
+(async () => {
+  await processEarlyTokens();
 
-const rootElement = document.getElementById("root");
-console.log('TeeMates: Root element found:', !!rootElement);
+  const rootElement = document.getElementById("root");
+  console.log('TeeMates: Root element found:', !!rootElement);
 
-if (rootElement) {
-  console.log('TeeMates: Creating React root');
-  const root = createRoot(rootElement);
-  root.render(
-    <StrictMode>
-      <App />
-    </StrictMode>
-  );
-} else {
-  console.error('TeeMates: Root element not found!');
-}
+  if (rootElement) {
+    console.log('TeeMates: Creating React root');
+    const root = createRoot(rootElement);
+    root.render(
+      <StrictMode>
+        <App />
+      </StrictMode>
+    );
+  } else {
+    console.error('TeeMates: Root element not found!');
+  }
+})();
+
