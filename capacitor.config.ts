@@ -10,8 +10,11 @@ const config: CapacitorConfig = {
   },
   bundledWebRuntime: false,
   ios: {
-    scheme: 'TeeMates',
+    scheme: 'teemates',
     contentInset: 'automatic'
+  },
+  android: {
+    scheme: 'teemates'
   },
   plugins: {
     Browser: {
