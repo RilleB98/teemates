@@ -127,48 +127,47 @@ export const Auth = () => {
     try {
       console.log('🍎 DEBUG: Starting Apple sign-in...');
       
-      if (Capacitor.isNativePlatform()) {
-        // For iOS app - use custom app scheme for redirect
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'apple',
-          options: {
-            redirectTo: 'teemates://auth-callback',
-          }
-        });
-        
-        if (error) {
-          console.error('❌ Apple OAuth error:', error);
-          setLoading(false);
-          return;
+      // Use web redirect URL for both mobile and web
+      // Capacitor will handle deep linking after the web auth completes
+      const redirectUrl = `${window.location.origin}/app`;
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+        options: {
+          redirectTo: redirectUrl,
         }
+      });
+      
+      if (error) {
+        console.error('❌ Apple OAuth error:', error);
+        toast({
+          title: "Inloggningsfel",
+          description: error.message,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+      
+      if (data?.url) {
+        console.log('🍎 DEBUG: Opening Apple OAuth URL:', data.url);
         
-        if (data?.url) {
-          console.log('🍎 DEBUG: Opening Apple OAuth in external browser:', data.url);
-          // Open in external browser for proper OAuth flow
+        if (Capacitor.isNativePlatform()) {
+          // Open in external browser for proper OAuth flow on mobile
           await Browser.open({ url: data.url });
           // Note: Don't set loading to false here - let the auth state listener handle it
-        }
-      } else {
-        // Web browser - standard flow
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'apple',
-          options: {
-            redirectTo: `${window.location.origin}/app`,
-          }
-        });
-        
-        if (error) {
-          console.error('❌ Apple OAuth error:', error);
-          setLoading(false);
-          return;
-        }
-        
-        if (data?.url) {
+        } else {
+          // Web browser - standard redirect
           window.location.href = data.url;
         }
       }
     } catch (err) {
       console.log("❌ Unexpected error during Apple sign-in:", err);
+      toast({
+        title: "Inloggningsfel",
+        description: "Något gick fel vid inloggning med Apple",
+        variant: "destructive",
+      });
       setLoading(false);
     }
   };
