@@ -48,16 +48,52 @@ export const AuthCallback = () => {
         if (passedUrl) {
           console.log('🔗 AuthCallback: Processing URL from parameter:', passedUrl);
           const decodedUrl = decodeURIComponent(passedUrl);
+          console.log('🔗 AuthCallback: Decoded URL:', decodedUrl);
+          
           try {
-            const url = new URL(decodedUrl);
-            if (url.hash) {
-              hash = url.hash.substring(1);
-              params = new URLSearchParams(hash);
-            } else if (url.search) {
-              params = new URLSearchParams(url.search);
+            // Handle both custom scheme and HTTPS URLs from WebAuthPlugin
+            if (decodedUrl.startsWith('https://')) {
+              const url = new URL(decodedUrl);
+              // For HTTPS URLs, tokens are typically in the fragment
+              if (url.hash) {
+                hash = url.hash.substring(1);
+                params = new URLSearchParams(hash);
+              } else if (url.search) {
+                params = new URLSearchParams(url.search);
+              }
+            } else if (decodedUrl.startsWith('teemates://')) {
+              // Handle custom scheme URLs
+              const url = new URL(decodedUrl);
+              if (url.hash) {
+                hash = url.hash.substring(1);
+                params = new URLSearchParams(hash);
+              } else if (url.search) {
+                params = new URLSearchParams(url.search);
+              }
+            } else {
+              // Fallback: try to extract tokens directly from the string
+              const hashIndex = decodedUrl.indexOf('#');
+              const queryIndex = decodedUrl.indexOf('?');
+              
+              if (hashIndex !== -1) {
+                hash = decodedUrl.substring(hashIndex + 1);
+                params = new URLSearchParams(hash);
+              } else if (queryIndex !== -1) {
+                params = new URLSearchParams(decodedUrl.substring(queryIndex + 1));
+              }
             }
           } catch (urlError) {
             console.error('❌ Failed to parse passed URL:', urlError);
+            console.log('🔄 Attempting manual token extraction from:', decodedUrl);
+            // Manual token extraction as fallback
+            const accessTokenMatch = decodedUrl.match(/access_token=([^&]+)/);
+            const refreshTokenMatch = decodedUrl.match(/refresh_token=([^&]+)/);
+            if (accessTokenMatch) {
+              params.set('access_token', accessTokenMatch[1]);
+              if (refreshTokenMatch) {
+                params.set('refresh_token', refreshTokenMatch[1]);
+              }
+            }
           }
         }
         // Check if this is a custom scheme URL (teemates://auth-callback)

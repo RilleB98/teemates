@@ -136,10 +136,8 @@ export const Auth = () => {
       await supabase.auth.signOut();
       localStorage.clear();
       
-      // Use custom scheme for Apple OAuth on native platforms
-      const redirectUrl = Capacitor.isNativePlatform() 
-        ? 'teemates://auth-callback' 
-        : `${window.location.origin}/auth-callback`;
+      // Use HTTPS redirect for all platforms to match WebAuthPlugin callbackURLScheme
+      const redirectUrl = `${window.location.origin}/auth-callback`;
       console.log('🔄 DEBUG: Using redirect URL:', redirectUrl);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -184,10 +182,18 @@ export const Auth = () => {
             toast({
               title: "Native auth misslyckades",
               description: "Försöker med webbläsare istället...",
-              variant: "destructive",
             });
             // Fallback to browser method
-            await Browser.open({ url: data.url });
+            try {
+              await Browser.open({ url: data.url });
+            } catch (browserError) {
+              console.error('❌ Browser fallback also failed:', browserError);
+              toast({
+                title: "Inloggning misslyckades",
+                description: "Kunde inte öppna inloggningssida",
+                variant: "destructive",
+              });
+            }
           }
         } else if (Capacitor.isNativePlatform()) {
           // Android - use browser
