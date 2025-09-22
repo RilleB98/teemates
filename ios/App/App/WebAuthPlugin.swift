@@ -12,8 +12,7 @@ public class WebAuthPlugin: CAPPlugin, ASWebAuthenticationPresentationContextPro
             return
         }
         
-        let scheme = "teemates"
-        let session = ASWebAuthenticationSession(url: url, callbackURLScheme: scheme) { callbackURL, error in
+        let session = ASWebAuthenticationSession(url: url, callbackURLScheme: nil) { callbackURL, error in
             if let error = error {
                 call.reject("Authentication failed", error.localizedDescription)
                 return
@@ -32,6 +31,13 @@ public class WebAuthPlugin: CAPPlugin, ASWebAuthenticationPresentationContextPro
     }
     
     public func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        return UIApplication.shared.windows.first { $0.isKeyWindow } ?? ASPresentationAnchor()
+        if #available(iOS 15.0, *) {
+            return UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .flatMap { $0.windows }
+                .first { $0.isKeyWindow } ?? ASPresentationAnchor()
+        } else {
+            return UIApplication.shared.windows.first { $0.isKeyWindow } ?? ASPresentationAnchor()
+        }
     }
 }
