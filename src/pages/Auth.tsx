@@ -166,12 +166,26 @@ export const Auth = () => {
         if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios') {
           // Use ASWebAuthenticationSession for iOS (auto-closes Safari)
           try {
+            console.log('🍎 DEBUG: Attempting to import WebAuthPlugin...');
             const WebAuth = (await import('../plugins/WebAuthPlugin')).default;
+            console.log('🍎 DEBUG: WebAuthPlugin imported successfully, starting auth...');
             const result = await WebAuth.startWebAuth({ url: data.url });
-            console.log('🍎 DEBUG: WebAuth completed:', result);
-            // Session will be handled by the auth state listener
+            console.log('✅ DEBUG: WebAuth completed successfully:', result);
+            
+            // Process the callback URL immediately if we get one
+            if (result?.url) {
+              console.log('🔄 DEBUG: Processing callback URL from WebAuth:', result.url);
+              // Navigate to AuthCallback with the URL as a parameter
+              const callbackUrl = encodeURIComponent(result.url);
+              navigate(`/auth-callback?url=${callbackUrl}`, { replace: true });
+            }
           } catch (webAuthError) {
-            console.log('🍎 DEBUG: WebAuth failed, falling back to browser:', webAuthError);
+            console.error('❌ DEBUG: WebAuth failed:', webAuthError);
+            toast({
+              title: "Native auth misslyckades",
+              description: "Försöker med webbläsare istället...",
+              variant: "destructive",
+            });
             // Fallback to browser method
             await Browser.open({ url: data.url });
           }

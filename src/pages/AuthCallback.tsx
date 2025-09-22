@@ -34,15 +34,34 @@ export const AuthCallback = () => {
           }
         }
 
-        // Handle both custom scheme and HTTPS callback URLs
+        // Handle both custom scheme and HTTPS callback URLs, and URL params from WebAuthPlugin
         const currentUrl = window.location.href;
         console.log('🔍 AuthCallback: Full URL:', currentUrl);
         
         let hash = '';
         let params = new URLSearchParams();
         
+        // First check if URL is passed as a query parameter (from WebAuthPlugin)
+        const urlSearchParams = new URLSearchParams(window.location.search);
+        const passedUrl = urlSearchParams.get('url');
+        
+        if (passedUrl) {
+          console.log('🔗 AuthCallback: Processing URL from parameter:', passedUrl);
+          const decodedUrl = decodeURIComponent(passedUrl);
+          try {
+            const url = new URL(decodedUrl);
+            if (url.hash) {
+              hash = url.hash.substring(1);
+              params = new URLSearchParams(hash);
+            } else if (url.search) {
+              params = new URLSearchParams(url.search);
+            }
+          } catch (urlError) {
+            console.error('❌ Failed to parse passed URL:', urlError);
+          }
+        }
         // Check if this is a custom scheme URL (teemates://auth-callback)
-        if (currentUrl.startsWith('teemates://')) {
+        else if (currentUrl.startsWith('teemates://')) {
           console.log('📱 AuthCallback: Processing custom scheme URL');
           const url = new URL(currentUrl);
           // For custom schemes, tokens might be in search params or hash
