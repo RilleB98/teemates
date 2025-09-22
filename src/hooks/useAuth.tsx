@@ -36,10 +36,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Parse tokens directly from URL fragments for iOS OAuth redirects
     const parseTokensFromURL = () => {
+      console.log("🔍 DEBUG: parseTokensFromURL called");
+      
+      // First check if we have early tokens from main.tsx
+      const earlyTokens = sessionStorage.getItem('early_auth_tokens');
+      if (earlyTokens) {
+        console.log("🚀 DEBUG: Found early auth tokens from main.tsx");
+        const tokens = JSON.parse(earlyTokens);
+        sessionStorage.removeItem('early_auth_tokens');
+        return {
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
+          expiresIn: '3600',
+          tokenType: 'bearer'
+        };
+      }
+      
+      // Fallback: check URL directly (shouldn't happen if early processing worked)
       const hash = window.location.hash;
       const search = window.location.search;
       
-      console.log("🔍 DEBUG: parseTokensFromURL called");
       console.log("🔍 DEBUG: Hash:", hash);
       console.log("🔍 DEBUG: Search:", search);
       console.log("🔍 DEBUG: Full URL:", window.location.href);
@@ -57,19 +73,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (accessToken) {
           console.log("🍎 DEBUG: Returning tokens for session establishment");
-          // Store tokens in sessionStorage before cleaning URL
-          sessionStorage.setItem('pending_auth', JSON.stringify({ accessToken, refreshToken, expiresIn, tokenType }));
           return { accessToken, refreshToken, expiresIn, tokenType };
         }
-      }
-      
-      // Check if we have stored tokens from a previous URL parse
-      const storedAuth = sessionStorage.getItem('pending_auth');
-      if (storedAuth) {
-        console.log("🔄 DEBUG: Found stored auth tokens");
-        const tokens = JSON.parse(storedAuth);
-        sessionStorage.removeItem('pending_auth');
-        return tokens;
       }
       
       console.log("❌ DEBUG: No tokens found in URL");
