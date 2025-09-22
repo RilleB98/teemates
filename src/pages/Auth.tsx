@@ -128,11 +128,11 @@ export const Auth = () => {
       console.log('🍎 DEBUG: Starting Apple sign-in...');
       
       if (Capacitor.isNativePlatform()) {
-        // For iOS app - open OAuth in external browser
+        // For iOS app - use custom app scheme for redirect
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'apple',
           options: {
-            redirectTo: `${window.location.origin}/app`,
+            redirectTo: 'teemates://auth/callback',
           }
         });
         
@@ -146,6 +146,7 @@ export const Auth = () => {
           console.log('🍎 DEBUG: Opening Apple OAuth in external browser:', data.url);
           // Open in external browser for proper OAuth flow
           await Browser.open({ url: data.url });
+          // Note: Don't set loading to false here - let the auth state listener handle it
         }
       } else {
         // Web browser - standard flow
