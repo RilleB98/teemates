@@ -57,8 +57,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (accessToken) {
           console.log("🍎 DEBUG: Returning tokens for session establishment");
+          // Store tokens in sessionStorage before cleaning URL
+          sessionStorage.setItem('pending_auth', JSON.stringify({ accessToken, refreshToken, expiresIn, tokenType }));
           return { accessToken, refreshToken, expiresIn, tokenType };
         }
+      }
+      
+      // Check if we have stored tokens from a previous URL parse
+      const storedAuth = sessionStorage.getItem('pending_auth');
+      if (storedAuth) {
+        console.log("🔄 DEBUG: Found stored auth tokens");
+        const tokens = JSON.parse(storedAuth);
+        sessionStorage.removeItem('pending_auth');
+        return tokens;
       }
       
       console.log("❌ DEBUG: No tokens found in URL");
