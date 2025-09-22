@@ -15,6 +15,7 @@ export const AuthCallback = () => {
 
     const handleOAuthCallback = async () => {
       console.log('🍎 AuthCallback: Processing OAuth callback...');
+      console.log('🔗 AuthCallback: Current URL:', window.location.href);
       
       try {
         // Check if tokens were already processed early in main.tsx
@@ -28,12 +29,58 @@ export const AuthCallback = () => {
           if (session?.user && isMounted) {
             console.log('✅ AuthCallback: Valid session found, redirecting to app');
             setStatus('success');
-            setTimeout(() => navigate('/app', { replace: true }), 1000);
+            setTimeout(() => navigate('/app', { replace: true }), 500);
             return;
           }
         }
 
-        // Try to get session from URL hash (standard OAuth flow)
+        // Extract tokens directly from URL hash (Apple OAuth)
+        const url = new URL(window.location.href);
+        const hash = url.hash.substring(1);
+        console.log('🔍 AuthCallback: URL hash:', hash);
+        
+        if (hash) {
+          const params = new URLSearchParams(hash);
+          const accessToken = params.get('access_token');
+          const refreshToken = params.get('refresh_token');
+          
+          console.log('🎫 AuthCallback: Found tokens in URL:', { 
+            hasAccessToken: !!accessToken, 
+            hasRefreshToken: !!refreshToken 
+          });
+
+          if (accessToken) {
+            console.log('🔑 AuthCallback: Setting session with extracted tokens...');
+            const { data, error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken || ''
+            });
+
+            // Clean up URL hash
+            if (window.history.replaceState) {
+              window.history.replaceState(null, '', window.location.pathname);
+            }
+
+            if (error) {
+              console.error('❌ AuthCallback: Error setting session with tokens:', error);
+              if (isMounted) {
+                setStatus('error');
+                setErrorMessage(error.message);
+              }
+              return;
+            }
+
+            if (data.session?.user && isMounted) {
+              console.log('✅ AuthCallback: Session set successfully with tokens, redirecting to app');
+              setStatus('success');
+              setTimeout(() => navigate('/app', { replace: true }), 500);
+              return;
+            }
+          }
+        }
+
+        // Fallback: Try to get session from Supabase (standard OAuth flow)
+        console.log('🔄 AuthCallback: Fallback to getSession...');
         const { data, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -46,10 +93,9 @@ export const AuthCallback = () => {
         }
 
         if (data.session?.user && isMounted) {
-          console.log('✅ AuthCallback: OAuth successful, redirecting to app');
+          console.log('✅ AuthCallback: OAuth successful via fallback, redirecting to app');
           setStatus('success');
-          // Small delay to show success state
-          setTimeout(() => navigate('/app', { replace: true }), 1000);
+          setTimeout(() => navigate('/app', { replace: true }), 500);
         } else {
           console.log('⚠️ AuthCallback: No session found, redirecting to auth');
           if (isMounted) {
