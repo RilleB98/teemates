@@ -12,7 +12,7 @@ public class WebAuthPlugin: CAPPlugin, ASWebAuthenticationPresentationContextPro
             return
         }
         
-        let session = ASWebAuthenticationSession(url: url, callbackURLScheme: nil) { callbackURL, error in
+        let session = ASWebAuthenticationSession(url: url, callbackURLScheme: "teemates") { callbackURL, error in
             if let error = error {
                 call.reject("Authentication failed", error.localizedDescription)
                 return

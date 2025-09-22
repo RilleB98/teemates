@@ -1,9 +1,0 @@
-{
-  "applinks": {
-    "apps": [],
-    "details": [{
-      "appID": "9XB58V323V.app.lovable.c3a7dfcdab3b42b0ace67b83101e3118", 
-      "paths": ["/auth-callback"]
-    }]
-  }
-}

@@ -136,8 +136,10 @@ export const Auth = () => {
       await supabase.auth.signOut();
       localStorage.clear();
       
-      // Use auth-callback URL for Apple OAuth
-      const redirectUrl = `${window.location.origin}/auth-callback`;
+      // Use custom scheme for Apple OAuth on native platforms
+      const redirectUrl = Capacitor.isNativePlatform() 
+        ? 'teemates://auth-callback' 
+        : `${window.location.origin}/auth-callback`;
       console.log('🔄 DEBUG: Using redirect URL:', redirectUrl);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
