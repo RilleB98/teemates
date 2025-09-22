@@ -132,7 +132,7 @@ export const Auth = () => {
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'apple',
           options: {
-            redirectTo: 'teemates://auth/callback',
+            redirectTo: 'teemates://auth-callback',
           }
         });
         
