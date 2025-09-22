@@ -12,15 +12,20 @@ public class WebAuthPlugin: CAPPlugin, ASWebAuthenticationPresentationContextPro
             return
         }
         
+        print("🍎 WebAuthPlugin: Starting auth session with URL: \(urlString)")
+        
         let session = ASWebAuthenticationSession(url: url, callbackURLScheme: "teemates") { callbackURL, error in
             if let error = error {
+                print("❌ WebAuthPlugin: Auth session error: \(error.localizedDescription)")
                 call.reject("Authentication failed", error.localizedDescription)
                 return
             }
             
             if let callbackURL = callbackURL {
+                print("✅ WebAuthPlugin: Auth session completed with URL: \(callbackURL.absoluteString)")
                 call.resolve(["url": callbackURL.absoluteString])
             } else {
+                print("❌ WebAuthPlugin: No callback URL received")
                 call.reject("No callback URL received")
             }
         }

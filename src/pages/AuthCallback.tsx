@@ -34,15 +34,39 @@ export const AuthCallback = () => {
           }
         }
 
-        // Extract tokens directly from URL hash (Apple OAuth)
-        const url = new URL(window.location.href);
-        const hash = url.hash.substring(1);
-        console.log('🔍 AuthCallback: URL hash:', hash);
+        // Handle both custom scheme and HTTPS callback URLs
+        const currentUrl = window.location.href;
+        console.log('🔍 AuthCallback: Full URL:', currentUrl);
         
-        if (hash) {
-          const params = new URLSearchParams(hash);
-          const accessToken = params.get('access_token');
-          const refreshToken = params.get('refresh_token');
+        let hash = '';
+        let params = new URLSearchParams();
+        
+        // Check if this is a custom scheme URL (teemates://auth-callback)
+        if (currentUrl.startsWith('teemates://')) {
+          console.log('📱 AuthCallback: Processing custom scheme URL');
+          const url = new URL(currentUrl);
+          // For custom schemes, tokens might be in search params or hash
+          if (url.hash) {
+            hash = url.hash.substring(1);
+            params = new URLSearchParams(hash);
+          } else if (url.search) {
+            params = new URLSearchParams(url.search);
+          }
+        } else {
+          // Standard HTTPS callback
+          console.log('🌐 AuthCallback: Processing HTTPS callback');
+          const url = new URL(currentUrl);
+          hash = url.hash.substring(1);
+          params = new URLSearchParams(hash);
+        }
+        
+        console.log('🔍 AuthCallback: Extracted hash/params:', hash || params.toString());
+        
+        // Extract tokens from params (works for both custom scheme and HTTPS)
+        const accessToken = params.get('access_token');
+        const refreshToken = params.get('refresh_token');
+        
+        if (accessToken) {
           
           console.log('🎫 AuthCallback: Found tokens in URL:', { 
             hasAccessToken: !!accessToken, 
