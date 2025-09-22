@@ -127,9 +127,13 @@ export const Auth = () => {
     try {
       console.log('🍎 DEBUG: Starting Apple sign-in...');
       
-      // Use web redirect URL for both mobile and web
-      // Capacitor will handle deep linking after the web auth completes
+      // Clear any existing session/storage to ensure clean state
+      await supabase.auth.signOut();
+      localStorage.clear();
+      
+      // Use the current origin for redirect URL (works for both web and mobile)
       const redirectUrl = `${window.location.origin}/app`;
+      console.log('🔄 DEBUG: Using redirect URL:', redirectUrl);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'apple',
@@ -155,7 +159,6 @@ export const Auth = () => {
         if (Capacitor.isNativePlatform()) {
           // Open in external browser for proper OAuth flow on mobile
           await Browser.open({ url: data.url });
-          // Note: Don't set loading to false here - let the auth state listener handle it
         } else {
           // Web browser - standard redirect
           window.location.href = data.url;
