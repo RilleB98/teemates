@@ -14,7 +14,7 @@ public class WebAuthPlugin: CAPPlugin, ASWebAuthenticationPresentationContextPro
         
         print("🍎 WebAuthPlugin: Starting auth session with URL: \(urlString)")
         
-        let session = ASWebAuthenticationSession(url: url, callbackURLScheme: "https") { callbackURL, error in
+        let session = ASWebAuthenticationSession(url: url, callbackURLScheme: "teemates") { callbackURL, error in
             if let error = error {
                 print("❌ WebAuthPlugin: Auth session error: \(error.localizedDescription)")
                 call.reject("Authentication failed", error.localizedDescription)

@@ -121,6 +121,12 @@ export const AuthCallback = () => {
         const accessToken = params.get('access_token');
         const refreshToken = params.get('refresh_token');
         
+        console.log('🎫 AuthCallback: Found tokens:', { 
+          hasAccessToken: !!accessToken, 
+          hasRefreshToken: !!refreshToken,
+          tokenPreview: accessToken ? accessToken.substring(0, 20) + '...' : 'none'
+        });
+        
         if (accessToken) {
           
           console.log('🎫 AuthCallback: Found tokens in URL:', { 

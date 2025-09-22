@@ -136,8 +136,10 @@ export const Auth = () => {
       await supabase.auth.signOut();
       localStorage.clear();
       
-      // Use HTTPS redirect for all platforms to match WebAuthPlugin callbackURLScheme
-      const redirectUrl = `${window.location.origin}/auth-callback`;
+      // Use custom scheme for native iOS to trigger proper ASWebAuthenticationSession callback
+      const redirectUrl = Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios'
+        ? 'teemates://auth-callback' 
+        : `${window.location.origin}/auth-callback`;
       console.log('🔄 DEBUG: Using redirect URL:', redirectUrl);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -167,15 +169,23 @@ export const Auth = () => {
             console.log('🍎 DEBUG: Attempting to import WebAuthPlugin...');
             const WebAuth = (await import('../plugins/WebAuthPlugin')).default;
             console.log('🍎 DEBUG: WebAuthPlugin imported successfully, starting auth...');
+            console.log('🍎 DEBUG: OAuth URL being sent to WebAuth:', data.url);
+            
             const result = await WebAuth.startWebAuth({ url: data.url });
             console.log('✅ DEBUG: WebAuth completed successfully:', result);
             
             // Process the callback URL immediately if we get one
             if (result?.url) {
               console.log('🔄 DEBUG: Processing callback URL from WebAuth:', result.url);
+              console.log('🔄 DEBUG: Callback URL length:', result.url.length);
+              console.log('🔄 DEBUG: Callback URL starts with teemates:', result.url.startsWith('teemates://'));
+              
               // Navigate to AuthCallback with the URL as a parameter
               const callbackUrl = encodeURIComponent(result.url);
+              console.log('🚀 DEBUG: Navigating to auth-callback with encoded URL:', callbackUrl);
               navigate(`/auth-callback?url=${callbackUrl}`, { replace: true });
+            } else {
+              console.error('❌ DEBUG: WebAuth returned no URL');
             }
           } catch (webAuthError) {
             console.error('❌ DEBUG: WebAuth failed:', webAuthError);
