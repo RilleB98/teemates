@@ -161,13 +161,9 @@ export const Auth = () => {
       if (data?.url) {
         console.log('🍎 DEBUG: Opening Apple OAuth URL:', data.url);
         
-        if (Capacitor.isNativePlatform()) {
-          // Open in external browser for proper OAuth flow on mobile
-          await Browser.open({ url: data.url });
-        } else {
-          // Web browser - standard redirect
-          window.location.href = data.url;
-        }
+        // Use window.location.href for all platforms to trigger Universal Links
+        // This allows the Safari popup to close automatically when returning to the app
+        window.location.href = data.url;
       }
     } catch (err) {
       console.log("❌ Unexpected error during Apple sign-in:", err);
