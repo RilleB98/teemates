@@ -22,12 +22,15 @@ export const Auth = () => {
     console.log("🍎 DEBUG: Auth page useEffect starting...");
     console.log("🍎 DEBUG: Current URL:", window.location.href);
     
+    let isMounted = true;
+    
     // Check for existing session first
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log("🍎 DEBUG: Initial session check:", { hasSession: !!session, hasUser: !!session?.user });
-      if (session?.user) {
+      if (session?.user && isMounted) {
         console.log("🍎 DEBUG: Existing session detected, redirecting to /app");
-        navigate("/app");
+        // Use setTimeout to ensure this runs after current render cycle
+        setTimeout(() => navigate("/app", { replace: true }), 0);
       }
     });
 
@@ -35,14 +38,16 @@ export const Auth = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("🍎 DEBUG: Auth page - auth state change:", event, !!session);
       console.log("🍎 DEBUG: Session user:", session?.user?.id);
-      if (session?.user) {
+      if (session?.user && isMounted) {
         console.log("🍎 DEBUG: User authenticated, redirecting to /app");
-        navigate("/app");
+        // Use setTimeout to ensure this runs after current render cycle
+        setTimeout(() => navigate("/app", { replace: true }), 0);
       }
     });
 
     return () => {
       console.log("🧹 DEBUG: Auth page cleanup");
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, [navigate]);
