@@ -38,7 +38,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const parseTokensFromURL = () => {
       console.log("🔍 DEBUG: parseTokensFromURL called");
       
-      // First check if we have early tokens from main.tsx
+      // Check if early auth was already handled in main.tsx
+      const earlyHandled = sessionStorage.getItem('early_auth_handled');
+      if (earlyHandled) {
+        console.log("✅ DEBUG: Early auth already handled in main.tsx, skipping token parsing");
+        sessionStorage.removeItem('early_auth_handled');
+        return null; // Let normal session check proceed
+      }
+      
+      // Check if we have early tokens from main.tsx (fallback)
       const earlyTokens = sessionStorage.getItem('early_auth_tokens');
       if (earlyTokens) {
         console.log("🚀 DEBUG: Found early auth tokens from main.tsx");

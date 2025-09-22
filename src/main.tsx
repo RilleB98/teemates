@@ -8,7 +8,7 @@ console.log('TeeMates: main.tsx loaded');
 console.log('TeeMates: DOM ready state:', document.readyState);
 
 // Early token processing for iOS OAuth callbacks BEFORE React initialization
-const processEarlyTokens = () => {
+const processEarlyTokens = async () => {
   const hash = window.location.hash;
   console.log('🚀 EARLY: Checking for OAuth tokens in URL:', hash);
   
@@ -19,22 +19,46 @@ const processEarlyTokens = () => {
     const refreshToken = params.get('refresh_token');
     
     if (accessToken) {
-      console.log('🔥 EARLY: Setting session immediately before React init');
-      // Store tokens for useAuth to pick up
-      sessionStorage.setItem('early_auth_tokens', JSON.stringify({
-        accessToken,
-        refreshToken
-      }));
-      
-      // Clean URL immediately
-      window.history.replaceState({}, document.title, window.location.pathname);
-      console.log('🧹 EARLY: URL cleaned');
+      console.log('🔥 EARLY: Setting session immediately via setSession');
+      try {
+        // Use setSession directly instead of storing tokens
+        const { data, error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken || ''
+        });
+        
+        if (data.session) {
+          console.log('✅ EARLY: Session established successfully via setSession!');
+          console.log('✅ EARLY: User ID:', data.session.user?.id);
+          
+          // Clean URL immediately after successful session
+          window.history.replaceState({}, document.title, window.location.pathname);
+          console.log('🧹 EARLY: URL cleaned after successful session');
+          
+          // Set flag that we handled auth early
+          sessionStorage.setItem('early_auth_handled', 'true');
+        } else if (error) {
+          console.error('❌ EARLY: Error setting session:', error);
+          // Store tokens as fallback for useAuth
+          sessionStorage.setItem('early_auth_tokens', JSON.stringify({
+            accessToken,
+            refreshToken
+          }));
+        }
+      } catch (error) {
+        console.error('❌ EARLY: Exception setting session:', error);
+        // Store tokens as fallback for useAuth
+        sessionStorage.setItem('early_auth_tokens', JSON.stringify({
+          accessToken,
+          refreshToken
+        }));
+      }
     }
   }
 };
 
-// Process tokens before React initialization
-processEarlyTokens();
+// Process tokens before React initialization (await for session establishment)
+await processEarlyTokens();
 
 const rootElement = document.getElementById("root");
 console.log('TeeMates: Root element found:', !!rootElement);
