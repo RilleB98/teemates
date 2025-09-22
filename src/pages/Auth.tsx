@@ -136,8 +136,8 @@ export const Auth = () => {
       await supabase.auth.signOut();
       localStorage.clear();
       
-      // Use the current origin for redirect URL (works for both web and mobile)
-      const redirectUrl = `${window.location.origin}/app`;
+      // Use auth-callback URL for Apple OAuth
+      const redirectUrl = `${window.location.origin}/auth-callback`;
       console.log('🔄 DEBUG: Using redirect URL:', redirectUrl);
       
       const { data, error } = await supabase.auth.signInWithOAuth({

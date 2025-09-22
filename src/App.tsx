@@ -9,6 +9,7 @@ import { Friends } from "./pages/Friends";
 import { SwipeMatch } from "./pages/SwipeMatch";
 import { Messages } from "./pages/Messages";
 import { Auth } from "./pages/Auth";
+import { AuthCallback } from "./pages/AuthCallback";
 import { PublicLanding } from "./pages/PublicLanding";
 import { AuthProvider } from "./hooks/useAuth";
 
@@ -58,6 +59,7 @@ const App = () => {
                 </WebViewGuard>
               } />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/auth-callback" element={<AuthCallback />} />
               <Route path="/courses" element={
                 <ProtectedRoute>
                   <Courses />
