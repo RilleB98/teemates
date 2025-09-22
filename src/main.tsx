@@ -9,6 +9,37 @@ console.log('TeeMates: DOM ready state:', document.readyState);
 
 // Early token processing for iOS OAuth callbacks BEFORE React initialization
 const processEarlyTokens = async () => {
+  // First check for iOS fallback tokens in sessionStorage
+  const storedAccessToken = sessionStorage.getItem('access_token');
+  const storedRefreshToken = sessionStorage.getItem('refresh_token');
+  
+  if (storedAccessToken) {
+    console.log('🍎 EARLY: Found iOS fallback tokens in sessionStorage');
+    try {
+      const { data, error } = await supabase.auth.setSession({
+        access_token: storedAccessToken,
+        refresh_token: storedRefreshToken || ''
+      });
+      
+      if (data.session) {
+        console.log('✅ EARLY: Session established from iOS fallback tokens');
+        sessionStorage.removeItem('access_token');
+        sessionStorage.removeItem('refresh_token');
+        sessionStorage.setItem('early_auth_handled', 'true');
+        return; // Exit early since we handled auth
+      } else if (error) {
+        console.error('❌ EARLY: Error setting session from iOS fallback:', error);
+      }
+    } catch (error) {
+      console.error('❌ EARLY: Exception setting session from iOS fallback:', error);
+    }
+    
+    // Clean up tokens even if session failed
+    sessionStorage.removeItem('access_token');
+    sessionStorage.removeItem('refresh_token');
+  }
+
+  // Then check URL hash for OAuth tokens
   const hash = window.location.hash;
   console.log('🚀 EARLY: Checking for OAuth tokens in URL:', hash);
   
