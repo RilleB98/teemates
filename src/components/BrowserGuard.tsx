@@ -35,20 +35,19 @@ const BrowserGuard = ({ children }: BrowserGuardProps) => {
                        userAgent.includes('version/') && isIOS ||
                        !(window as any).chrome && isIOS;
       
-      // Check URL parameters and domain
+      // Check URL parameters only - remove domain check for now
       const urlParams = new URLSearchParams(window.location.search);
       const hasForceHideBadge = urlParams.has('forceHideBadge');
-      const isOurDomain = currentUrl.includes('teemates.app');
       
-      // Allow access if it's iOS, Capacitor, WebView, has special parameter, or from our production domain
-      const allowAccess = isIOS || isCapacitorApp || isWebView || hasForceHideBadge || isOurDomain;
+      // Only allow access if it's iOS, Capacitor, WebView, or has special parameter
+      // Remove domain check to force browser blocking
+      const allowAccess = isIOS || isCapacitorApp || isWebView || hasForceHideBadge;
       
       console.log('🔒 Detection Results:');
       console.log('🔒 Is iOS:', isIOS);
       console.log('🔒 Is Capacitor:', isCapacitorApp);
       console.log('🔒 Is WebView:', isWebView);
       console.log('🔒 Has ForceHideBadge:', hasForceHideBadge);
-      console.log('🔒 Is Our Domain:', isOurDomain);
       console.log('🔒 Allow Access:', allowAccess);
       
       setIsWebViewOrApp(allowAccess);
