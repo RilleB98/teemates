@@ -104,15 +104,6 @@ export const SwipeMatch = () => {
       <div className="pb-24 pt-8">
         <div className="container mx-auto px-4">
           <div className="max-w-sm mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-center space-x-2 mb-2 xs:mb-3">
-              <div className="w-8 h-8 xs:w-10 xs:h-10 bg-gradient-golf rounded-full flex items-center justify-center shadow-golf animate-float">
-                <Users className="w-4 h-4 xs:w-5 xs:h-5 text-white" />
-              </div>
-              <h1 className="text-xl xs:text-2xl md:text-3xl font-bold text-golf-premium">Golf Match</h1>
-            </div>
-            <p className="text-muted-foreground text-sm xs:text-base mb-3 text-center">Hitta din nästa golfpartner</p>
-              
             {/* Premium Upgrade Button */}
             {!canSwipeYes() && (
               <Button
