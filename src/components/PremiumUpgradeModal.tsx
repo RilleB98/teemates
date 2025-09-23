@@ -39,9 +39,7 @@ export function PremiumUpgradeModal({ isOpen, onClose, onUpgrade }: PremiumUpgra
   const features = [
     "Obegränsat antal swipes",
     "Skapa och se spelförslag",
-    "Öppna swipe-funktionen på specifika banor", 
-    "Prioriterat stöd",
-    "Tidiga tillgång till nya funktioner",
+    "Öppna swipe-funktionen på specifika banor",
   ];
 
   return (
@@ -69,7 +67,7 @@ export function PremiumUpgradeModal({ isOpen, onClose, onUpgrade }: PremiumUpgra
               </Badge>
             </div>
             <CardDescription className="text-2xl font-bold text-primary">
-              99 kr/månad
+              59 kr/månad
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
