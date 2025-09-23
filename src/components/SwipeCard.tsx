@@ -48,7 +48,45 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
   const [dragOffset, setDragOffset] = useState(0);
   const [startPos, setStartPos] = useState(0);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [needsScroll, setNeedsScroll] = useState(false);
   const { canSwipeYes, incrementYesSwipeCount } = useSwipeLimit();
+
+  // Calculate content height and determine if scrolling is needed
+  const calculateContentHeight = () => {
+    const baseHeight = 320; // Image height
+    const paddingHeight = 64; // Padding and margins
+    
+    let contentSections = 0;
+    
+    // Count sections that have content
+    if (profile.play_frequency || profile.availability || profile.handicap || profile.home_city) {
+      contentSections++; // Info badges
+    }
+    if (profile.home_club) {
+      contentSections++; // Golf info
+    }
+    if (profile.bio) {
+      contentSections++; // Bio
+    }
+    if (profile.mutual_friends && profile.mutual_friends.length > 0) {
+      contentSections++; // Mutual friends
+    }
+    if (profile.mutual_favorite_courses && profile.mutual_favorite_courses.length > 0) {
+      contentSections++; // Mutual courses
+    }
+    
+    const estimatedContentHeight = contentSections * 80; // ~80px per section
+    const totalHeight = baseHeight + estimatedContentHeight + paddingHeight;
+    
+    const maxHeightWithoutScroll = 600; // Max height before scrolling
+    const needsScrolling = totalHeight > maxHeightWithoutScroll;
+    
+    setNeedsScroll(needsScrolling);
+    
+    return needsScrolling ? 650 : Math.min(totalHeight, maxHeightWithoutScroll);
+  };
+
+  const cardHeight = calculateContentHeight();
 
   const handleStart = (clientX: number) => {
     setIsDragging(true);
@@ -188,7 +226,7 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
         style={{
           transform: `translateX(${dragOffset}px) rotate(${rotation}deg)`,
           opacity: isDragging ? opacity : 1,
-          height: '750px', // Increased height for more content
+          height: `${cardHeight}px`,
         }}
       >
         {/* Main profile image with gradient overlay */}
@@ -238,9 +276,10 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
           )}
         </div>
 
-        {/* Scrollable profile content */}
-        <ScrollArea className="flex-1 px-6 pb-20">
-          <div className="space-y-4 py-4">
+        {/* Scrollable or static profile content */}
+        {needsScroll ? (
+          <ScrollArea className="flex-1 px-6 pb-4">
+            <div className="space-y-4 py-4">
             {/* Quick info badges */}
             <InfoBadges 
               playFrequency={profile.play_frequency}
@@ -284,51 +323,78 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
             {profile.mutual_favorite_courses && (
               <MutualFavoriteCourses mutualCourses={profile.mutual_favorite_courses} />
             )}
+            </div>
+          </ScrollArea>
+        ) : (
+          <div className="flex-1 px-6 pb-4">
+            <div className="space-y-4 py-4">
+              {/* Quick info badges */}
+              <InfoBadges 
+                playFrequency={profile.play_frequency}
+                availability={profile.availability}
+                handicap={profile.handicap}
+                homeCity={profile.home_city}
+              />
+
+              {/* Golf info */}
+              {profile.home_club && (
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-foreground flex items-center gap-2">
+                    <User size={16} />
+                    Golfinfo
+                  </h3>
+                  <div className="bg-secondary/50 rounded-lg p-3">
+                    <div className="text-sm">
+                      <span className="font-medium">Hemklubb:</span>
+                      <span className="ml-2">{profile.home_club}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Bio */}
+              {profile.bio && (
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-foreground">Om mig</h3>
+                  <div className="bg-secondary/50 rounded-lg p-3">
+                    <p className="text-sm leading-relaxed">{profile.bio}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Mutual friends */}
+              {profile.mutual_friends && (
+                <MutualFriends mutualFriends={profile.mutual_friends} />
+              )}
+
+              {/* Mutual favorite courses */}
+              {profile.mutual_favorite_courses && (
+                <MutualFavoriteCourses mutualCourses={profile.mutual_favorite_courses} />
+              )}
+            </div>
           </div>
-        </ScrollArea>
+        )}
       </Card>
       
-      {/* Fixed action buttons - always visible */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-6 z-20">
-        {/* Desktop buttons */}
-        <div className="hidden md:flex gap-4">
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={handleSwipeLeft}
-            className="w-16 h-16 rounded-full border-2 border-red-200 hover:border-red-300 hover:bg-red-50 bg-card/95 backdrop-blur-sm shadow-lg transition-colors"
-          >
-            <X size={24} className="text-red-500" />
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={handleSwipeRight}
-            className="w-16 h-16 rounded-full border-2 border-green-200 hover:border-green-300 hover:bg-green-50 bg-card/95 backdrop-blur-sm shadow-lg transition-colors"
-          >
-            <Heart size={24} className="text-green-500" />
-          </Button>
-        </div>
-        
-        {/* Mobile buttons */}
-        <div className="flex gap-4 md:hidden">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleSwipeLeft}
-            className="w-14 h-14 rounded-full border-2 border-red-200 hover:border-red-300 hover:bg-red-50 bg-card/95 backdrop-blur-sm shadow-lg transition-colors"
-          >
-            <X size={20} className="text-red-500" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleSwipeRight}
-            className="w-14 h-14 rounded-full border-2 border-green-200 hover:border-green-300 hover:bg-green-50 bg-card/95 backdrop-blur-sm shadow-lg transition-colors"
-          >
-            <Heart size={20} className="text-green-500" />
-          </Button>
-        </div>
+      {/* Fixed action buttons positioned above bottom navigation */}
+      <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 flex gap-6 z-30">
+        {/* Desktop and mobile buttons */}
+        <Button
+          variant="outline"
+          size="lg"
+          onClick={handleSwipeLeft}
+          className="w-16 h-16 rounded-full border-2 border-red-200 hover:border-red-300 hover:bg-red-50 bg-card/95 backdrop-blur-sm shadow-lg transition-colors"
+        >
+          <X size={24} className="text-red-500" />
+        </Button>
+        <Button
+          variant="outline"
+          size="lg"
+          onClick={handleSwipeRight}
+          className="w-16 h-16 rounded-full border-2 border-green-200 hover:border-green-300 hover:bg-green-50 bg-card/95 backdrop-blur-sm shadow-lg transition-colors"
+        >
+          <Heart size={24} className="text-green-500" />
+        </Button>
       </div>
 
       <PremiumUpgradeModal
