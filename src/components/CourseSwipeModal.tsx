@@ -100,10 +100,7 @@ export const CourseSwipeModal = ({
               <DialogTitle className="text-lg sm:text-xl font-bold text-golf-premium mb-1">
                 {courseName}
               </DialogTitle>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <MapPin className="w-3 sm:w-4 h-3 sm:h-4 mr-1" />
-                {courseLocation}
-              </div>
+              
             </div>
             
             {totalProfiles > 0}
