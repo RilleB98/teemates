@@ -2,9 +2,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { X, Heart, RefreshCw, MapPin } from "lucide-react";
+import { X, Heart, RefreshCw, MapPin, User } from "lucide-react";
 import { SwipeCard } from "@/components/SwipeCard";
 import { useCourseProfiles } from "@/hooks/useCourseProfiles";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { InfoBadges } from "@/components/InfoBadges";
+import { MutualFriends } from "@/components/MutualFriends";
+import { MutualFavoriteCourses } from "@/components/MutualFavoriteCourses";
 
 interface CourseSwipeModalProps {
   isOpen: boolean;
@@ -61,8 +65,8 @@ export const CourseSwipeModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] sm:max-w-lg mx-auto p-0 bg-gradient-to-br from-golf-green via-background to-golf-green-light">
-        <div className="p-4 sm:p-6">
+      <DialogContent className="max-w-[95vw] sm:max-w-lg mx-auto p-0 bg-gradient-to-br from-background via-card to-secondary/20 border-0 overflow-hidden">
+        <div className="p-4 sm:p-6 pb-8">{/* Reduced bottom padding since buttons are now fixed */}
           <DialogHeader className="mb-3 sm:mb-4">
             <div>
               <DialogTitle className="text-lg sm:text-xl font-bold text-golf-premium mb-1">
@@ -91,26 +95,26 @@ export const CourseSwipeModal = ({
             )}
           </DialogHeader>
 
-          <div className="relative h-[500px] sm:h-[600px] flex items-center justify-center">
+          <div className="relative flex items-center justify-center">
             {!hasMoreProfiles || !currentProfile ? (
-              <Card className="w-full h-full flex items-center justify-center bg-white/95 backdrop-blur-sm">
-                <div className="text-center p-4 sm:p-6 lg:p-8">
-                  <Heart className="w-12 sm:w-16 h-12 sm:h-16 text-muted-foreground mx-auto mb-3 sm:mb-4" />
-                  <h3 className="text-lg sm:text-xl font-bold text-golf-premium mb-2">
+              <Card className="w-full max-w-sm h-[500px] flex items-center justify-center bg-card/95 backdrop-blur-sm">
+                <div className="text-center p-6 space-y-4">
+                  <Heart className="w-16 h-16 text-muted-foreground mx-auto" />
+                  <h3 className="text-xl font-bold text-foreground">
                     {totalProfiles === 0 ? 'Inga spelare hittades' : 'Inga fler spelare'}
                   </h3>
-                  <p className="text-sm sm:text-base text-muted-foreground mb-4 px-2">
+                  <p className="text-muted-foreground leading-relaxed">
                     {totalProfiles === 0 
                       ? `Det finns inga andra spelare med ${courseName} som hemmabana just nu.`
                       : 'Du har sett alla spelare från denna golfbana.'
                     }
                   </p>
-                  <div className="space-y-2 sm:space-y-3">
-                    <Button onClick={handleRefresh} variant="outline" className="w-full touch-target">
+                  <div className="space-y-3">
+                    <Button onClick={handleRefresh} variant="outline" className="w-full">
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Uppdatera lista
                     </Button>
-                    <Button onClick={onClose} className="w-full touch-target">
+                    <Button onClick={onClose} className="w-full">
                       Stäng
                     </Button>
                   </div>
