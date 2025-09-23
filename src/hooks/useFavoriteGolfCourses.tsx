@@ -3,8 +3,16 @@ import { supabase } from '@/integrations/supabase/client';
 
 import { useAuth } from './useAuth';
 
+interface GolfCourse {
+  id: string;
+  name: string;
+  location: string;
+  image: string;
+}
+
 export const useFavoriteGolfCourses = () => {
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [favoriteDetails, setFavoriteDetails] = useState<GolfCourse[]>([]);
   const [loading, setLoading] = useState(true);
   
   const { user } = useAuth();
@@ -22,12 +30,21 @@ export const useFavoriteGolfCourses = () => {
     try {
       const { data, error } = await supabase
         .from('favorite_golf_courses')
-        .select('golf_course_id')
+        .select(`
+          golf_course_id,
+          golf_courses!favorite_golf_courses_golf_course_id_fkey (
+            id,
+            name,
+            location,
+            image
+          )
+        `)
         .eq('user_id', user?.id);
 
       if (error) throw error;
 
       setFavorites(data?.map(item => item.golf_course_id) || []);
+      setFavoriteDetails(data?.map(item => (item as any).golf_courses).filter(Boolean) || []);
     } catch (error) {
       console.error('Error loading favorites:', error);
     } finally {
@@ -53,6 +70,7 @@ export const useFavoriteGolfCourses = () => {
         if (error) throw error;
 
         setFavorites(prev => prev.filter(id => id !== golfCourseId));
+        setFavoriteDetails(prev => prev.filter(course => course.id !== golfCourseId));
         // Golfbanan har tagits bort från dina favoriter
       } else {
         const { error } = await supabase
@@ -65,6 +83,8 @@ export const useFavoriteGolfCourses = () => {
         if (error) throw error;
 
         setFavorites(prev => [...prev, golfCourseId]);
+        // Reload favorites to get the course details
+        loadFavorites();
         // Golfbanan har lagts till i dina favoriter
       }
     } catch (error) {
@@ -76,6 +96,7 @@ export const useFavoriteGolfCourses = () => {
 
   return {
     favorites,
+    favoriteDetails,
     loading,
     toggleFavorite,
     isFavorite

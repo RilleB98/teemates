@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { CourseSelector } from "@/components/CourseSelector";
 import { ImageCropper } from "@/components/ImageCropper";
 import { PhotoGalleryModal } from "@/components/PhotoGalleryModal";
+import { useFavoriteGolfCourses } from "@/hooks/useFavoriteGolfCourses";
 import { Camera as CapacitorCamera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 export const Profile = () => {
@@ -31,7 +32,9 @@ export const Profile = () => {
     birth_date: null as Date | null,
     home_city: "",
     bio: "",
-    golf_id: ""
+    golf_id: "",
+    play_frequency: "",
+    availability: ""
   });
   const [birthDay, setBirthDay] = useState("");
   const [birthMonth, setBirthMonth] = useState("");
@@ -46,6 +49,7 @@ export const Profile = () => {
   const [showImageOptions, setShowImageOptions] = useState(false);
   const [showPhotoGallery, setShowPhotoGallery] = useState(false);
   const navigate = useNavigate();
+  const { favoriteDetails, loading: favoritesLoading, toggleFavorite } = useFavoriteGolfCourses();
 
   // Helper function to update birth date from individual components
   const updateBirthDate = (day: string, month: string, year: string) => {
@@ -171,7 +175,9 @@ export const Profile = () => {
           birth_date: birthDate,
           home_city: data.home_city || "",
           bio: data.bio || "",
-          golf_id: (data as any).golf_id || ""
+          golf_id: (data as any).golf_id || "",
+          play_frequency: data.play_frequency || "",
+          availability: data.availability || ""
         });
         
         // Set individual date components and golf ID suffix
@@ -441,7 +447,9 @@ export const Profile = () => {
           : null,
         home_city: profileData.home_city,
         bio: profileData.bio,
-        golf_id: profileData.golf_id
+        golf_id: profileData.golf_id,
+        play_frequency: profileData.play_frequency,
+        availability: profileData.availability
       };
 
       const { error } = await supabase
@@ -472,7 +480,7 @@ export const Profile = () => {
 
   // Auto-save when profile changes
   useEffect(() => {
-    if (profile.name || profile.birth_date || profile.gender || profile.handicap || profile.selected_course || profile.home_city) {
+    if (profile.name || profile.birth_date || profile.gender || profile.handicap || profile.selected_course || profile.home_city || profile.play_frequency || profile.availability) {
       debouncedAutoSave(profile);
     }
   }, [profile, debouncedAutoSave]);
@@ -877,8 +885,84 @@ export const Profile = () => {
                   />
                 </div>
 
+                {/* Play Frequency Section */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-foreground">Hur ofta spelar du golf?</Label>
+                  <Select value={profile.play_frequency} onValueChange={(value) => setProfile(prev => ({ ...prev, play_frequency: value }))}>
+                    <SelectTrigger className="border-muted focus:border-primary transition-colors">
+                      <SelectValue placeholder="Välj spelfrekvens" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="every_day">Varje dag</SelectItem>
+                      <SelectItem value="several_times_week">Flera gånger i veckan</SelectItem>
+                      <SelectItem value="once_week">En gång i veckan</SelectItem>
+                      <SelectItem value="few_times_month">Några gånger i månaden</SelectItem>
+                      <SelectItem value="rarely">Sällan</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Availability Section */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-foreground">När brukar du spela?</Label>
+                  <Select value={profile.availability} onValueChange={(value) => setProfile(prev => ({ ...prev, availability: value }))}>
+                    <SelectTrigger className="border-muted focus:border-primary transition-colors">
+                      <SelectValue placeholder="Välj tillgänglighet" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="weekdays">Vardagar</SelectItem>
+                      <SelectItem value="weekends">Helger</SelectItem>
+                      <SelectItem value="evenings">Kvällar</SelectItem>
+                      <SelectItem value="flexible">Flexibel</SelectItem>
+                      <SelectItem value="mornings">Morgon/förmiddag</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Favorite Golf Courses Section */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-semibold text-foreground">Favorit golfbanor</Label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate('/courses')}
+                      className="text-xs"
+                    >
+                      Hantera favoriter
+                    </Button>
+                  </div>
+                  
+                  {favoritesLoading ? (
+                    <div className="text-sm text-muted-foreground">Laddar favoriter...</div>
+                  ) : favoriteDetails.length > 0 ? (
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {favoriteDetails.map((course) => (
+                        <div key={course.id} className="flex items-center justify-between bg-secondary/50 rounded-md px-3 py-2">
+                          <div>
+                            <div className="font-medium text-sm">{course.name}</div>
+                            <div className="text-xs text-muted-foreground">{course.location}</div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleFavorite(course.id)}
+                            className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
+                          >
+                            ×
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-muted-foreground bg-secondary/30 rounded-md px-3 py-4 text-center">
+                      Inga favoriter ännu. Gå till Banor för att lägga till favoriter.
+                    </div>
+                  )}
+                </div>
+
                 {/* Missing fields indicator */}
-                {(!profile.name || !profile.birth_date || !profile.gender || !profile.handicap || !profile.selected_course || !profile.home_city) && (
+                {(!profile.name || !profile.birth_date || !profile.gender || !profile.handicap || !profile.selected_course || !profile.home_city || !profile.play_frequency || !profile.availability) && (
                   <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
                     <h4 className="text-sm font-semibold text-orange-800 mb-2">Du behöver fylla i följande fält:</h4>
                     <ul className="text-sm text-orange-700 space-y-1">
@@ -888,6 +972,8 @@ export const Profile = () => {
                       {!profile.handicap && <li>• Handikapp</li>}
                       {!profile.selected_course && <li>• Hemmaklubb</li>}
                       {!profile.home_city && <li>• Närliggande storstad</li>}
+                      {!profile.play_frequency && <li>• Spelfrekvens</li>}
+                      {!profile.availability && <li>• Tillgänglighet</li>}
                     </ul>
                   </div>
                 )}
