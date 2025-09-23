@@ -62,9 +62,9 @@ const BrowserGuard = ({ children }: BrowserGuardProps) => {
       
       setIsWebViewOrApp(allowAccess);
       
-      // If not allowed and not on root path, use window.location to avoid React Router issues
-      if (!allowAccess && location.pathname !== '/' && !hasRedirected) {
-        console.log('🔒 Redirecting browser user to landing page');
+      // If desktop browser, always redirect to root regardless of current path
+      if (isDesktopBrowser && location.pathname !== '/' && !hasRedirected) {
+        console.log('🔒 Redirecting desktop browser to root');
         setHasRedirected(true);
         window.location.href = '/';
         return;
