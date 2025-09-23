@@ -375,12 +375,9 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
               )}
 
               {/* Mutual favorite courses */}
-              {(() => {
-                console.log('🔍 DEBUG SwipeCard: Mutual courses for', profile.name, ':', profile.mutual_favorite_courses);
-                return profile.mutual_favorite_courses && profile.mutual_favorite_courses.length > 0 ? (
-                  <MutualFavoriteCourses mutualCourses={profile.mutual_favorite_courses} />
-                ) : null;
-              })()}
+              {profile.mutual_favorite_courses && (
+                <MutualFavoriteCourses mutualCourses={profile.mutual_favorite_courses} />
+              )}
             </div>
           </div>
         )}
