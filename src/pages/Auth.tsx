@@ -190,12 +190,26 @@ export const Auth = () => {
           } catch (webAuthError: any) {
             console.error('❌ DEBUG: WebAuth failed:', webAuthError);
             
-            // Handle user cancellation gracefully
+            // Handle user cancellation - but check if they actually logged in first
             if (webAuthError.message === 'USER_CANCELLED' || webAuthError.message?.includes('cancelled')) {
-              console.log('🔄 DEBUG: User cancelled authentication');
+              console.log('🔄 DEBUG: User cancelled authentication, checking if session exists...');
+              
+              // Check if user actually logged in despite manual Safari closure
+              try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session?.user) {
+                  console.log('✅ DEBUG: Session found despite manual closure, navigating to app');
+                  navigate("/app", { replace: true });
+                  return;
+                }
+              } catch (sessionError) {
+                console.error('❌ DEBUG: Error checking session:', sessionError);
+              }
+              
+              console.log('❌ DEBUG: No session found, user truly cancelled');
               toast({
                 title: "Inloggning avbruten",
-                description: "Inloggning avbröts av användaren",
+                description: "Stäng Safari och tryck på 'Återgå till TeeMates' om du loggade in",
                 variant: "default",
               });
               setLoading(false);
