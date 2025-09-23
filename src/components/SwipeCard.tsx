@@ -296,13 +296,9 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
             />
 
             {/* Golf info */}
-            {profile.home_club && (
-              <div className="space-y-2">
-                <h3 className="font-semibold text-foreground flex items-center gap-2">
-                  <User size={16} />
-                  Golfinfo
-                </h3>
-                <div className="bg-secondary/50 rounded-lg p-3">
+              {profile.home_club && (
+                <div className="space-y-2">
+                  <div className="bg-secondary/50 rounded-lg p-3">
                   <div className="text-sm">
                     <span className="font-medium">Hemklubb:</span>
                     <span className="ml-2">{profile.home_club}</span>
