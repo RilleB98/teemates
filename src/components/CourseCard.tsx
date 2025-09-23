@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Star, Users, Crown } from "lucide-react";
 import { useState } from "react";
 import { CourseSwipeModal } from "./CourseSwipeModal";
+import { usePremium } from "@/hooks/usePremium";
+import { PremiumUpgradeModal } from "./PremiumUpgradeModal";
 
 interface CourseCardProps {
   name: string;
@@ -20,9 +22,15 @@ export const CourseCard = ({
   activeUsers,
   onSwipeClick
 }: CourseCardProps) => {
+  const { isPremium } = usePremium();
   const [showSwipeModal, setShowSwipeModal] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   const handleSwipeClick = () => {
+    if (!isPremium) {
+      setShowPremiumModal(true);
+      return;
+    }
     setShowSwipeModal(true);
     onSwipeClick?.();
   };
@@ -63,8 +71,17 @@ export const CourseCard = ({
             className="flex-1 text-sm sm:text-base touch-target"
             onClick={handleSwipeClick}
           >
-            <Users className="w-4 h-4 mr-2" />
-            Swipa här
+            {isPremium ? (
+              <>
+                <Users className="w-4 h-4 mr-2" />
+                Swipa här
+              </>
+            ) : (
+              <>
+                <Crown className="w-4 h-4 mr-2" />
+                Premium krävs
+              </>
+            )}
           </Button>
         </div>
       </div>
@@ -74,6 +91,11 @@ export const CourseCard = ({
         onClose={() => setShowSwipeModal(false)}
         courseName={name}
         courseLocation={location}
+      />
+      
+      <PremiumUpgradeModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
       />
     </Card>
   );
