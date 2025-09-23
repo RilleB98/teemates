@@ -184,25 +184,6 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
           <CardContent className="p-0 h-full flex flex-col">
             {/* Profile Image */}
             <div className="relative h-2/3 bg-gradient-to-br from-gray-100 to-gray-200">
-              {/* Mobile action buttons in corners of profile image */}
-              <div className="absolute inset-0 z-10 md:hidden">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="absolute bottom-4 left-6 w-14 h-14 rounded-full bg-red-500/90 hover:bg-red-600/90 border-red-600 text-white shadow-lg"
-                  onClick={handleSwipeLeft}
-                >
-                  <X className="h-7 w-7" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="absolute bottom-4 right-6 w-14 h-14 rounded-full bg-green-500/90 hover:bg-green-600/90 border-green-600 text-white shadow-lg"
-                  onClick={handleSwipeRight}
-                >
-                  <Heart className="h-7 w-7" />
-                </Button>
-              </div>
               {profile.avatar_url ? (
                 <img 
                   src={profile.avatar_url} 
@@ -265,6 +246,26 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
             </div>
           </CardContent>
         </Card>
+        
+        {/* Mobile action buttons at bottom of card */}
+        <div className="absolute bottom-2 left-0 right-0 flex justify-between px-6 z-20 md:hidden">
+          <Button
+            variant="outline"
+            size="icon"
+            className="w-14 h-14 rounded-full bg-red-500/90 hover:bg-red-600/90 border-red-600 text-white shadow-lg"
+            onClick={handleSwipeLeft}
+          >
+            <X className="h-7 w-7" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="w-14 h-14 rounded-full bg-green-500/90 hover:bg-green-600/90 border-green-600 text-white shadow-lg"
+            onClick={handleSwipeRight}
+          >
+            <Heart className="h-7 w-7" />
+          </Button>
+        </div>
       </div>
 
       {/* Desktop action buttons - Hidden on mobile */}
