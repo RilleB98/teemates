@@ -68,7 +68,8 @@ export const useSwipeProfiles = () => {
     setLoading(true);
     
     try {
-      // Simple query without dangerous auth operations
+      // Fetch all profiles that aren't the current user and have names
+      console.log("🔍 DEBUG: Fetching profiles...");
       const { data, error } = await supabase
         .from('profiles')
         .select(`user_id, name, avatar_url, age, handicap, gender, home_club, birth_date, bio, home_city`)
@@ -78,158 +79,171 @@ export const useSwipeProfiles = () => {
 
       if (error) {
         console.error('❌ Error fetching profiles:', error);
-        
-        // Enhanced retry mechanism
-        if (retryCount < 3) {
-          console.log(`🔄 RETRY: Attempt ${retryCount + 2}/4 with exponential backoff`);
-          fetchingRef.current = false;
-          const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s delays
-          setTimeout(() => fetchProfiles(true, retryCount + 1), delay);
-        }
-        return;
+        throw error;
       }
 
-      console.log("✅ RAW DATA: Fetched", data?.length, "profiles from database");
-      console.log("📋 RAW NAMES:", data?.map(p => `${p.name} (ID: ${p.user_id.slice(-6)})`).join(', '));
+      console.log(`✅ DEBUG: Raw profiles fetched: ${data?.length || 0}`);
+      console.log("📋 DEBUG: Raw profiles:", data?.map(p => ({ name: p.name, id: p.user_id.slice(-6) })));
       
       if (!data || data.length === 0) {
-        console.log("⚠️ NO DATA: Database returned empty result");
-        if (retryCount < 2) {
-          console.log("🔄 RETRY: Empty result, trying again...");
-          fetchingRef.current = false;
-          setTimeout(() => fetchProfiles(true, retryCount + 1), 2000);
-        }
+        console.log("❌ DEBUG: No profiles found");
+        setProfiles([]);
+        setCurrentIndex(0);
+        setLoading(false);
+        fetchingRef.current = false;
         return;
       }
 
-      if (data) {
-        // Get accepted friends to filter out
-        const { data: friendsData } = await supabase
+      // Fetch filtering data in parallel for better performance
+      console.log("🔍 DEBUG: Fetching filter data...");
+      const [friendResult, swipeResult, restrictionResult] = await Promise.allSettled([
+        supabase
           .from('friends')
           .select('friend_id, user_id')
-          .eq('status', 'accepted')
-          .or(`user_id.eq.${user.id},friend_id.eq.${user.id}`);
-
-        const friendIds = new Set(
-          friendsData?.map(friend => 
-            friend.user_id === user.id ? friend.friend_id : friend.user_id
-          ) || []
-        );
-
-        // Get active restrictions (rejected friend requests that haven't expired)
-        const { data: restrictionsData } = await supabase
+          .or(`user_id.eq.${user.id},friend_id.eq.${user.id}`)
+          .eq('status', 'accepted'),
+        
+        supabase
+          .from('user_swipes')
+          .select('target_user_id')
+          .eq('user_id', user.id),
+        
+        supabase
           .from('swipe_restrictions')
           .select('target_user_id')
           .eq('user_id', user.id)
-          .eq('restriction_type', 'rejected_friend_request')
-          .or('expires_at.is.null,expires_at.gt.now()');
+          .or('expires_at.is.null,expires_at.gt.now()')
+      ]);
 
-        const restrictedIds = new Set(
-          restrictionsData?.map(r => r.target_user_id) || []
-        );
+      // Extract data safely from Promise.allSettled results
+      const friendData = friendResult.status === 'fulfilled' ? friendResult.value.data || [] : [];
+      const swipeData = swipeResult.status === 'fulfilled' ? swipeResult.value.data || [] : [];
+      const restrictionData = restrictionResult.status === 'fulfilled' ? restrictionResult.value.data || [] : [];
 
-        // Get existing swipes to filter out
-        const { data: swipesData } = await supabase
-          .from('user_swipes')
-          .select('target_user_id')
-          .eq('user_id', user.id);
+      console.log("👥 DEBUG: Friends found:", friendData.length);
+      console.log("👆 DEBUG: Previous swipes:", swipeData.length);
+      console.log("🚫 DEBUG: Restrictions:", restrictionData.length);
 
-        const swipedIds = new Set(
-          swipesData?.map(s => s.target_user_id) || []
-        );
+      // Create filter sets for efficient lookup
+      const friendIds = new Set(
+        friendData.map(f => f.user_id === user.id ? f.friend_id : f.user_id)
+      );
+      
+      const swipedIds = new Set(swipeData.map(s => s.target_user_id));
+      const restrictedIds = new Set(restrictionData.map(r => r.target_user_id));
 
-        console.log("🔍 FILTERING: Starting with", data.length, "profiles");
-        console.log("🔍 FILTERING: Friend IDs to exclude:", Array.from(friendIds));
-        console.log("🔍 FILTERING: Restricted IDs to exclude:", Array.from(restrictedIds));
-        console.log("🔍 FILTERING: Swiped IDs to exclude:", Array.from(swipedIds));
+      console.log("🔍 DEBUG: Filter sets created");
+      console.log("👥 Friend IDs:", Array.from(friendIds).map(id => id.slice(-6)));
+      console.log("👆 Swiped IDs:", Array.from(swipedIds).map(id => id.slice(-6)));
+      console.log("🚫 Restricted IDs:", Array.from(restrictedIds).map(id => id.slice(-6)));
+
+      // Filter out friends, already swiped, and restricted profiles
+      const availableProfiles = data.filter(profile => {
+        const profileId = profile.user_id;
         
-        // Apply all filters
-        let filteredProfiles = data.filter(profile => {
-          const isFriend = friendIds.has(profile.user_id);
-          const isRestricted = restrictedIds.has(profile.user_id);
-          const isAlreadySwiped = swipedIds.has(profile.user_id);
-          
-          if (isFriend || isRestricted || isAlreadySwiped) {
-            console.log(`❌ FILTERED OUT: ${profile.name} - Friend:${isFriend} Restricted:${isRestricted} Swiped:${isAlreadySwiped}`);
+        const isFriend = friendIds.has(profileId);
+        const isSwiped = swipedIds.has(profileId);
+        const isRestricted = restrictedIds.has(profileId);
+        
+        const isExcluded = isFriend || isSwiped || isRestricted;
+        
+        console.log(`${isExcluded ? '❌' : '✅'} ${profile.name}: Friend=${isFriend}, Swiped=${isSwiped}, Restricted=${isRestricted}`);
+        
+        return !isExcluded;
+      });
+
+      console.log(`✅ DEBUG: Available profiles after filtering: ${availableProfiles.length}`);
+      console.log("📋 DEBUG: Available profiles:", availableProfiles.map(p => p.name));
+
+      // Apply user preference filters
+      let finalProfiles = availableProfiles;
+      
+      // Apply age filter
+      finalProfiles = finalProfiles.filter(profile => {
+        if (!profile.age || profile.age < memoizedFilters.minAge || profile.age > memoizedFilters.maxAge) {
+          console.log(`❌ AGE FILTER: ${profile.name} (age: ${profile.age})`);
+          return false;
+        }
+        return true;
+      });
+
+      // Apply handicap filter
+      finalProfiles = finalProfiles.filter(profile => {
+        if (profile.handicap == null || profile.handicap < memoizedFilters.minHandicap || profile.handicap > memoizedFilters.maxHandicap) {
+          console.log(`❌ HANDICAP FILTER: ${profile.name} (handicap: ${profile.handicap})`);
+          return false;
+        }
+        return true;
+      });
+
+      // Apply gender filter
+      if (memoizedFilters.gender !== 'all') {
+        finalProfiles = finalProfiles.filter(profile => {
+          if (profile.gender !== memoizedFilters.gender) {
+            console.log(`❌ GENDER FILTER: ${profile.name} (gender: ${profile.gender})`);
             return false;
           }
-          
-          console.log(`✅ KEPT: ${profile.name} (ID: ${profile.user_id.slice(-6)})`);
           return true;
         });
-
-        // Apply age and handicap filters from current state
-        const currentFilters = memoizedFilters;
-        console.log("🎯 APPLYING FILTERS:", currentFilters);
-        
-        filteredProfiles = filteredProfiles.filter(profile => {
-          // Age filter
-          if (profile.age < currentFilters.minAge || profile.age > currentFilters.maxAge) {
-            console.log(`❌ AGE FILTERED: ${profile.name} (age: ${profile.age})`);
-            return false;
-          }
-          
-          // Handicap filter
-          if (profile.handicap < currentFilters.minHandicap || profile.handicap > currentFilters.maxHandicap) {
-            console.log(`❌ HANDICAP FILTERED: ${profile.name} (handicap: ${profile.handicap})`);
-            return false;
-          }
-          
-          // Gender filter
-          if (currentFilters.gender !== 'all' && profile.gender !== currentFilters.gender) {
-            console.log(`❌ GENDER FILTERED: ${profile.name} (gender: ${profile.gender})`);
-            return false;
-          }
-          
-          return true;
-        }).map(profile => ({
-          ...profile,
-          bio: profile.bio || ""
-        }));
-
-        console.log("✅ FINAL RESULT:", filteredProfiles.length, "profiles after all filtering");
-        console.log("📋 FINAL NAMES:", filteredProfiles.map(p => p.name).join(', '));
-
-        // Sort by local city priority if enabled
-        if (currentFilters.prioritizeLocalCity) {
-          try {
-            const { data: currentUserData } = await supabase
-              .from('profiles')
-              .select('home_city')
-              .eq('user_id', user.id)
-              .single();
-
-            if (currentUserData?.home_city) {
-              const userHomeCity = currentUserData.home_city;
-              console.log("🏠 CITY SORT: User city is", userHomeCity);
-              
-              filteredProfiles.sort((a, b) => {
-                const aIsLocal = a.home_city === userHomeCity;
-                const bIsLocal = b.home_city === userHomeCity;
-                
-                if (aIsLocal && !bIsLocal) return -1;
-                if (!aIsLocal && bIsLocal) return 1;
-                return 0;
-              });
-              
-              console.log("🏠 CITY SORTED:", filteredProfiles.map(p => `${p.name} (${p.home_city})`));
-            }
-          } catch (cityError) {
-            console.error('❌ City sorting error:', cityError);
-          }
-        }
-        
-        setProfiles(filteredProfiles);
-        setCurrentIndex(0);
       }
-    } catch (error) {
-      console.error('❌ Error in fetchProfiles:', error);
-      setProfiles([]);
-    } finally {
+
+      // Sort by local city priority if enabled
+      if (memoizedFilters.prioritizeLocalCity) {
+        try {
+          const { data: currentUserData } = await supabase
+            .from('profiles')
+            .select('home_city')
+            .eq('user_id', user.id)
+            .single();
+
+          if (currentUserData?.home_city) {
+            const userHomeCity = currentUserData.home_city;
+            console.log("🏠 DEBUG: Sorting by city priority. User city:", userHomeCity);
+            
+            finalProfiles.sort((a, b) => {
+              const aIsLocal = a.home_city === userHomeCity;
+              const bIsLocal = b.home_city === userHomeCity;
+              
+              if (aIsLocal && !bIsLocal) return -1;
+              if (!aIsLocal && bIsLocal) return 1;
+              return 0;
+            });
+          }
+        } catch (cityError) {
+          console.error('❌ City sorting error:', cityError);
+        }
+      }
+
+      // Ensure all profiles have required fields
+      finalProfiles = finalProfiles.map(profile => ({
+        ...profile,
+        bio: profile.bio || ""
+      }));
+      
+      console.log(`✅ DEBUG: Final profiles after all filters: ${finalProfiles.length}`);
+      console.log("📋 DEBUG: Final profiles:", finalProfiles.map(p => p.name));
+
+      setProfiles(finalProfiles);
+      setCurrentIndex(0);
       setLoading(false);
       fetchingRef.current = false;
+
+    } catch (error) {
+      console.error('❌ Error in fetchProfiles:', error);
+      setLoading(false);
+      fetchingRef.current = false;
+      
+      // Retry on network errors
+      if (retryCount < 2 && error instanceof Error && 
+          (error.message.includes('fetch') || error.message.includes('network'))) {
+        console.log(`⏳ Retrying in ${(retryCount + 1) * 2} seconds...`);
+        setTimeout(() => {
+          fetchingRef.current = false;
+          fetchProfiles(forceRefresh, retryCount + 1);
+        }, (retryCount + 1) * 2000);
+      }
     }
-  }, [user, memoizedFilters]);
+  }, [user?.id, memoizedFilters]);
 
 
   useEffect(() => {
