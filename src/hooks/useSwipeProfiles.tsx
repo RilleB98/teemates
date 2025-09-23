@@ -30,7 +30,7 @@ export const useSwipeProfiles = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<SwipeFilters>({
-    minAge: 18,
+    minAge: 16,
     maxAge: 80,
     minHandicap: 0,
     maxHandicap: 54,
@@ -78,6 +78,9 @@ export const useSwipeProfiles = () => {
         return;
       }
 
+      console.log("🔍 DEBUG: Raw profiles from database:", data?.length);
+      console.log("🔍 DEBUG: Raw profile names:", data?.map(p => `${p.name} (age: ${p.age})`));
+
       if (data) {
         // Get accepted friends to filter out
         const { data: friendsData } = await supabase
@@ -104,19 +107,31 @@ export const useSwipeProfiles = () => {
           restrictionsData?.map(r => r.target_user_id) || []
         );
 
-        // Filter out friends and restricted users
-        let filteredProfiles = data
-          .filter(profile => 
-            !friendIds.has(profile.user_id) && 
-            !restrictedIds.has(profile.user_id)
-          )
-          .map(profile => ({
-            ...profile,
-            bio: profile.bio || ""
-          }));
+        // Filter out friends and restricted users with detailed logging
+        console.log("🔍 DEBUG: Before filtering - profiles:", data.map(p => `${p.name} (${p.user_id})`));
+        
+        let filteredProfiles = data.filter(profile => {
+          const isFriend = friendIds.has(profile.user_id);
+          const isRestricted = restrictedIds.has(profile.user_id);
+          
+          if (isFriend) {
+            console.log(`🔍 DEBUG: FILTERED OUT (friend): ${profile.name} (${profile.user_id})`);
+          }
+          if (isRestricted) {
+            console.log(`🔍 DEBUG: FILTERED OUT (restricted): ${profile.name} (${profile.user_id})`);
+          }
+          if (!isFriend && !isRestricted) {
+            console.log(`🔍 DEBUG: KEPT: ${profile.name} (${profile.user_id}) - age: ${profile.age}, handicap: ${profile.handicap}`);
+          }
+          
+          return !isFriend && !isRestricted;
+        }).map(profile => ({
+          ...profile,
+          bio: profile.bio || ""
+        }));
 
-        console.log("🔍 DEBUG: Filtered profiles:", filteredProfiles.length);
-        console.log("🔍 DEBUG: Profile names:", filteredProfiles.map(p => p.name));
+        console.log("🔍 DEBUG: After friend/restriction filtering:", filteredProfiles.length);
+        console.log("🔍 DEBUG: Remaining profile names:", filteredProfiles.map(p => p.name));
         console.log("🔍 DEBUG: Friends filtered out:", friendIds.size);
         console.log("🔍 DEBUG: Friend IDs:", Array.from(friendIds));
         console.log("🔍 DEBUG: Restricted users filtered out:", restrictedIds.size);
