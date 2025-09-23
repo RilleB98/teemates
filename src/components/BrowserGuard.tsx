@@ -9,9 +9,10 @@ interface BrowserGuardProps {
 
 const BrowserGuard = ({ children }: BrowserGuardProps) => {
   const [isWebViewOrApp, setIsWebViewOrApp] = useState<boolean | null>(null);
-  const [hasRedirected, setHasRedirected] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Only run detection once when component mounts
 
   useEffect(() => {
     const detectAppEnvironment = () => {
@@ -61,21 +62,11 @@ const BrowserGuard = ({ children }: BrowserGuardProps) => {
       console.log('🔒 Allow Access:', allowAccess);
       
       setIsWebViewOrApp(allowAccess);
-      
-      // If desktop browser, always redirect to root regardless of current path
-      if (isDesktopBrowser && location.pathname !== '/' && !hasRedirected) {
-        console.log('🔒 Redirecting desktop browser to root');
-        setHasRedirected(true);
-        window.location.href = '/';
-        return;
-      }
     };
 
-    // Only run detection once
-    if (isWebViewOrApp === null) {
-      detectAppEnvironment();
-    }
-  }, [location.pathname]); // Removed navigate and hasRedirected from dependencies
+    // Only run detection once when component mounts
+    detectAppEnvironment();
+  }, []); // Empty dependency array to run only once
 
   if (isWebViewOrApp === null) {
     // Loading state
@@ -87,7 +78,15 @@ const BrowserGuard = ({ children }: BrowserGuardProps) => {
   }
 
   if (!isWebViewOrApp) {
-    // Block regular browsers from accessing app routes
+    // For desktop browsers, instead of showing the block page on protected routes,
+    // immediately redirect to home to prevent infinite loops
+    if (location.pathname !== '/') {
+      console.log('🔒 Desktop browser detected on protected route, redirecting to home');
+      window.location.replace('/');
+      return null;
+    }
+    
+    // Only show the block page when already on home page
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="max-w-md w-full">
@@ -101,12 +100,6 @@ const BrowserGuard = ({ children }: BrowserGuardProps) => {
             <p className="text-sm text-muted-foreground">
               För att komma åt alla funktioner behöver du ladda ner TeeMates-appen från App Store.
             </p>
-            <Button 
-              onClick={() => navigate('/')}
-              className="w-full"
-            >
-              Tillbaka till startsidan
-            </Button>
             <div className="text-xs text-muted-foreground">
               🍎 Ladda ner från App Store
             </div>
