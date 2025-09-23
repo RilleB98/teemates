@@ -10,7 +10,15 @@ export const PublicLanding = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && user) {
+    // Check if this is a desktop browser that should not access /app
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isDesktopSafari = userAgent.includes('safari') && !userAgent.includes('mobile') && userAgent.includes('mac');
+    const isChrome = userAgent.includes('chrome') && !userAgent.includes('mobile');
+    const isFirefox = userAgent.includes('firefox') && !userAgent.includes('mobile');
+    const isDesktopBrowser = isDesktopSafari || isChrome || isFirefox;
+    
+    // Only redirect logged in users to /app if they're NOT on a desktop browser
+    if (!loading && user && !isDesktopBrowser) {
       navigate("/app");
     }
   }, [user, loading, navigate]);
