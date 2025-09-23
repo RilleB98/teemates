@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["9XB58V323V.app.lovable.c3a7dfcdab3b42b0ace67b83101e3118"],
+        "components": [
+          {
+            "/": "/auth-callback*",
+            "comment": "Matches any auth callback URL"
+          }
+        ]
+      }
+    ]
+  }
+}
