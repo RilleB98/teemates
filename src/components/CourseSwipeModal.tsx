@@ -2,13 +2,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { X, Heart, RefreshCw, MapPin, User } from "lucide-react";
+import { X, Heart, RefreshCw, MapPin, User, Crown } from "lucide-react";
 import { SwipeCard } from "@/components/SwipeCard";
 import { useCourseProfiles } from "@/hooks/useCourseProfiles";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { InfoBadges } from "@/components/InfoBadges";
 import { MutualFriends } from "@/components/MutualFriends";
 import { MutualFavoriteCourses } from "@/components/MutualFavoriteCourses";
+import { usePremium } from "@/hooks/usePremium";
+import { PremiumUpgradeModal } from "./PremiumUpgradeModal";
+import { useState } from "react";
 
 interface CourseSwipeModalProps {
   isOpen: boolean;
@@ -23,6 +26,9 @@ export const CourseSwipeModal = ({
   courseName, 
   courseLocation 
 }: CourseSwipeModalProps) => {
+  const { isPremium } = usePremium();
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  
   const {
     currentProfile,
     hasMoreProfiles,
@@ -35,12 +41,20 @@ export const CourseSwipeModal = ({
   } = useCourseProfiles(courseName);
 
   const handleSwipeLeft = () => {
+    if (!isPremium) {
+      setShowPremiumModal(true);
+      return;
+    }
     if (currentProfile) {
       swipeLeft();
     }
   };
 
   const handleSwipeRight = () => {
+    if (!isPremium) {
+      setShowPremiumModal(true);
+      return;
+    }
     if (currentProfile) {
       swipeRight(currentProfile.user_id);
     }
@@ -96,7 +110,31 @@ export const CourseSwipeModal = ({
           </DialogHeader>
 
           <div className="relative flex items-center justify-center">
-            {!hasMoreProfiles || !currentProfile ? (
+            {!isPremium ? (
+              <Card className="w-full max-w-sm h-[500px] flex items-center justify-center bg-card/95 backdrop-blur-sm">
+                <div className="text-center p-6 space-y-4">
+                  <Crown className="w-16 h-16 text-yellow-500 mx-auto" />
+                  <h3 className="text-xl font-bold text-foreground">
+                    Premium krävs
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    För att swipea på spelare från specifika golfbanor behöver du Premium.
+                  </p>
+                  <div className="space-y-3">
+                    <Button 
+                      onClick={() => setShowPremiumModal(true)}
+                      className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white"
+                    >
+                      <Crown className="w-4 h-4 mr-2" />
+                      Uppgradera till Premium
+                    </Button>
+                    <Button onClick={onClose} variant="outline" className="w-full">
+                      Stäng
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ) : !hasMoreProfiles || !currentProfile ? (
               <Card className="w-full max-w-sm h-[500px] flex items-center justify-center bg-card/95 backdrop-blur-sm">
                 <div className="text-center p-6 space-y-4">
                   <Heart className="w-16 h-16 text-muted-foreground mx-auto" />
@@ -129,6 +167,11 @@ export const CourseSwipeModal = ({
             )}
           </div>
         </div>
+        
+        <PremiumUpgradeModal
+          isOpen={showPremiumModal}
+          onClose={() => setShowPremiumModal(false)}
+        />
       </DialogContent>
     </Dialog>
   );
