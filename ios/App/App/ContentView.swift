@@ -17,54 +17,113 @@ struct ContentView: UIViewRepresentable {
         NotificationCenter.default.addObserver(forName: .didReceiveOAuthCallbackURL,
                                                object: nil,
                                                queue: .main) { note in
-            guard let url = note.object as? URL,
-                  let fragment = url.fragment else { return }
+            guard let url = note.object as? URL else { 
+                print("❌ [Auth] Invalid callback URL")
+                return 
+            }
 
+            print("✅ [Auth] Received callback URL: \(url)")
+            
             var accessToken = ""
             var refreshToken = ""
-
-            fragment.split(separator: "&").forEach { pair in
-                let parts = pair.split(separator: "=", maxSplits: 1).map(String.init)
-                if parts.count == 2 {
-                    switch parts[0] {
-                    case "access_token": accessToken = parts[1]
-                    case "refresh_token": refreshToken = parts[1]
-                    default: break
+            
+            // Handle both fragment (#) and query (?) parameters
+            if let fragment = url.fragment, !fragment.isEmpty {
+                print("🔍 [Auth] Processing fragment: \(fragment)")
+                fragment.split(separator: "&").forEach { pair in
+                    let parts = pair.split(separator: "=", maxSplits: 1).map(String.init)
+                    if parts.count == 2 {
+                        switch parts[0] {
+                        case "access_token": accessToken = parts[1]
+                        case "refresh_token": refreshToken = parts[1]
+                        default: break
+                        }
+                    }
+                }
+            } else if let query = url.query, !query.isEmpty {
+                print("🔍 [Auth] Processing query: \(query)")
+                query.split(separator: "&").forEach { pair in
+                    let parts = pair.split(separator: "=", maxSplits: 1).map(String.init)
+                    if parts.count == 2 {
+                        switch parts[0] {
+                        case "access_token": accessToken = parts[1]
+                        case "refresh_token": refreshToken = parts[1]
+                        default: break
+                        }
                     }
                 }
             }
+            
+            guard !accessToken.isEmpty else {
+                print("❌ [Auth] No access token found in callback")
+                DispatchQueue.main.async {
+                    webView.load(URLRequest(url: URL(string: "https://teemates.app/auth")!))
+                }
+                return
+            }
+            
+            print("✅ [Auth] Found tokens - access: \(accessToken.prefix(20))..., refresh: \(!refreshToken.isEmpty)")
 
-            // Injicera session i webview
-            let js = """
-            (async () => {
-              try {
-                console.log('🍎 [iOS] Setting session with tokens');
-                const { data, error } = await window.supabase.auth.setSession({
-                  access_token: "\(accessToken)",
-                  refresh_token: "\(refreshToken)"
-                });
-                if (error) {
-                  console.error('❌ [iOS] setSession error:', error);
-                } else {
-                  console.log('✅ [iOS] setSession success, redirecting to app');
-                  window.location.href = '/app';
+            // Improved JavaScript injection with retry logic
+            let injectTokens = {
+                let js = """
+                (async () => {
+                  try {
+                    // Wait for Supabase to be available
+                    let retries = 0;
+                    while (!window.supabase && retries < 50) {
+                      await new Promise(resolve => setTimeout(resolve, 100));
+                      retries++;
+                    }
+                    
+                    if (!window.supabase) {
+                      console.error('❌ [iOS] Supabase not available after waiting');
+                      window.location.href = '/auth-callback?access_token=\(accessToken)&refresh_token=\(refreshToken)';
+                      return;
+                    }
+                    
+                    console.log('🍎 [iOS] Setting session with tokens');
+                    const { data, error } = await window.supabase.auth.setSession({
+                      access_token: "\(accessToken)",
+                      refresh_token: "\(refreshToken)"
+                    });
+                    
+                    if (error) {
+                      console.error('❌ [iOS] setSession error:', error);
+                      window.location.href = '/auth-callback?access_token=\(accessToken)&refresh_token=\(refreshToken)';
+                    } else {
+                      console.log('✅ [iOS] setSession success, redirecting to app');
+                      window.location.href = '/app';
+                    }
+                  } catch (err) {
+                    console.error('❌ [iOS] Session setup error:', err);
+                    window.location.href = '/auth-callback?access_token=\(accessToken)&refresh_token=\(refreshToken)';
+                  }
+                })();
+                """
+                
+                webView.evaluateJavaScript(js) { result, error in
+                    if let error = error {
+                        print("❌ [WebView] JS error: \(error)")
+                        // Fallback to auth-callback page
+                        DispatchQueue.main.async {
+                            let fallbackURL = "https://teemates.app/auth-callback?access_token=\(accessToken)&refresh_token=\(refreshToken)"
+                            webView.load(URLRequest(url: URL(string: fallbackURL)!))
+                        }
+                    } else {
+                        print("✅ [Auth] Session tokens injected successfully")
+                    }
                 }
-              } catch (err) {
-                console.error('❌ [iOS] Session setup error:', err);
-              }
-            })();
-            """
-            webView.evaluateJavaScript(js) { result, error in
-                if let error = error {
-                    print("❌ [WebView] JS error: \(error)")
-                } else {
-                    print("✅ [Auth] Session tokens injected successfully")
-                }
+            }
+            
+            // Wait a bit for the page to load before injecting
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                injectTokens()
             }
         }
 
-        // Ladda start-URL
-        if let url = URL(string: "https://teemates.app/app") {
+        // Ladda start-URL - ändrat till /auth istället för /app
+        if let url = URL(string: "https://teemates.app/auth") {
             print("🌍 [WebView] Laddar start-URL: \(url)")
             webView.load(URLRequest(url: url))
         }
