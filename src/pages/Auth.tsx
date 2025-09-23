@@ -77,10 +77,6 @@ export const Auth = () => {
         variant: "destructive",
       });
     } else {
-      toast({
-        title: "Välkommen!",
-        description: "Du är nu inloggad.",
-      });
       navigate("/app");
     }
     setLoading(false);
