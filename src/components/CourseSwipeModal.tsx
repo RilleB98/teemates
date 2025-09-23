@@ -48,7 +48,15 @@ export const CourseSwipeModal = ({
   } = useCourseProfiles(courseName);
 
   const handleSwipeLeft = () => {
+    console.log('🎯 CourseSwipeModal - Swipe Left Attempt:', { 
+      isPremium, 
+      premiumLoading, 
+      isAdmin, 
+      manualPremium 
+    });
+    
     if (!isPremium) {
+      console.log('🎯 CourseSwipeModal - Non-premium user, showing upgrade modal');
       setShowPremiumModal(true);
       return;
     }
@@ -58,7 +66,15 @@ export const CourseSwipeModal = ({
   };
 
   const handleSwipeRight = () => {
+    console.log('🎯 CourseSwipeModal - Swipe Right Attempt:', { 
+      isPremium, 
+      premiumLoading, 
+      isAdmin, 
+      manualPremium 
+    });
+    
     if (!isPremium) {
+      console.log('🎯 CourseSwipeModal - Non-premium user, showing upgrade modal');
       setShowPremiumModal(true);
       return;
     }
