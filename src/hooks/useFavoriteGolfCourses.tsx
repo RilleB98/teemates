@@ -28,23 +28,30 @@ export const useFavoriteGolfCourses = () => {
 
   const loadFavorites = async () => {
     try {
-      const { data, error } = await supabase
+      // First get the favorite course IDs
+      const { data: favoritesData, error: favoritesError } = await supabase
         .from('favorite_golf_courses')
-        .select(`
-          golf_course_id,
-          golf_courses!favorite_golf_courses_golf_course_id_fkey (
-            id,
-            name,
-            location,
-            image
-          )
-        `)
+        .select('golf_course_id')
         .eq('user_id', user?.id);
 
-      if (error) throw error;
+      if (favoritesError) throw favoritesError;
 
-      setFavorites(data?.map(item => item.golf_course_id) || []);
-      setFavoriteDetails(data?.map(item => (item as any).golf_courses).filter(Boolean) || []);
+      const favoriteIds = favoritesData?.map(item => item.golf_course_id) || [];
+      setFavorites(favoriteIds);
+
+      // Then get the full course details for favorites
+      if (favoriteIds.length > 0) {
+        const { data: coursesData, error: coursesError } = await supabase
+          .from('golf_courses')
+          .select('id, name, location, image')
+          .in('id', favoriteIds);
+
+        if (coursesError) throw coursesError;
+        
+        setFavoriteDetails(coursesData || []);
+      } else {
+        setFavoriteDetails([]);
+      }
     } catch (error) {
       console.error('Error loading favorites:', error);
     } finally {
@@ -61,6 +68,7 @@ export const useFavoriteGolfCourses = () => {
 
     try {
       if (isFavorite) {
+        // Remove from favorites
         const { error } = await supabase
           .from('favorite_golf_courses')
           .delete()
@@ -71,21 +79,32 @@ export const useFavoriteGolfCourses = () => {
 
         setFavorites(prev => prev.filter(id => id !== golfCourseId));
         setFavoriteDetails(prev => prev.filter(course => course.id !== golfCourseId));
-        // Golfbanan har tagits bort från dina favoriter
       } else {
+        // Add to favorites - use upsert to handle duplicates
         const { error } = await supabase
           .from('favorite_golf_courses')
-          .insert({
+          .upsert({
             user_id: user.id,
             golf_course_id: golfCourseId
+          }, {
+            onConflict: 'user_id,golf_course_id'
           });
 
         if (error) throw error;
 
+        // Add to local state immediately
         setFavorites(prev => [...prev, golfCourseId]);
-        // Reload favorites to get the course details
-        loadFavorites();
-        // Golfbanan har lagts till i dina favoriter
+        
+        // Get the course details for the new favorite
+        const { data: courseData } = await supabase
+          .from('golf_courses')
+          .select('id, name, location, image')
+          .eq('id', golfCourseId)
+          .maybeSingle();
+
+        if (courseData) {
+          setFavoriteDetails(prev => [...prev, courseData]);
+        }
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
