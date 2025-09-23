@@ -136,8 +136,10 @@ export const Auth = () => {
       await supabase.auth.signOut();
       localStorage.clear();
       
-      // Use HTTPS callback for all platforms to match ASWebAuthenticationSession expectations
-      const redirectUrl = `${window.location.origin}/auth-callback`;
+      // Use custom scheme for native iOS to trigger proper ASWebAuthenticationSession callback
+      const redirectUrl = Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios'
+        ? 'teemates://auth-callback' 
+        : `${window.location.origin}/auth-callback`;
       console.log('🔄 DEBUG: Using redirect URL:', redirectUrl);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -175,10 +177,13 @@ export const Auth = () => {
             // Process the callback URL immediately if we get one
             if (result?.url) {
               console.log('🔄 DEBUG: Processing callback URL from WebAuth:', result.url);
-              console.log('🔄 DEBUG: Callback URL starts with https:', result.url.startsWith('https://'));
+              console.log('🔄 DEBUG: Callback URL length:', result.url.length);
+              console.log('🔄 DEBUG: Callback URL starts with teemates:', result.url.startsWith('teemates://'));
               
-              // Since we're using HTTPS callbacks, navigate directly to the callback URL
-              window.location.href = result.url;
+              // Navigate to AuthCallback with the URL as a parameter
+              const callbackUrl = encodeURIComponent(result.url);
+              console.log('🚀 DEBUG: Navigating to auth-callback with encoded URL:', callbackUrl);
+              navigate(`/auth-callback?url=${callbackUrl}`, { replace: true });
             } else {
               console.error('❌ DEBUG: WebAuth returned no URL');
             }
