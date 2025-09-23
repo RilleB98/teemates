@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Heart, X, MapPin, User } from 'lucide-react';
@@ -48,11 +48,10 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
   const [dragOffset, setDragOffset] = useState(0);
   const [startPos, setStartPos] = useState(0);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
-  const [needsScroll, setNeedsScroll] = useState(false);
   const { canSwipeYes, incrementYesSwipeCount } = useSwipeLimit();
 
-  // Calculate content height and determine if scrolling is needed
-  const calculateContentHeight = () => {
+  // Calculate content sections and determine if scrolling is needed
+  const { cardHeight, needsScroll } = useMemo(() => {
     const baseHeight = 320; // Image height
     const paddingHeight = 64; // Padding and margins
     
@@ -81,12 +80,20 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
     const maxHeightWithoutScroll = 600; // Max height before scrolling
     const needsScrolling = totalHeight > maxHeightWithoutScroll;
     
-    setNeedsScroll(needsScrolling);
-    
-    return needsScrolling ? 650 : Math.min(totalHeight, maxHeightWithoutScroll);
-  };
-
-  const cardHeight = calculateContentHeight();
+    return {
+      cardHeight: needsScrolling ? 650 : Math.min(totalHeight, maxHeightWithoutScroll),
+      needsScroll: needsScrolling
+    };
+  }, [
+    profile.play_frequency,
+    profile.availability, 
+    profile.handicap,
+    profile.home_city,
+    profile.home_club,
+    profile.bio,
+    profile.mutual_friends,
+    profile.mutual_favorite_courses
+  ]);
 
   const handleStart = (clientX: number) => {
     setIsDragging(true);
