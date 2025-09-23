@@ -40,7 +40,7 @@ export const FriendProfileModal = ({ isOpen, onClose, profile, onMessage }: Frie
           {/* Name with Age */}
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-900">
-              {profile.name || 'Okänd vän'}{profile.age ? `, ${profile.age} år` : ''}
+              {profile.name?.split(' ')[0] || 'Okänd vän'}{profile.age ? `, ${profile.age} år` : ''}
             </h2>
             {profile.home_club && (
               <p className="text-lg text-gray-600 mt-1">{profile.home_club}</p>

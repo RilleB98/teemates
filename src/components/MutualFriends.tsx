@@ -29,10 +29,10 @@ export const MutualFriends = ({ mutualFriends }: MutualFriendsProps) => {
             <Avatar className="w-5 h-5">
               <AvatarImage src={friend.avatar_url || undefined} />
               <AvatarFallback className="text-xs">
-                {friend.name?.charAt(0) || "?"}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-xs font-medium">{friend.name}</span>
+              {friend.name?.charAt(0) || "?"}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-xs font-medium">{friend.name?.split(' ')[0] || 'Okänt'}</span>
           </div>
         ))}
         

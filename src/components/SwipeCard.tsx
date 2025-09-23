@@ -253,7 +253,7 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
           {/* Name and age overlay */}
           <div className="absolute bottom-4 left-4 text-white">
             <h2 className="text-3xl font-bold tracking-tight">
-              {profile.name || 'Okänt namn'}
+              {profile.name?.split(' ')[0] || 'Okänt namn'}
               {profile.age && <span className="text-2xl font-normal">, {profile.age}</span>}
             </h2>
             {profile.home_city && (
