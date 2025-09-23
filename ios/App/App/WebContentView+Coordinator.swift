@@ -29,27 +29,56 @@ class WebContentCoordinator: NSObject, WKNavigationDelegate {
                         }
                     }
 
-                // Anropa Supabase JS SDK i webview för att etablera sessionen korrekt
+                // Enhanced Supabase session setup with better error handling
                 let js = """
                 (async () => {
-                  const { data, error } = await window.supabase.auth.setSession({
-                    access_token: "\(accessToken)",
-                    refresh_token: "\(refreshToken)"
-                  });
-                  if (error) {
-                    console.error('[Auth] setSession error:', error);
-                  } else {
-                    console.log('[Auth] setSession success:', data);
-                    window.location.href = '/app';
+                  try {
+                    console.log('🔧 [Coordinator] Setting up session with tokens');
+                    
+                    // Wait for Supabase to be available
+                    let retries = 0;
+                    while (!window.supabase && retries < 50) {
+                      await new Promise(resolve => setTimeout(resolve, 100));
+                      retries++;
+                    }
+                    
+                    if (!window.supabase) {
+                      console.error('❌ [Coordinator] Supabase not available, using fallback');
+                      window.location.href = '/auth-callback?access_token=\(accessToken)&refresh_token=\(refreshToken)&fallback=coordinator_timeout';
+                      return;
+                    }
+                    
+                    const { data, error } = await window.supabase.auth.setSession({
+                      access_token: "\(accessToken)",
+                      refresh_token: "\(refreshToken)"
+                    });
+                    
+                    if (error) {
+                      console.error('❌ [Coordinator] setSession error:', error);
+                      window.location.href = '/auth-callback?access_token=\(accessToken)&refresh_token=\(refreshToken)&fallback=coordinator_error';
+                    } else {
+                      console.log('✅ [Coordinator] setSession success:', data);
+                      window.location.href = '/app';
+                    }
+                  } catch (err) {
+                    console.error('❌ [Coordinator] Session setup error:', err);
+                    window.location.href = '/auth-callback?access_token=\(accessToken)&refresh_token=\(refreshToken)&fallback=coordinator_exception';
                   }
                 })();
                 """
 
                 webView.evaluateJavaScript(js) { result, error in
                     if let error = error {
-                        print("❌ [WebView] JS error: \(error)")
+                        print("❌ [WebView] Coordinator JS error: \(error)")
+                        // Navigate to fallback URL if JavaScript fails
+                        DispatchQueue.main.async {
+                            let fallbackURL = "teemates://auth-callback?access_token=\(accessToken)&refresh_token=\(refreshToken)&fallback=coordinator_js_error"
+                            if let url = URL(string: fallbackURL) {
+                                webView.load(URLRequest(url: url))
+                            }
+                        }
                     } else {
-                        print("✅ [Auth] setSession körd i webview")
+                        print("✅ [Auth] Coordinator setSession executed successfully")
                     }
                 }
 

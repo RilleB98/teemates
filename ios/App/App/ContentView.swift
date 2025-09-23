@@ -64,25 +64,46 @@ struct ContentView: UIViewRepresentable {
             
             print("✅ [Auth] Found tokens - access: \(accessToken.prefix(20))..., refresh: \(!refreshToken.isEmpty)")
 
-            // Improved JavaScript injection with retry logic
-            let injectTokens = {
+            // Enhanced JavaScript injection with better debugging and fallback
+            let injectTokensWithRetry = {
+                print("🔄 [Auth] Starting token injection process")
+                
+                // First check current WebView URL
+                webView.evaluateJavaScript("window.location.href") { result, error in
+                    if let currentURL = result as? String {
+                        print("📍 [WebView] Current URL: \(currentURL)")
+                    }
+                }
+                
                 let js = """
                 (async () => {
                   try {
-                    // Wait for Supabase to be available
+                    console.log('🍎 [iOS] Starting session setup...');
+                    console.log('🌐 [iOS] Current URL:', window.location.href);
+                    
+                    // Store tokens in sessionStorage as backup
+                    sessionStorage.setItem('ios_access_token', '\(accessToken)');
+                    sessionStorage.setItem('ios_refresh_token', '\(refreshToken)');
+                    console.log('💾 [iOS] Tokens stored in sessionStorage');
+                    
+                    // Wait for Supabase to be available with more detailed logging
                     let retries = 0;
-                    while (!window.supabase && retries < 50) {
+                    while (!window.supabase && retries < 100) {
+                      if (retries % 10 === 0) {
+                        console.log(\`⏳ [iOS] Waiting for Supabase... attempt \${retries}\`);
+                      }
                       await new Promise(resolve => setTimeout(resolve, 100));
                       retries++;
                     }
                     
                     if (!window.supabase) {
-                      console.error('❌ [iOS] Supabase not available after waiting');
-                      window.location.href = '/auth-callback?access_token=\(accessToken)&refresh_token=\(refreshToken)';
+                      console.error('❌ [iOS] Supabase not available after 10 seconds');
+                      console.log('🔄 [iOS] Redirecting to auth-callback fallback');
+                      window.location.href = '/auth-callback?access_token=\(accessToken)&refresh_token=\(refreshToken)&fallback=js_timeout';
                       return;
                     }
                     
-                    console.log('🍎 [iOS] Setting session with tokens');
+                    console.log('✅ [iOS] Supabase client found, setting session...');
                     const { data, error } = await window.supabase.auth.setSession({
                       access_token: "\(accessToken)",
                       refresh_token: "\(refreshToken)"
@@ -90,35 +111,67 @@ struct ContentView: UIViewRepresentable {
                     
                     if (error) {
                       console.error('❌ [iOS] setSession error:', error);
-                      window.location.href = '/auth-callback?access_token=\(accessToken)&refresh_token=\(refreshToken)';
+                      console.log('🔄 [iOS] Redirecting to auth-callback fallback');
+                      window.location.href = '/auth-callback?access_token=\(accessToken)&refresh_token=\(refreshToken)&fallback=session_error';
                     } else {
-                      console.log('✅ [iOS] setSession success, redirecting to app');
+                      console.log('✅ [iOS] Session established successfully');
+                      console.log('🎯 [iOS] Session data:', data);
+                      // Clean up sessionStorage
+                      sessionStorage.removeItem('ios_access_token');
+                      sessionStorage.removeItem('ios_refresh_token');
+                      console.log('🏠 [iOS] Redirecting to /app');
                       window.location.href = '/app';
                     }
                   } catch (err) {
                     console.error('❌ [iOS] Session setup error:', err);
-                    window.location.href = '/auth-callback?access_token=\(accessToken)&refresh_token=\(refreshToken)';
+                    console.log('🔄 [iOS] Redirecting to auth-callback fallback');
+                    window.location.href = '/auth-callback?access_token=\(accessToken)&refresh_token=\(refreshToken)&fallback=js_error';
                   }
                 })();
                 """
                 
                 webView.evaluateJavaScript(js) { result, error in
                     if let error = error {
-                        print("❌ [WebView] JS error: \(error)")
-                        // Fallback to auth-callback page
+                        print("❌ [WebView] JavaScript execution failed: \(error)")
+                        print("🔄 [Auth] Using Swift fallback navigation")
+                        // Immediate fallback to auth-callback page
                         DispatchQueue.main.async {
-                            let fallbackURL = "https://teemates.app/auth-callback?access_token=\(accessToken)&refresh_token=\(refreshToken)"
+                            let fallbackURL = "https://teemates.app/auth-callback?access_token=\(accessToken)&refresh_token=\(refreshToken)&fallback=swift_error"
+                            print("🌐 [Auth] Loading fallback URL: \(fallbackURL)")
                             webView.load(URLRequest(url: URL(string: fallbackURL)!))
                         }
                     } else {
-                        print("✅ [Auth] Session tokens injected successfully")
+                        print("✅ [Auth] JavaScript injection completed successfully")
                     }
                 }
             }
             
-            // Wait a bit for the page to load before injecting
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                injectTokens()
+            // Check if WebView is ready and on correct domain before injecting
+            let checkWebViewReady = {
+                webView.evaluateJavaScript("document.readyState") { result, error in
+                    if let readyState = result as? String {
+                        print("📄 [WebView] Document ready state: \(readyState)")
+                        
+                        if readyState == "complete" || readyState == "interactive" {
+                            print("✅ [WebView] Page ready, injecting tokens")
+                            injectTokensWithRetry()
+                        } else {
+                            print("⏳ [WebView] Page not ready, waiting...")
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                checkWebViewReady()
+                            }
+                        }
+                    } else {
+                        print("⚠️ [WebView] Could not get ready state, proceeding anyway")
+                        injectTokensWithRetry()
+                    }
+                }
+            }
+            
+            // Start checking after a brief delay
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                print("🚀 [Auth] Starting WebView readiness check")
+                checkWebViewReady()
             }
         }
 
