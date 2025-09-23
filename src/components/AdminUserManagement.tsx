@@ -114,21 +114,36 @@ export const AdminUserManagement = () => {
     
     setSearchLoading(true);
     try {
-      // Get profile with manual_premium status
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('user_id, name, golf_id, handicap, home_club, avatar_url, manual_premium')
-        .eq('golf_id', fullGolfId)
-        .maybeSingle();
+      // Use the RPC function first to find the user
+      const { data: profiles, error: rpcError } = await supabase
+        .rpc('search_profiles_by_golf_id', { 
+          search_golf_id: fullGolfId 
+        });
 
-      if (error) {
-        console.error('Search error:', error);
+      if (rpcError) {
+        console.error('RPC Search error:', rpcError);
         setFoundUser(null);
         return;
       }
 
+      const profile = profiles?.[0];
+
       if (profile) {
-        setFoundUser(profile);
+        // Get the manual_premium status for this user
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('manual_premium')
+          .eq('user_id', profile.user_id)
+          .single();
+
+        if (profileError) {
+          console.error('Error fetching manual premium status:', profileError);
+        }
+
+        setFoundUser({
+          ...profile,
+          manual_premium: profileData?.manual_premium || false
+        });
       } else {
         setFoundUser(null);
       }
