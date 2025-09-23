@@ -132,16 +132,6 @@ export const SwipeMatch = () => {
       <div className="pb-24 pt-8">
         <div className="container mx-auto px-4">
           <div className="max-w-sm mx-auto space-y-6">
-            {/* Premium Upgrade Button */}
-            {!canSwipeYes() && (
-              <Button
-                onClick={() => setShowPremiumModal(true)}
-                className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white mb-4"
-              >
-                <Crown className="h-4 w-4 mr-2" />
-                Uppgradera till Premium - {getRemainingSwipes()} ja-swipes kvar
-              </Button>
-            )}
 
             {/* Filters */}
             <SwipeFiltersComponent 
