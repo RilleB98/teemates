@@ -18,6 +18,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AdminOnlyRoute } from "./components/AdminOnlyRoute";
 import NotFound from "./pages/NotFound";
 import WebViewGuard from "./components/WebViewGuard";
+import BrowserGuard from "./components/BrowserGuard";
 import { useNotificationProcessor } from "./hooks/useNotificationProcessor";
 import { usePushNotifications } from "./hooks/usePushNotifications";
 
@@ -50,41 +51,57 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
+              {/* Public routes - always accessible */}
               <Route path="/" element={<PublicLanding />} />
-              <Route path="/app" element={
-                <WebViewGuard>
-                  <ProtectedRoute>
-                    <SwipeMatch />
-                  </ProtectedRoute>
-                </WebViewGuard>
-              } />
               <Route path="/auth" element={<Auth />} />
               <Route path="/auth-callback" element={<AuthCallback />} />
+              
+              {/* Protected app routes - only accessible via WebView/iOS app */}
+              <Route path="/app" element={
+                <BrowserGuard>
+                  <WebViewGuard>
+                    <ProtectedRoute>
+                      <SwipeMatch />
+                    </ProtectedRoute>
+                  </WebViewGuard>
+                </BrowserGuard>
+              } />
               <Route path="/courses" element={
-                <ProtectedRoute>
-                  <Courses />
-                </ProtectedRoute>
+                <BrowserGuard>
+                  <ProtectedRoute>
+                    <Courses />
+                  </ProtectedRoute>
+                </BrowserGuard>
               } />
               <Route path="/friends" element={
-                <ProtectedRoute>
-                  <Friends />
-                </ProtectedRoute>
+                <BrowserGuard>
+                  <ProtectedRoute>
+                    <Friends />
+                  </ProtectedRoute>
+                </BrowserGuard>
               } />
               <Route path="/messages" element={
-                <ProtectedRoute>
-                  <Messages />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/golf" element={
-                <AdminOnlyRoute>
-                  <AdminGolf />
-                </AdminOnlyRoute>
+                <BrowserGuard>
+                  <ProtectedRoute>
+                    <Messages />
+                  </ProtectedRoute>
+                </BrowserGuard>
               } />
               <Route path="/profile" element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
+                <BrowserGuard>
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                </BrowserGuard>
               } />
+              <Route path="/admin/golf" element={
+                <BrowserGuard>
+                  <AdminOnlyRoute>
+                    <AdminGolf />
+                  </AdminOnlyRoute>
+                </BrowserGuard>
+              } />
+              
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
