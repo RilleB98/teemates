@@ -33,14 +33,19 @@ export function usePremium() {
           .maybeSingle()
       ]);
 
+      console.log('🔍 Premium Debug - Profile result:', profileResult);
+      console.log('🔍 Premium Debug - Role result:', roleResult);
+
       if (profileResult.error) {
         console.error('Error fetching premium status:', profileResult.error);
       } else {
         setManualPremium(profileResult.data?.manual_premium || false);
+        console.log('🔍 Premium Debug - Manual premium:', profileResult.data?.manual_premium);
       }
 
       // User is admin if they have admin role
       setIsAdmin(!!roleResult.data);
+      console.log('🔍 Premium Debug - Is admin:', !!roleResult.data);
     } catch (error) {
       console.error('Error in fetchPremiumStatus:', error);
     } finally {
@@ -53,6 +58,12 @@ export function usePremium() {
   }, [user?.id]);
 
   const isPremium = isSubscribed || manualPremium || isAdmin;
+  
+  console.log('🔍 Premium Debug - Final isPremium:', isPremium, {
+    isSubscribed,
+    manualPremium,
+    isAdmin
+  });
 
   return {
     isPremium,
