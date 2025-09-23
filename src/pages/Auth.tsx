@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,39 +17,14 @@ export const Auth = () => {
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
+
   useEffect(() => {
-    console.log("🍎 DEBUG: Auth page useEffect starting...");
-    console.log("🍎 DEBUG: Current URL:", window.location.href);
-    
-    let isMounted = true;
-    
-    // Check for existing session first
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("🍎 DEBUG: Initial session check:", { hasSession: !!session, hasUser: !!session?.user });
-      if (session?.user && isMounted) {
-        console.log("🍎 DEBUG: Existing session detected, redirecting to /app");
-        // Use setTimeout to ensure this runs after current render cycle
-        setTimeout(() => navigate("/app", { replace: true }), 0);
-      }
-    });
-
-    // Set up auth state listener for immediate redirects
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("🍎 DEBUG: Auth page - auth state change:", event, !!session);
-      console.log("🍎 DEBUG: Session user:", session?.user?.id);
-      if (session?.user && isMounted) {
-        console.log("🍎 DEBUG: User authenticated, redirecting to /app");
-        // Use setTimeout to ensure this runs after current render cycle
-        setTimeout(() => navigate("/app", { replace: true }), 0);
-      }
-    });
-
-    return () => {
-      console.log("🧹 DEBUG: Auth page cleanup");
-      isMounted = false;
-      subscription.unsubscribe();
-    };
-  }, [navigate]);
+    // Let useAuth handle all authentication logic - no duplicate listeners
+    if (user) {
+      navigate("/app", { replace: true });
+    }
+  }, [user, navigate]);
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
