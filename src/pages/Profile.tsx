@@ -576,13 +576,29 @@ export const Profile = () => {
                   {/* Name Section */}
                   <div className="w-full text-center">
                     {isEditingName ? (
-                      <div className="space-y-2">
-                        <Input
-                          value={tempName}
-                          onChange={(e) => setTempName(e.target.value)}
-                          placeholder="Ange ditt namn"
-                          className="text-center font-bold text-xl border-primary/30 focus:border-primary"
-                        />
+                      <div className="space-y-3">
+                        <div className="space-y-2">
+                          <Input
+                            value={tempName.split(' ')[0] || ''}
+                            onChange={(e) => {
+                              const firstName = e.target.value;
+                              const lastName = tempName.split(' ').slice(1).join(' ') || '';
+                              setTempName(`${firstName} ${lastName}`.trim());
+                            }}
+                            placeholder="Förnamn"
+                            className="text-center font-bold text-lg border-primary/30 focus:border-primary"
+                          />
+                          <Input
+                            value={tempName.split(' ').slice(1).join(' ') || ''}
+                            onChange={(e) => {
+                              const firstName = tempName.split(' ')[0] || '';
+                              const lastName = e.target.value;
+                              setTempName(`${firstName} ${lastName}`.trim());
+                            }}
+                            placeholder="Efternamn"
+                            className="text-center font-bold text-lg border-primary/30 focus:border-primary"
+                          />
+                        </div>
                          <div className="flex gap-2 justify-center">
                            <Button size="sm" onClick={handleNameSave} className="flex-1">
                              Spara
