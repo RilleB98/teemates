@@ -128,39 +128,31 @@ export const AuthCallback = () => {
         });
         
         if (accessToken) {
-          
-          console.log('🎫 AuthCallback: Found tokens in URL:', { 
-            hasAccessToken: !!accessToken, 
-            hasRefreshToken: !!refreshToken 
+          console.log('🔑 AuthCallback: Setting session with extracted tokens...');
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken || ''
           });
 
-          if (accessToken) {
-            console.log('🔑 AuthCallback: Setting session with extracted tokens...');
-            const { data, error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken || ''
-            });
+          // Clean up URL
+          if (window.history.replaceState) {
+            window.history.replaceState(null, '', window.location.pathname);
+          }
 
-            // Clean up URL hash
-            if (window.history.replaceState) {
-              window.history.replaceState(null, '', window.location.pathname);
+          if (error) {
+            console.error('❌ AuthCallback: Error setting session with tokens:', error);
+            if (isMounted) {
+              setStatus('error');
+              setErrorMessage(error.message);
             }
+            return;
+          }
 
-            if (error) {
-              console.error('❌ AuthCallback: Error setting session with tokens:', error);
-              if (isMounted) {
-                setStatus('error');
-                setErrorMessage(error.message);
-              }
-              return;
-            }
-
-            if (data.session?.user && isMounted) {
-              console.log('✅ AuthCallback: Session set successfully with tokens, redirecting to app');
-              setStatus('success');
-              setTimeout(() => navigate('/app', { replace: true }), 500);
-              return;
-            }
+          if (data.session?.user && isMounted) {
+            console.log('✅ AuthCallback: Session set successfully, redirecting to app');
+            setStatus('success');
+            setTimeout(() => navigate('/app', { replace: true }), 500);
+            return;
           }
         }
 

@@ -174,45 +174,56 @@ export const Auth = () => {
             const result = await WebAuth.startWebAuth({ url: data.url });
             console.log('✅ DEBUG: WebAuth completed successfully:', result);
             
-            // Process the callback URL immediately if we get one
+            // After WebAuth completes, check for session directly
+            console.log('🔄 DEBUG: Checking for session after WebAuth...');
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user) {
+              console.log('✅ DEBUG: Session found after WebAuth, navigating to app');
+              navigate('/app', { replace: true });
+              return;
+            }
+            
+            // If no session yet, process the callback URL
             if (result?.url) {
-              console.log('🔄 DEBUG: Processing callback URL from WebAuth:', result.url);
-              console.log('🔄 DEBUG: Callback URL length:', result.url.length);
-              console.log('🔄 DEBUG: Callback URL starts with teemates:', result.url.startsWith('teemates://'));
-              
-              // Navigate to AuthCallback with the URL as a parameter
+              console.log('🔄 DEBUG: No immediate session, processing callback URL:', result.url);
               const callbackUrl = encodeURIComponent(result.url);
-              console.log('🚀 DEBUG: Navigating to auth-callback with encoded URL:', callbackUrl);
               navigate(`/auth-callback?url=${callbackUrl}`, { replace: true });
             } else {
-              console.error('❌ DEBUG: WebAuth returned no URL');
+              console.error('❌ DEBUG: WebAuth returned no URL and no session found');
+              toast({
+                title: "Inloggning misslyckades",
+                description: "Ingen callback-URL mottagen",
+                variant: "destructive",
+              });
+              setLoading(false);
             }
           } catch (webAuthError: any) {
             console.error('❌ DEBUG: WebAuth failed:', webAuthError);
             
-            // Handle user cancellation - but check if they actually logged in first
+            // Handle user cancellation - check if they actually logged in first
             if (webAuthError.message === 'USER_CANCELLED' || webAuthError.message?.includes('cancelled')) {
-              console.log('🔄 DEBUG: User cancelled authentication, checking if session exists...');
+              console.log('🔄 DEBUG: User cancelled/closed Safari, checking session...');
               
-              // Check if user actually logged in despite manual Safari closure
-              try {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session?.user) {
-                  console.log('✅ DEBUG: Session found despite manual closure, navigating to app');
-                  navigate("/app", { replace: true });
-                  return;
+              // Small delay to allow auth state to update
+              setTimeout(async () => {
+                try {
+                  const { data: { session } } = await supabase.auth.getSession();
+                  if (session?.user) {
+                    console.log('✅ DEBUG: Session found despite Safari closure, navigating to app');
+                    navigate("/app", { replace: true });
+                  } else {
+                    console.log('❌ DEBUG: No session found, login was cancelled');
+                    toast({
+                      title: "Inloggning avbruten",
+                      description: "Om du lyckades logga in, stäng Safari och återgå till appen",
+                    });
+                    setLoading(false);
+                  }
+                } catch (sessionError) {
+                  console.error('❌ DEBUG: Error checking session:', sessionError);
+                  setLoading(false);
                 }
-              } catch (sessionError) {
-                console.error('❌ DEBUG: Error checking session:', sessionError);
-              }
-              
-              console.log('❌ DEBUG: No session found, user truly cancelled');
-              toast({
-                title: "Inloggning avbruten",
-                description: "Stäng Safari och tryck på 'Återgå till TeeMates' om du loggade in",
-                variant: "default",
-              });
-              setLoading(false);
+              }, 1000);
               return;
             }
             

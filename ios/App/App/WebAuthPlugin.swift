@@ -15,7 +15,7 @@ public class WebAuthPlugin: CAPPlugin, ASWebAuthenticationPresentationContextPro
         
         print("🍎 WebAuthPlugin: Starting auth session")
         print("🍎 WebAuthPlugin: OAuth URL: \(urlString)")
-        print("🍎 WebAuthPlugin: Expected callback scheme: https://teemates.app")
+        print("🍎 WebAuthPlugin: Expected callback scheme: teemates://")
         
         let session = ASWebAuthenticationSession(url: url, callbackURLScheme: "teemates") { callbackURL, error in
             if let error = error {
