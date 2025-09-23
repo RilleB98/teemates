@@ -114,56 +114,24 @@ export const AdminUserManagement = () => {
     
     setSearchLoading(true);
     try {
-      // First try to search by golf_id
-      let profile = null;
-      let error = null;
+      // Use the same RPC function as admin search for consistency
+      const { data: profiles, error } = await supabase
+        .rpc('search_profiles_by_golf_id', { 
+          search_golf_id: fullGolfId 
+        });
 
-      const { data: golfIdProfile, error: golfIdError } = await supabase
-        .from('profiles')
-        .select(`
-          user_id,
-          name,
-          golf_id,
-          email:user_id (
-            email
-          )
-        `)
-        .eq('golf_id', fullGolfId)
-        .maybeSingle();
-
-      if (golfIdProfile) {
-        profile = golfIdProfile;
-      } else {
-        // If no golf_id match, try searching by name (case-insensitive)
-        const { data: nameProfile, error: nameError } = await supabase
-          .from('profiles')
-          .select(`
-            user_id,
-            name,
-            golf_id,
-            email:user_id (
-              email
-            )
-          `)
-          .ilike('name', `%${fullGolfId}%`)
-          .limit(1)
-          .maybeSingle();
-
-        if (nameProfile) {
-          profile = nameProfile;
-        } else {
-          error = nameError;
-        }
-      }
-
-      if (error && !profile) {
+      if (error) {
         console.error('Search error:', error);
         setFoundUser(null);
         return;
       }
 
+      const profile = profiles?.[0] || null;
+
       if (profile) {
         setFoundUser(profile);
+      } else {
+        setFoundUser(null);
       }
     } catch (error) {
       console.error('Error searching user:', error);
