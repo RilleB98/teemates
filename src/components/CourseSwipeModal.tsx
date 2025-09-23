@@ -65,7 +65,7 @@ export const CourseSwipeModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] sm:max-w-lg mx-auto p-0 bg-gradient-to-br from-background via-card to-secondary/20 border-0 overflow-hidden">
+      <DialogContent className="max-w-[95vw] sm:max-w-lg mx-auto p-0 bg-gradient-to-br from-golf-green via-background to-golf-green-light border-0 overflow-hidden">
         <div className="p-4 sm:p-6 pb-8">{/* Reduced bottom padding since buttons are now fixed */}
           <DialogHeader className="mb-3 sm:mb-4">
             <div>
