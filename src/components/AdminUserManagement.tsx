@@ -114,19 +114,18 @@ export const AdminUserManagement = () => {
     
     setSearchLoading(true);
     try {
-      // Use the same RPC function as admin search for consistency
-      const { data: profiles, error } = await supabase
-        .rpc('search_profiles_by_golf_id', { 
-          search_golf_id: fullGolfId 
-        });
+      // Get profile with manual_premium status
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('user_id, name, golf_id, handicap, home_club, avatar_url, manual_premium')
+        .eq('golf_id', fullGolfId)
+        .maybeSingle();
 
       if (error) {
         console.error('Search error:', error);
         setFoundUser(null);
         return;
       }
-
-      const profile = profiles?.[0] || null;
 
       if (profile) {
         setFoundUser(profile);
@@ -138,6 +137,29 @@ export const AdminUserManagement = () => {
       setFoundUser(null);
     } finally {
       setSearchLoading(false);
+    }
+  };
+
+  const toggleManualPremium = async (userId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ manual_premium: !currentStatus })
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      console.log(`Manual premium ${!currentStatus ? 'aktiverat' : 'avaktiverat'}`);
+      
+      // Refresh the found user to show updated status
+      if (foundUser) {
+        setFoundUser({
+          ...foundUser,
+          manual_premium: !currentStatus
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling manual premium:', error);
     }
   };
 
@@ -276,19 +298,30 @@ export const AdminUserManagement = () => {
                   <div>
                     <h3 className="font-medium">{foundUser.name || 'Namnlös användare'}</h3>
                     <p className="text-sm text-muted-foreground">Golf-ID: {foundUser.golf_id}</p>
-                    <div className="mt-2">
+                    <div className="mt-2 flex gap-2">
                       <Badge variant="secondary">
                         Betalningar hanteras av Apple
                       </Badge>
+                      {foundUser.manual_premium && (
+                        <Badge variant="default">
+                          <Crown className="w-3 h-3 mr-1" />
+                          Admin Premium
+                        </Badge>
+                      )}
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      Premium funktionalitet tillgänglig via Apple In-App Purchase
+                    <div className="text-sm text-muted-foreground mt-1">
+                      Premium funktionalitet tillgänglig via Apple In-App Purchase eller admin-bypass
                     </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      Premium-hantering sker via Apple App Store
-                    </p>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => toggleManualPremium(foundUser.user_id, foundUser.manual_premium)}
+                      variant={foundUser.manual_premium ? "destructive" : "default"}
+                      size="sm"
+                    >
+                      <Crown className="w-4 h-4 mr-2" />
+                      {foundUser.manual_premium ? 'Ta bort Premium' : 'Ge Premium'}
+                    </Button>
                   </div>
                 </div>
               </CardContent>

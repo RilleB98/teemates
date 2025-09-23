@@ -285,6 +285,7 @@ export type Database = {
           last_location: Json | null
           last_swipe_reset: string | null
           location_enabled: boolean | null
+          manual_premium: boolean
           name: string | null
           push_token: string | null
           selected_course: Json | null
@@ -307,6 +308,7 @@ export type Database = {
           last_location?: Json | null
           last_swipe_reset?: string | null
           location_enabled?: boolean | null
+          manual_premium?: boolean
           name?: string | null
           push_token?: string | null
           selected_course?: Json | null
@@ -329,6 +331,7 @@ export type Database = {
           last_location?: Json | null
           last_swipe_reset?: string | null
           location_enabled?: boolean | null
+          manual_premium?: boolean
           name?: string | null
           push_token?: string | null
           selected_course?: Json | null

@@ -8,6 +8,7 @@ export function useSwipeLimit() {
   const isSubscribed = false; // Set to false to enable premium features
   const [swipeCount, setSwipeCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [manualPremium, setManualPremium] = useState(false);
   
   const FREE_SWIPE_LIMIT = 3;
 
@@ -18,6 +19,17 @@ export function useSwipeLimit() {
     }
 
     try {
+      // First check if user has manual premium
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('manual_premium')
+        .eq('user_id', user.id)
+        .single();
+
+      if (profileData) {
+        setManualPremium(profileData.manual_premium || false);
+      }
+
       const { data, error } = await supabase
         .from('user_swipe_counts')
         .select('*')
@@ -82,7 +94,7 @@ export function useSwipeLimit() {
   };
 
   const incrementSwipeCount = async () => {
-    if (!user?.id || isSubscribed) return true; // Premium användare har obegränsat
+    if (!user?.id || isSubscribed || manualPremium) return true; // Premium användare har obegränsat
 
     const newCount = swipeCount + 1;
     
@@ -109,12 +121,12 @@ export function useSwipeLimit() {
   };
 
   const canSwipe = () => {
-    if (isSubscribed) return true; // Premium användare kan alltid swipea
+    if (isSubscribed || manualPremium) return true; // Premium användare kan alltid swipea
     return swipeCount < FREE_SWIPE_LIMIT;
   };
 
   const getRemainingSwipes = () => {
-    if (isSubscribed) return 999; // "Obegränsat" för premium
+    if (isSubscribed || manualPremium) return 999; // "Obegränsat" för premium
     return Math.max(0, FREE_SWIPE_LIMIT - swipeCount);
   };
 
