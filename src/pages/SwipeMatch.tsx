@@ -9,10 +9,29 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSwipeLimit } from '@/hooks/useSwipeLimit';
 import { PremiumUpgradeModal } from '@/components/PremiumUpgradeModal';
 import { useState } from 'react';
+import { resetSwipesForUsers } from '@/utils/resetSwipes';
+import { toast } from '@/hooks/use-toast';
 
 export const SwipeMatch = () => {
   const { user } = useAuth();
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+
+  const handleResetSwipes = async () => {
+    try {
+      await resetSwipesForUsers(['8e00885e-abd2-4fed-8724-543ee0437077', 'd277c243-cff0-47b1-a65c-08309e2c09a1']);
+      toast({
+        title: "Swipes återställda",
+        description: "Rulle och Kulle ska nu synas igen i din feed.",
+      });
+      forceRefresh();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Fel",
+        description: "Kunde inte återställa swipes. Försök igen.",
+      });
+    }
+  };
   const {
     currentProfile,
     hasMoreProfiles,
@@ -80,13 +99,22 @@ export const SwipeMatch = () => {
                       <p className="text-muted-foreground text-sm xs:text-base leading-relaxed">
                         Du har sett alla tillgängliga profiler med dina nuvarande filter.
                       </p>
-                      <Button 
-                        onClick={() => forceRefresh()} 
-                        className="w-full bg-gradient-golf hover:shadow-golf transition-all duration-300 text-sm xs:text-base font-medium h-10 xs:h-11"
-                      >
-                        <RefreshCw className="h-4 w-4 mr-2" />
-                        Uppdatera
-                      </Button>
+                      <div className="space-y-2">
+                        <Button 
+                          onClick={() => forceRefresh()} 
+                          className="w-full bg-gradient-golf hover:shadow-golf transition-all duration-300 text-sm xs:text-base font-medium h-10 xs:h-11"
+                        >
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Uppdatera
+                        </Button>
+                        <Button 
+                          onClick={handleResetSwipes}
+                          variant="outline"
+                          className="w-full text-sm xs:text-base font-medium h-10 xs:h-11"
+                        >
+                          Återställ Rulle & Kulle
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
