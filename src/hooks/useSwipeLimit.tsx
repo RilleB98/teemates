@@ -93,10 +93,7 @@ export function useSwipeLimit() {
     }
   };
 
-  const incrementSwipeCount = async (isYesSwipe: boolean = true) => {
-    // Only count YES swipes towards the limit
-    if (!isYesSwipe) return true; // NO swipes are always allowed
-    
+  const incrementYesSwipeCount = async () => {
     if (!user?.id || isSubscribed || manualPremium) return true; // Premium användare har obegränsat
 
     const newCount = swipeCount + 1;
@@ -123,12 +120,13 @@ export function useSwipeLimit() {
     }
   };
 
-  const canSwipe = (isYesSwipe: boolean = true) => {
-    // NO swipes are always allowed regardless of limits
-    if (!isYesSwipe) return true;
-    
-    if (isSubscribed || manualPremium) return true; // Premium användare kan alltid swipea
+  const canSwipeYes = () => {
+    if (isSubscribed || manualPremium) return true; // Premium användare kan alltid swipea ja
     return swipeCount < FREE_SWIPE_LIMIT;
+  };
+
+  const canSwipe = () => {
+    return true; // Kan alltid swipea nej
   };
 
   const getRemainingSwipes = () => {
@@ -143,7 +141,8 @@ export function useSwipeLimit() {
   return {
     swipeCount,
     canSwipe,
-    incrementSwipeCount,
+    canSwipeYes,
+    incrementYesSwipeCount,
     getRemainingSwipes,
     loading,
     FREE_SWIPE_LIMIT,

@@ -4,8 +4,7 @@ import { useSwipeProfiles } from '@/hooks/useSwipeProfiles';
 import { SwipeCard } from '@/components/SwipeCard';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Users, RefreshCw, Bug, UserCheck, Crown } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Loader2, Users, RefreshCw, Crown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSwipeLimit } from '@/hooks/useSwipeLimit';
 import { PremiumUpgradeModal } from '@/components/PremiumUpgradeModal';
@@ -23,15 +22,13 @@ export const SwipeMatch = () => {
     swipeLeft,
     swipeRight,
     refetch,
-    fetchAllProfiles,
     totalProfiles,
-    currentIndex,
-    debugInfo
+    currentIndex
   } = useSwipeProfiles();
   
   const {
     swipeCount,
-    canSwipe,
+    canSwipeYes,
     getRemainingSwipes,
     loading: swipeLoading,
     FREE_SWIPE_LIMIT
@@ -117,13 +114,13 @@ export const SwipeMatch = () => {
               <p className="text-muted-foreground text-sm xs:text-base mb-3">Hitta din nästa golfpartner</p>
               
               {/* Premium Upgrade Button */}
-              {!canSwipe() && (
+              {!canSwipeYes() && (
                 <Button
                   onClick={() => setShowPremiumModal(true)}
                   className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white mb-4"
                 >
                   <Crown className="h-4 w-4 mr-2" />
-                  Uppgradera till Premium
+                  Uppgradera till Premium - {getRemainingSwipes()} ja-swipes kvar
                 </Button>
               )}
             </div>
@@ -133,7 +130,6 @@ export const SwipeMatch = () => {
               filters={filters} 
               onFiltersChange={setFilters} 
             />
-
 
             {/* Profile Card with Swipe Functionality */}
             {currentProfile ? (

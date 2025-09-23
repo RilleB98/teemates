@@ -21,7 +21,7 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
-  const { canSwipe, incrementSwipeCount } = useSwipeLimit();
+  const { canSwipeYes, incrementYesSwipeCount } = useSwipeLimit();
 
   const handleStart = (clientX: number, clientY: number) => {
     setIsDragging(true);
@@ -56,7 +56,7 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
   };
 
   const handleSwipeLeft = async () => {
-    // Left swipes (NO) are always allowed - no limit check needed
+    // Left swipes are always allowed
     if (cardRef.current) {
       cardRef.current.style.transform = 'translateX(-100%) rotate(-30deg)';
       cardRef.current.style.opacity = '0';
@@ -68,13 +68,12 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
   };
 
   const handleSwipeRight = async () => {
-    // Right swipes (YES) check the limit
-    if (!canSwipe(true)) {
+    if (!canSwipeYes()) {
       setShowPremiumModal(true);
       return;
     }
 
-    const success = await incrementSwipeCount(true);
+    const success = await incrementYesSwipeCount();
     if (!success) return;
 
     if (cardRef.current) {
