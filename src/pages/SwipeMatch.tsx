@@ -85,7 +85,7 @@ export const SwipeMatch = () => {
                         className="w-full bg-gradient-golf hover:shadow-golf transition-all duration-300 text-sm xs:text-base font-medium h-10 xs:h-11"
                       >
                         <RefreshCw className="h-4 w-4 mr-2" />
-                        Force Uppdatera (Cache Clear)
+                        Uppdatera
                       </Button>
                     </div>
                   </CardContent>
