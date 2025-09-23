@@ -9,6 +9,7 @@ interface BrowserGuardProps {
 
 const BrowserGuard = ({ children }: BrowserGuardProps) => {
   const [isWebViewOrApp, setIsWebViewOrApp] = useState<boolean | null>(null);
+  const [hasRedirected, setHasRedirected] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -61,15 +62,16 @@ const BrowserGuard = ({ children }: BrowserGuardProps) => {
       
       setIsWebViewOrApp(allowAccess);
       
-      // If not allowed and not on root path, redirect to landing
-      if (!allowAccess && location.pathname !== '/') {
+      // If not allowed and not on root path and haven't redirected yet, redirect to landing
+      if (!allowAccess && location.pathname !== '/' && !hasRedirected) {
         console.log('🔒 Redirecting browser user to landing page');
+        setHasRedirected(true);
         navigate('/', { replace: true });
       }
     };
 
     detectAppEnvironment();
-  }, [location.pathname, navigate]);
+  }, [location.pathname, navigate, hasRedirected]);
 
   if (isWebViewOrApp === null) {
     // Loading state
