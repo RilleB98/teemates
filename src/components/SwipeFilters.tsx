@@ -62,8 +62,7 @@ export const SwipeFiltersComponent = ({ filters, onFiltersChange }: SwipeFilters
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="outline" size="sm" className="mb-4">
-          <Settings className="h-4 w-4 mr-2" />
-          Filter
+          <Settings className="h-4 w-4" />
         </Button>
       </SheetTrigger>
       <SheetContent side="bottom" className="h-[80vh]">
