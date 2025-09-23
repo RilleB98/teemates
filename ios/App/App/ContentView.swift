@@ -2,185 +2,32 @@ import SwiftUI
 import WebKit
 import AuthenticationServices
 
+extension Notification.Name {
+    static let didReceiveOAuthCallbackURL = Notification.Name("didReceiveOAuthCallbackURL")
+}
+
 struct ContentView: UIViewRepresentable {
-
-    let webView = WKWebView()
-
     func makeUIView(context: Context) -> WKWebView {
-        webView.navigationDelegate = context.coordinator
-        webView.configuration.preferences.javaScriptEnabled = true
+        let webView = WKWebView()
+        let coordinator = context.coordinator
         
-        // Add JavaScript message handler for Apple OAuth
-        webView.configuration.userContentController.add(context.coordinator, name: "appleOAuth")
-
-        // Lyssna på OAuth callback från AppDelegate
-        NotificationCenter.default.addObserver(forName: .didReceiveOAuthCallbackURL,
-                                               object: nil,
-                                               queue: .main) { note in
-            guard let url = note.object as? URL else { 
-                print("❌ [Auth] Invalid callback URL")
-                return 
-            }
-
-            print("✅ [Auth] Received callback URL: \(url)")
-            
-            var accessToken = ""
-            var refreshToken = ""
-            
-            // Handle both fragment (#) and query (?) parameters
-            if let fragment = url.fragment, !fragment.isEmpty {
-                print("🔍 [Auth] Processing fragment: \(fragment)")
-                fragment.split(separator: "&").forEach { pair in
-                    let parts = pair.split(separator: "=", maxSplits: 1).map(String.init)
-                    if parts.count == 2 {
-                        switch parts[0] {
-                        case "access_token": accessToken = parts[1]
-                        case "refresh_token": refreshToken = parts[1]
-                        default: break
-                        }
-                    }
-                }
-            } else if let query = url.query, !query.isEmpty {
-                print("🔍 [Auth] Processing query: \(query)")
-                query.split(separator: "&").forEach { pair in
-                    let parts = pair.split(separator: "=", maxSplits: 1).map(String.init)
-                    if parts.count == 2 {
-                        switch parts[0] {
-                        case "access_token": accessToken = parts[1]
-                        case "refresh_token": refreshToken = parts[1]
-                        default: break
-                        }
-                    }
-                }
-            }
-            
-            guard !accessToken.isEmpty else {
-                print("❌ [Auth] No access token found in callback")
-                DispatchQueue.main.async {
-                    webView.load(URLRequest(url: URL(string: "https://teemates.app/auth")!))
-                }
-                return
-            }
-            
-            print("✅ [Auth] Found tokens - access: \(accessToken.prefix(20))..., refresh: \(!refreshToken.isEmpty)")
-
-            // Enhanced JavaScript injection with better debugging and fallback
-            let injectTokensWithRetry = {
-                print("🔄 [Auth] Starting token injection process")
-                
-                // First check current WebView URL
-                webView.evaluateJavaScript("window.location.href") { result, error in
-                    if let currentURL = result as? String {
-                        print("📍 [WebView] Current URL: \(currentURL)")
-                    }
-                }
-                
-                let js = """
-                (async () => {
-                  try {
-                    console.log('🍎 [iOS] Starting session setup...');
-                    console.log('🌐 [iOS] Current URL:', window.location.href);
-                    
-                    // Store tokens in sessionStorage as backup
-                    sessionStorage.setItem('ios_access_token', '\(accessToken)');
-                    sessionStorage.setItem('ios_refresh_token', '\(refreshToken)');
-                    console.log('💾 [iOS] Tokens stored in sessionStorage');
-                    
-                    // Wait for Supabase to be available with more detailed logging
-                    let retries = 0;
-                    while (!window.supabase && retries < 100) {
-                      if (retries % 10 === 0) {
-                        console.log(\`⏳ [iOS] Waiting for Supabase... attempt \${retries}\`);
-                      }
-                      await new Promise(resolve => setTimeout(resolve, 100));
-                      retries++;
-                    }
-                    
-                    if (!window.supabase) {
-                      console.error('❌ [iOS] Supabase not available after 10 seconds');
-                      console.log('🔄 [iOS] Redirecting to auth-callback fallback');
-                      window.location.href = '/auth-callback?access_token=\(accessToken)&refresh_token=\(refreshToken)&fallback=js_timeout';
-                      return;
-                    }
-                    
-                    console.log('✅ [iOS] Supabase client found, setting session...');
-                    const { data, error } = await window.supabase.auth.setSession({
-                      access_token: "\(accessToken)",
-                      refresh_token: "\(refreshToken)"
-                    });
-                    
-                    if (error) {
-                      console.error('❌ [iOS] setSession error:', error);
-                      console.log('🔄 [iOS] Redirecting to auth-callback fallback');
-                      window.location.href = '/auth-callback?access_token=\(accessToken)&refresh_token=\(refreshToken)&fallback=session_error';
-                    } else {
-                      console.log('✅ [iOS] Session established successfully');
-                      console.log('🎯 [iOS] Session data:', data);
-                      // Clean up sessionStorage
-                      sessionStorage.removeItem('ios_access_token');
-                      sessionStorage.removeItem('ios_refresh_token');
-                      console.log('🏠 [iOS] Redirecting to /app');
-                      window.location.href = '/app';
-                    }
-                  } catch (err) {
-                    console.error('❌ [iOS] Session setup error:', err);
-                    console.log('🔄 [iOS] Redirecting to auth-callback fallback');
-                    window.location.href = '/auth-callback?access_token=\(accessToken)&refresh_token=\(refreshToken)&fallback=js_error';
-                  }
-                })();
-                """
-                
-                webView.evaluateJavaScript(js) { result, error in
-                    if let error = error {
-                        print("❌ [WebView] JavaScript execution failed: \(error)")
-                        print("🔄 [Auth] Using Swift fallback navigation")
-                        // Immediate fallback to auth-callback page
-                        DispatchQueue.main.async {
-                            let fallbackURL = "https://teemates.app/auth-callback?access_token=\(accessToken)&refresh_token=\(refreshToken)&fallback=swift_error"
-                            print("🌐 [Auth] Loading fallback URL: \(fallbackURL)")
-                            webView.load(URLRequest(url: URL(string: fallbackURL)!))
-                        }
-                    } else {
-                        print("✅ [Auth] JavaScript injection completed successfully")
-                    }
-                }
-            }
-            
-            // Check if WebView is ready and on correct domain before injecting
-            let checkWebViewReady = {
-                webView.evaluateJavaScript("document.readyState") { result, error in
-                    if let readyState = result as? String {
-                        print("📄 [WebView] Document ready state: \(readyState)")
-                        
-                        if readyState == "complete" || readyState == "interactive" {
-                            print("✅ [WebView] Page ready, injecting tokens")
-                            injectTokensWithRetry()
-                        } else {
-                            print("⏳ [WebView] Page not ready, waiting...")
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                checkWebViewReady()
-                            }
-                        }
-                    } else {
-                        print("⚠️ [WebView] Could not get ready state, proceeding anyway")
-                        injectTokensWithRetry()
-                    }
-                }
-            }
-            
-            // Start checking after a brief delay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                print("🚀 [Auth] Starting WebView readiness check")
-                checkWebViewReady()
-            }
-        }
-
-        // Ladda start-URL - ändrat till /auth istället för /app
+        webView.navigationDelegate = coordinator
+        webView.configuration.userContentController.add(coordinator, name: "appleOAuth")
+        
+        // Set up observer for OAuth callback
+        NotificationCenter.default.addObserver(
+            coordinator,
+            selector: #selector(Coordinator.handleOAuthCallback(_:)),
+            name: .didReceiveOAuthCallbackURL,
+            object: nil
+        )
+        
+        coordinator.webView = webView
+        
         if let url = URL(string: "https://teemates.app/auth") {
-            print("🌍 [WebView] Laddar start-URL: \(url)")
             webView.load(URLRequest(url: url))
         }
-
+        
         return webView
     }
 
@@ -189,66 +36,173 @@ struct ContentView: UIViewRepresentable {
     func makeCoordinator() -> Coordinator { Coordinator() }
 
     class Coordinator: NSObject, WKNavigationDelegate, ASWebAuthenticationPresentationContextProviding, WKScriptMessageHandler {
-
-        private var authSession: ASWebAuthenticationSession?
+        weak var webView: WKWebView?
         
-        // Handle JavaScript messages from React
-        func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-            if message.name == "appleOAuth" {
-                guard let body = message.body as? [String: Any],
-                      let urlString = body["url"] as? String,
-                      let oauthURL = URL(string: urlString) else {
-                    print("❌ [OAuth] Invalid message from React")
-                    return
-                }
-                
-                print("🍎 [OAuth] Starting Apple OAuth with URL: \(urlString)")
-                startAppleOAuth(url: oauthURL)
-            }
+        deinit {
+            NotificationCenter.default.removeObserver(self)
         }
-
-        func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
-                     decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-
-            guard let url = navigationAction.request.url else {
-                decisionHandler(.allow)
+        
+        @objc func handleOAuthCallback(_ notification: Notification) {
+            guard let userInfo = notification.userInfo,
+                  let url = userInfo["url"] as? URL else {
+                print("🍎 OAUTH: Invalid callback notification")
                 return
             }
-
-            // Allow all navigation
-            decisionHandler(.allow)
-        }
-
-        private func startAppleOAuth(url: URL) {
-            let session = ASWebAuthenticationSession(
-                url: url,
-                callbackURLScheme: "teemates"
-            ) { callbackURL, error in
-                if let error = error {
-                    print("❌ [OAuth] ASWebAuthenticationSession error: \(error)")
+            
+            print("🍎 OAUTH: Processing callback URL: \(url)")
+            
+            func checkWebViewReady(attempt: Int = 0) {
+                guard let webView = self.webView else {
+                    print("🍎 OAUTH: WebView not available")
                     return
                 }
                 
-                if let callbackURL = callbackURL {
-                    print("✅ [OAuth] Callback received: \(callbackURL)")
-                    // Tokens will be handled via Universal Links → NotificationCenter → ContentView
+                let maxAttempts = 10
+                if attempt >= maxAttempts {
+                    print("🍎 OAUTH: Max attempts reached, giving up")
+                    return
+                }
+                
+                let testScript = "typeof window !== 'undefined' && typeof window.supabase !== 'undefined'"
+                webView.evaluateJavaScript(testScript) { result, error in
+                    if let result = result as? Bool, result {
+                        print("🍎 OAUTH: WebView ready, processing tokens")
+                        self.processTokens(from: url, webView: webView)
+                    } else {
+                        print("🍎 OAUTH: WebView not ready, retry \(attempt + 1)/\(maxAttempts)")
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            checkWebViewReady(attempt: attempt + 1)
+                        }
+                    }
                 }
             }
-
-            session.presentationContextProvider = self
-            session.prefersEphemeralWebBrowserSession = true
-            self.authSession = session
             
-            DispatchQueue.main.async {
-                _ = session.start()
+            checkWebViewReady()
+        }
+        
+        private func processTokens(from url: URL, webView: WKWebView) {
+            let urlString = url.absoluteString
+            
+            guard let accessTokenRange = urlString.range(of: "access_token=") else {
+                print("🍎 OAUTH: No access token found")
+                return
+            }
+            
+            let accessTokenStart = accessTokenRange.upperBound
+            let accessTokenEnd = urlString[accessTokenStart...].firstIndex(of: "&") ?? urlString.endIndex
+            let accessToken = String(urlString[accessTokenStart..<accessTokenEnd])
+            
+            let refreshTokenRange = urlString.range(of: "refresh_token=")
+            let refreshToken: String
+            
+            if let refreshRange = refreshTokenRange {
+                let refreshTokenStart = refreshRange.upperBound
+                let refreshTokenEnd = urlString[refreshTokenStart...].firstIndex(of: "&") ?? urlString.endIndex
+                refreshToken = String(urlString[refreshTokenStart..<refreshTokenEnd])
+            } else {
+                refreshToken = ""
+                print("🍎 OAUTH: No refresh token found")
+            }
+            
+            print("🍎 OAUTH: Extracted tokens - access: \(accessToken.prefix(20))..., refresh: \(refreshToken.prefix(20))...")
+            
+            let jsCode = """
+                (function() {
+                    console.log('🍎 JS: Setting Supabase session with native tokens');
+                    
+                    if (typeof window.supabase === 'undefined') {
+                        console.error('🍎 JS: Supabase not available');
+                        return;
+                    }
+                    
+                    const session = {
+                        access_token: '\(accessToken)',
+                        refresh_token: '\(refreshToken)',
+                        expires_in: 3600,
+                        token_type: 'bearer',
+                        user: null
+                    };
+                    
+                    window.supabase.auth.setSession(session)
+                        .then(function(result) {
+                            console.log('🍎 JS: Session set successfully', result);
+                            sessionStorage.setItem('early_auth_handled', 'true');
+                            
+                            if (window.location.pathname === '/auth') {
+                                console.log('🍎 JS: Redirecting from auth page');
+                                window.location.href = '/';
+                            }
+                        })
+                        .catch(function(error) {
+                            console.error('🍎 JS: Failed to set session', error);
+                            window.location.href = '/auth?error=session_failed';
+                        });
+                })();
+            """
+            
+            webView.evaluateJavaScript(jsCode) { result, error in
+                if let error = error {
+                    print("🍎 OAUTH: JavaScript error: \(error)")
+                } else {
+                    print("🍎 OAUTH: Successfully injected session")
+                }
             }
         }
-
+        
+        func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+            if message.name == "appleOAuth" {
+                print("🍎 OAUTH: Received Apple OAuth request from web")
+                startAppleOAuth()
+            }
+        }
+        
+        private func startAppleOAuth() {
+            guard let url = URL(string: "https://fzhmvraztypgemyrguxw.supabase.co/auth/v1/authorize?provider=apple") else {
+                print("🍎 OAUTH: Invalid Supabase Apple OAuth URL")
+                return
+            }
+            
+            let session = ASWebAuthenticationSession(url: url, callbackURLScheme: "com.teemates.app") { callbackURL, error in
+                if let error = error {
+                    print("🍎 OAUTH: Apple OAuth error: \(error)")
+                    return
+                }
+                
+                guard let callbackURL = callbackURL else {
+                    print("🍎 OAUTH: No callback URL received")
+                    return
+                }
+                
+                print("🍎 OAUTH: Apple OAuth success, posting notification")
+                NotificationCenter.default.post(
+                    name: .didReceiveOAuthCallbackURL,
+                    object: nil,
+                    userInfo: ["url": callbackURL]
+                )
+            }
+            
+            session.presentationContextProvider = self
+            session.start()
+        }
+        
         func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-            UIApplication.shared.connectedScenes
-                .compactMap { $0 as? UIWindowScene }
-                .flatMap { $0.windows }
-                .first { $0.isKeyWindow } ?? UIWindow()
+            if #available(iOS 15.0, *) {
+                return ASPresentationAnchor()
+            } else {
+                return UIApplication.shared.windows.first ?? ASPresentationAnchor()
+            }
+        }
+        
+        func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+            decisionHandler(WKNavigationActionPolicy.allow)
+        }
+        
+        func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+            print("🌐 WebView started loading: \(webView.url?.absoluteString ?? "unknown")")
+        }
+        
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            print("🌐 WebView finished loading: \(webView.url?.absoluteString ?? "unknown")")
         }
     }
 }
