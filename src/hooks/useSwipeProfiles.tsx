@@ -29,6 +29,12 @@ export const useSwipeProfiles = () => {
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<{
+    rawDataCount: number;
+    excludedFriends: number;
+    excludedSwipes: number;
+    finalCount: number;
+  } | null>(null);
   const [filters, setFilters] = useState<SwipeFilters>({
     minAge: 18,
     maxAge: 80,
@@ -37,6 +43,42 @@ export const useSwipeProfiles = () => {
     gender: 'all',
     prioritizeLocalCity: true
   });
+
+  const fetchAllProfiles = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      // Get ALL profiles except current user - no filters applied
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('user_id, name, avatar_url, age, handicap, gender, home_club, birth_date, bio, home_city')
+        .neq('user_id', user.id)
+        .not('name', 'is', null)
+        .limit(50);
+
+      console.log("🔧 DEBUG ALL PROFILES:", data);
+      
+      if (data && !error) {
+        const mappedProfiles = data.map(profile => ({
+          ...profile,
+          bio: profile.bio || ""
+        }));
+        setProfiles(mappedProfiles);
+        setCurrentIndex(0);
+        setDebugInfo({
+          rawDataCount: data.length,
+          excludedFriends: 0,
+          excludedSwipes: 0,
+          finalCount: data.length
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching all profiles:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchProfiles = async () => {
     if (!user) {
@@ -81,6 +123,9 @@ export const useSwipeProfiles = () => {
       console.log("🔍 DEBUG: - Data count:", data?.length);
       console.log("🔍 DEBUG: - Raw data:", data);
 
+      // Update debug info with raw data count
+      setDebugInfo(prev => ({ ...prev!, rawDataCount: data?.length || 0 }));
+
       if (error) {
         console.error('❌ Error fetching profiles:', error);
         return;
@@ -114,6 +159,13 @@ export const useSwipeProfiles = () => {
           console.log("🔍 DEBUG: - Friend IDs to exclude:", friendIds);
           console.log("🔍 DEBUG: - Swiped user IDs to exclude:", swipedUserIds);
           console.log("🔍 DEBUG: - Total excluded IDs:", excludedIds);
+          
+          // Update debug info with exclusion counts
+          setDebugInfo(prev => ({ 
+            ...prev!, 
+            excludedFriends: friendIds.length,
+            excludedSwipes: swipedUserIds.length 
+          }));
           
           let filteredProfiles = data.filter(profile => !excludedIds.includes(profile.user_id)).map(profile => ({
             ...profile,
@@ -155,6 +207,9 @@ export const useSwipeProfiles = () => {
           console.log("🔍 DEBUG: Final profiles to set:");
           console.log("🔍 DEBUG: - Final count:", filteredProfiles.length);
           console.log("🔍 DEBUG: - Final profiles:", filteredProfiles.map(p => ({ user_id: p.user_id, name: p.name, age: p.age, handicap: p.handicap, gender: p.gender, home_city: p.home_city })));
+          
+          // Update debug info with final count
+          setDebugInfo(prev => ({ ...prev!, finalCount: filteredProfiles.length }));
           
           setProfiles(filteredProfiles);
           setCurrentIndex(0);
@@ -252,7 +307,9 @@ export const useSwipeProfiles = () => {
     swipeLeft,
     swipeRight,
     refetch: fetchProfiles,
+    fetchAllProfiles,
     totalProfiles: profiles.length,
-    currentIndex
+    currentIndex,
+    debugInfo
   };
 };

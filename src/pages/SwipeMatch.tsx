@@ -4,10 +4,12 @@ import { useSwipeProfiles } from '@/hooks/useSwipeProfiles';
 import { SwipeCard } from '@/components/SwipeCard';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Users, RefreshCw } from 'lucide-react';
+import { Loader2, Users, RefreshCw, Bug, UserCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/hooks/useAuth';
 
 export const SwipeMatch = () => {
+  const { user } = useAuth();
   const {
     currentProfile,
     hasMoreProfiles,
@@ -17,8 +19,10 @@ export const SwipeMatch = () => {
     swipeLeft,
     swipeRight,
     refetch,
+    fetchAllProfiles,
     totalProfiles,
-    currentIndex
+    currentIndex,
+    debugInfo
   } = useSwipeProfiles();
 
   if (loading) {
@@ -107,20 +111,86 @@ export const SwipeMatch = () => {
               onFiltersChange={setFilters} 
             />
 
-            {/* Debug refresh button */}
-            <div className="text-center">
-              <Button 
-                onClick={() => {
-                  console.log("🔧 DEBUG: Manual refresh triggered");
-                  refetch();
-                }} 
-                variant="outline"
-                size="sm"
-                className="text-xs"
-              >
-                🔧 Debug Refresh
-              </Button>
-            </div>
+            {/* Debug Information Panel */}
+            <Card className="bg-card/95 backdrop-blur-sm border-primary/20">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Bug className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-semibold">Debug Info</h3>
+                </div>
+                
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Användare:</span>
+                    <span className="font-mono">{user?.id ? `${user.id.slice(0,8)}...` : 'Ingen'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Profiler laddade:</span>
+                    <span className="font-mono">{totalProfiles}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Aktuell index:</span>
+                    <span className="font-mono">{currentIndex}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Har fler:</span>
+                    <span className="font-mono">{hasMoreProfiles ? 'Ja' : 'Nej'}</span>
+                  </div>
+                  {debugInfo && (
+                    <>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Rådata count:</span>
+                        <span className="font-mono">{debugInfo.rawDataCount || 0}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Exkluderade vänner:</span>
+                        <span className="font-mono">{debugInfo.excludedFriends || 0}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Exkluderade swipes:</span>
+                        <span className="font-mono">{debugInfo.excludedSwipes || 0}</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div className="flex gap-2 mt-4">
+                  <Button 
+                    onClick={refetch} 
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 text-xs"
+                  >
+                    <RefreshCw className="h-3 w-3 mr-1" />
+                    Ladda om
+                  </Button>
+                  <Button 
+                    onClick={() => setFilters({
+                      minAge: 18,
+                      maxAge: 80,
+                      minHandicap: 0,
+                      maxHandicap: 54,
+                      gender: 'all',
+                      prioritizeLocalCity: false
+                    })} 
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 text-xs"
+                  >
+                    Reset filter
+                  </Button>
+                </div>
+                <Button 
+                  onClick={fetchAllProfiles} 
+                  variant="secondary"
+                  size="sm"
+                  className="w-full text-xs mt-2"
+                >
+                  <UserCheck className="h-3 w-3 mr-1" />
+                  Visa ALLA profiler (debug)
+                </Button>
+              </CardContent>
+            </Card>
 
             {/* Profile Card with Swipe Functionality */}
             {currentProfile ? (
