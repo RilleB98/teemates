@@ -161,27 +161,23 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
 
   return (
     <div className="relative w-full max-w-sm mx-auto h-[500px] sm:h-[600px]">
-      {/* Mobile action buttons at top */}
-      <div className="absolute top-2 sm:top-4 left-1/2 transform -translate-x-1/2 flex gap-2 sm:gap-4 z-20 md:hidden">
+      {/* Mobile action buttons positioned over image at bottom corners */}
+      <div className="absolute bottom-16 left-0 right-0 flex justify-between px-4 z-20 md:hidden">
         <Button
           variant="outline"
-          size="sm"
-          className="bg-white/90 border-red-200 hover:bg-red-50 text-red-600 text-xs sm:text-sm touch-target"
+          size="icon"
+          className="w-12 h-12 rounded-full bg-red-500/90 hover:bg-red-600/90 border-red-600 text-white shadow-lg"
           onClick={handleSwipeLeft}
         >
-          <X className="h-3 sm:h-4 w-3 sm:w-4 mr-1" />
-          <span className="hidden xs:inline">Hoppa över</span>
-          <span className="xs:hidden">Nej</span>
+          <X className="h-6 w-6" />
         </Button>
         <Button
           variant="outline"
-          size="sm"
-          className="bg-white/90 border-green-200 hover:bg-green-50 text-green-600 text-xs sm:text-sm touch-target"
+          size="icon"
+          className="w-12 h-12 rounded-full bg-green-500/90 hover:bg-green-600/90 border-green-600 text-white shadow-lg"
           onClick={handleSwipeRight}
         >
-          <Heart className="h-3 sm:h-4 w-3 sm:w-4 mr-1" />
-          <span className="hidden xs:inline">Gilla</span>
-          <span className="xs:hidden">Ja</span>
+          <Heart className="h-6 w-6" />
         </Button>
       </div>
 
