@@ -50,7 +50,7 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
   
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { isPremium } = usePremium();
+  const { isPremium, loading: premiumLoading } = usePremium();
   const [isLoading, setIsLoading] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [golfCourses, setGolfCourses] = useState<Array<{ id: string; name: string; location: string }>>([]);
@@ -333,6 +333,18 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
     "21:00-21:30", "21:30-22:00"
   ];
 
+
+  // Show loading while checking premium status
+  if (premiumLoading) {
+    return (
+      <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl">
+        <CardContent className="p-8 text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-golf-green mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Laddar...</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   // Show premium modal if user is not premium
   if (!isPremium) {
