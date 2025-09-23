@@ -188,12 +188,8 @@ export const SwipeMatch = () => {
                           <span className="font-mono">{debugInfo.rawDataCount || 0}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Exkluderade vänner:</span>
-                          <span className="font-mono">{debugInfo.excludedFriends || 0}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Exkluderade swipes:</span>
-                          <span className="font-mono">{debugInfo.excludedSwipes || 0}</span>
+                          <span className="text-muted-foreground">Slutlig count:</span>
+                          <span className="font-mono">{debugInfo.finalCount || 0}</span>
                         </div>
                       </div>
                     </>

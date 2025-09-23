@@ -31,8 +31,6 @@ export const useSwipeProfiles = () => {
   const [loading, setLoading] = useState(false);
   const [debugInfo, setDebugInfo] = useState<{
     rawDataCount: number;
-    excludedFriends: number;
-    excludedSwipes: number;
     finalCount: number;
   } | null>(null);
   const [filters, setFilters] = useState<SwipeFilters>({
@@ -68,8 +66,6 @@ export const useSwipeProfiles = () => {
         setCurrentIndex(0);
         setDebugInfo({
           rawDataCount: data.length,
-          excludedFriends: 0,
-          excludedSwipes: 0,
           finalCount: data.length
         });
       }
@@ -123,58 +119,22 @@ export const useSwipeProfiles = () => {
       console.log("🔍 DEBUG: - Data count:", data?.length);
       console.log("🔍 DEBUG: - Raw data:", data);
 
-      // Update debug info with raw data count
-      setDebugInfo(prev => ({ ...prev!, rawDataCount: data?.length || 0 }));
-
       if (error) {
         console.error('❌ Error fetching profiles:', error);
         return;
       }
 
-      // Filter out existing friends and users swiped on in last month
+      // No filtering - show all profiles that match filters
       if (data) {
         try {
-          // Get friends
-          const { data: friendData } = await supabase
-            .from('friends')
-            .select('friend_id')
-            .eq('user_id', user.id)
-            .eq('status', 'accepted');
-
-          // Get users swiped on in the last month
-          const oneMonthAgo = new Date();
-          oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-          
-          const { data: swipeData } = await supabase
-            .from('user_swipes')
-            .select('target_user_id')
-            .eq('user_id', user.id)
-            .gte('created_at', oneMonthAgo.toISOString());
-
-          const friendIds = friendData?.map(f => f.friend_id) || [];
-          const swipedUserIds = swipeData?.map(s => s.target_user_id) || [];
-          const excludedIds = [...friendIds, ...swipedUserIds];
-
-          console.log("🔍 DEBUG: Filtering data:");
-          console.log("🔍 DEBUG: - Friend IDs to exclude:", friendIds);
-          console.log("🔍 DEBUG: - Swiped user IDs to exclude:", swipedUserIds);
-          console.log("🔍 DEBUG: - Total excluded IDs:", excludedIds);
-          
-          // Update debug info with exclusion counts
-          setDebugInfo(prev => ({ 
-            ...prev!, 
-            excludedFriends: friendIds.length,
-            excludedSwipes: swipedUserIds.length 
-          }));
-          
-          let filteredProfiles = data.filter(profile => !excludedIds.includes(profile.user_id)).map(profile => ({
+          let filteredProfiles = data.map(profile => ({
             ...profile,
             bio: profile.bio || ""
           }));
 
-          console.log("🔍 DEBUG: After filtering out friends/swipes:");
-          console.log("🔍 DEBUG: - Filtered profiles count:", filteredProfiles.length);
-          console.log("🔍 DEBUG: - Filtered profiles:", filteredProfiles.map(p => ({ user_id: p.user_id, name: p.name })));
+          console.log("🔍 DEBUG: All profiles after basic filters:");
+          console.log("🔍 DEBUG: - Profiles count:", filteredProfiles.length);
+          console.log("🔍 DEBUG: - Profiles:", filteredProfiles.map(p => ({ user_id: p.user_id, name: p.name })));
 
           // Sort by local city priority if enabled
           if (filters.prioritizeLocalCity) {
@@ -209,19 +169,20 @@ export const useSwipeProfiles = () => {
           console.log("🔍 DEBUG: - Final profiles:", filteredProfiles.map(p => ({ user_id: p.user_id, name: p.name, age: p.age, handicap: p.handicap, gender: p.gender, home_city: p.home_city })));
           
           // Update debug info with final count
-          setDebugInfo(prev => ({ ...prev!, finalCount: filteredProfiles.length }));
+          setDebugInfo({ rawDataCount: data?.length || 0, finalCount: filteredProfiles.length });
           
           setProfiles(filteredProfiles);
           setCurrentIndex(0);
-        } catch (friendError) {
-          console.error('Error fetching friends or swipes:', friendError);
-          // Still set profiles even if friends/swipes query fails
+        } catch (cityError) {
+          console.error('Error sorting by city:', cityError);
+          // Still set profiles even if city sorting fails
           const mappedProfiles = data.map(profile => ({
             ...profile,
             bio: profile.bio || ""
           }));
           setProfiles(mappedProfiles);
           setCurrentIndex(0);
+          setDebugInfo({ rawDataCount: data?.length || 0, finalCount: mappedProfiles.length });
         }
       }
     } catch (error) {
