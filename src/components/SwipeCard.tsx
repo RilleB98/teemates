@@ -67,10 +67,8 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
           }
         });
     }
-    console.log(`🔍 DEBUG: ${profile.name} has ${images.length} total images:`, images);
-    console.log(`🔍 DEBUG: ${profile.name} user_photos:`, profile.user_photos);
     return images;
-  }, [profile.avatar_url, profile.user_photos, profile.name]);
+  }, [profile.avatar_url, profile.user_photos]);
 
   // Reset image index when profile changes
   useEffect(() => {
@@ -311,16 +309,11 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
                     key={index}
                     className={`w-2 h-2 rounded-full transition-all duration-200 ${
                       index === currentImageIndex 
-                        ? 'bg-white shadow-lg' 
+                        ? 'bg-white' 
                         : 'bg-white/50'
                     }`}
                   />
                 ))}
-              </div>
-              
-              {/* Debug: Show image count */}
-              <div className="absolute top-8 right-4 bg-black/50 text-white px-2 py-1 rounded text-xs z-30">
-                {currentImageIndex + 1}/{availableImages.length}
               </div>
             </>
           )}
