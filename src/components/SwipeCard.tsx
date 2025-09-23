@@ -51,6 +51,9 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { canSwipeYes, incrementYesSwipeCount } = useSwipeLimit();
 
+  // Debug mutual favorite courses
+  console.log(`🏌️ Profile ${profile.name} mutual_favorite_courses:`, profile.mutual_favorite_courses);
+
   
   // Get all available images (avatar + user_photos)
   const availableImages = useMemo(() => {
@@ -76,8 +79,8 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
     setCurrentImageIndex(0);
   }, [profile.user_id]);
 
-  // Handle image navigation
-  const handleImageNavigation = (direction: 'prev' | 'next', e: React.MouseEvent) => {
+  // Handle image navigation - improved to handle both mouse and touch events
+  const handleImageNavigation = (direction: 'prev' | 'next', e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation(); // Prevent swipe detection
     e.preventDefault();
     
@@ -301,28 +304,46 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
             <>
               {/* Left navigation area (previous image) */}
               <div
-                className="absolute left-0 top-0 w-1/2 h-full z-20 cursor-pointer flex items-center justify-start pl-4"
+                className="absolute left-0 top-0 w-1/2 h-full z-30 cursor-pointer flex items-center justify-start pl-4"
                 onClick={(e) => handleImageNavigation('prev', e)}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  handleImageNavigation('prev', e);
+                }}
                 style={{ background: 'transparent' }}
               >
-                <div className="opacity-0 hover:opacity-100 transition-opacity bg-black/20 rounded-full p-2">
+                <div className="opacity-0 hover:opacity-100 active:opacity-100 transition-opacity bg-black/20 rounded-full p-2">
                   <div className="w-2 h-2 border-l-2 border-b-2 border-white transform rotate-45"></div>
                 </div>
               </div>
               
               {/* Right navigation area (next image) */}
               <div
-                className="absolute right-0 top-0 w-1/2 h-full z-20 cursor-pointer flex items-center justify-end pr-4"
+                className="absolute right-0 top-0 w-1/2 h-full z-30 cursor-pointer flex items-center justify-end pr-4"
                 onClick={(e) => handleImageNavigation('next', e)}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  handleImageNavigation('next', e);
+                }}
                 style={{ background: 'transparent' }}
               >
-                <div className="opacity-0 hover:opacity-100 transition-opacity bg-black/20 rounded-full p-2">
+                <div className="opacity-0 hover:opacity-100 active:opacity-100 transition-opacity bg-black/20 rounded-full p-2">
                   <div className="w-2 h-2 border-r-2 border-b-2 border-white transform -rotate-45"></div>
                 </div>
               </div>
               
               {/* Image indicators */}
-              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex gap-1 z-30">
+              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex gap-1 z-40">
                 {availableImages.map((_, index) => (
                   <div
                     key={index}

@@ -10,9 +10,14 @@ interface MutualFavoriteCoursesProps {
 }
 
 export const MutualFavoriteCourses = ({ mutualCourses }: MutualFavoriteCoursesProps) => {
+  console.log('🏌️ MutualFavoriteCourses component received:', mutualCourses);
+  
   if (!mutualCourses || mutualCourses.length === 0) {
+    console.log('🏌️ No mutual courses to display');
     return null;
   }
+  
+  console.log('🏌️ Rendering mutual courses section with', mutualCourses.length, 'courses');
 
   return (
     <div className="space-y-2">
