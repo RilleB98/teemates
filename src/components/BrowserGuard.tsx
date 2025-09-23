@@ -22,6 +22,12 @@ const BrowserGuard = ({ children }: BrowserGuardProps) => {
       console.log('🔒 Current URL:', currentUrl);
       console.log('🔒 Location pathname:', location.pathname);
       
+      // Check for desktop browsers explicitly
+      const isDesktopSafari = userAgent.includes('safari') && !userAgent.includes('mobile') && userAgent.includes('mac');
+      const isChrome = userAgent.includes('chrome') && !userAgent.includes('mobile');
+      const isFirefox = userAgent.includes('firefox') && !userAgent.includes('mobile');
+      const isDesktopBrowser = isDesktopSafari || isChrome || isFirefox;
+      
       // Check for iOS device
       const isIOS = /iphone|ipod|ipad/.test(userAgent) && !(window as any).MSStream;
       
@@ -32,18 +38,21 @@ const BrowserGuard = ({ children }: BrowserGuardProps) => {
       
       // Check for WebView indicators
       const isWebView = userAgent.includes('wkwebview') ||
-                       userAgent.includes('version/') && isIOS ||
-                       !(window as any).chrome && isIOS;
+                       (userAgent.includes('version/') && isIOS) ||
+                       (!(window as any).chrome && isIOS);
       
-      // Check URL parameters only - remove domain check for now
+      // Check URL parameters
       const urlParams = new URLSearchParams(window.location.search);
       const hasForceHideBadge = urlParams.has('forceHideBadge');
       
-      // Only allow access if it's iOS, Capacitor, WebView, or has special parameter
-      // Remove domain check to force browser blocking
-      const allowAccess = isIOS || isCapacitorApp || isWebView || hasForceHideBadge;
+      // Block desktop browsers explicitly, allow only iOS/WebView/Capacitor
+      const allowAccess = !isDesktopBrowser && (isIOS || isCapacitorApp || isWebView || hasForceHideBadge);
       
       console.log('🔒 Detection Results:');
+      console.log('🔒 Is Desktop Safari:', isDesktopSafari);
+      console.log('🔒 Is Chrome:', isChrome);
+      console.log('🔒 Is Firefox:', isFirefox);
+      console.log('🔒 Is Desktop Browser:', isDesktopBrowser);
       console.log('🔒 Is iOS:', isIOS);
       console.log('🔒 Is Capacitor:', isCapacitorApp);
       console.log('🔒 Is WebView:', isWebView);
