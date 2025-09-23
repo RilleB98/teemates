@@ -38,9 +38,9 @@ const BrowserGuard = ({ children }: BrowserGuardProps) => {
       // Check URL parameters and domain
       const urlParams = new URLSearchParams(window.location.search);
       const hasForceHideBadge = urlParams.has('forceHideBadge');
-      const isOurDomain = currentUrl.includes('teemates.app') || currentUrl.includes('lovableproject.com');
+      const isOurDomain = currentUrl.includes('teemates.app');
       
-      // Allow access if it's iOS, Capacitor, WebView, has special parameter, or from our domain
+      // Allow access if it's iOS, Capacitor, WebView, has special parameter, or from our production domain
       const allowAccess = isIOS || isCapacitorApp || isWebView || hasForceHideBadge || isOurDomain;
       
       console.log('🔒 Detection Results:');
