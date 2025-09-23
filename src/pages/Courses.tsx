@@ -123,7 +123,7 @@ Du kan även klicka på en specifik bana för att se användare just på den ban
           {favoriteCount > 0 && <div className="mb-6 p-4 bg-pink-100/90 border border-pink-200 rounded-xl backdrop-blur-sm animate-fade-in">
               <p className="text-sm text-pink-700 flex items-center">
                 <Heart className="w-4 h-4 mr-2 fill-current" />
-                Dina favoritbanor visas högst upp
+                Dina favoritbanor visas högst upp!
               </p>
             </div>}
 
