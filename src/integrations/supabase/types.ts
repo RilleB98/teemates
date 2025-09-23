@@ -272,6 +272,7 @@ export type Database = {
       profiles: {
         Row: {
           age: number | null
+          availability: string | null
           avatar_url: string | null
           bio: string | null
           birth_date: string | null
@@ -287,6 +288,7 @@ export type Database = {
           location_enabled: boolean | null
           manual_premium: boolean
           name: string | null
+          play_frequency: string | null
           push_token: string | null
           selected_course: Json | null
           swipes_today: number | null
@@ -295,6 +297,7 @@ export type Database = {
         }
         Insert: {
           age?: number | null
+          availability?: string | null
           avatar_url?: string | null
           bio?: string | null
           birth_date?: string | null
@@ -310,6 +313,7 @@ export type Database = {
           location_enabled?: boolean | null
           manual_premium?: boolean
           name?: string | null
+          play_frequency?: string | null
           push_token?: string | null
           selected_course?: Json | null
           swipes_today?: number | null
@@ -318,6 +322,7 @@ export type Database = {
         }
         Update: {
           age?: number | null
+          availability?: string | null
           avatar_url?: string | null
           bio?: string | null
           birth_date?: string | null
@@ -333,6 +338,7 @@ export type Database = {
           location_enabled?: boolean | null
           manual_premium?: boolean
           name?: string | null
+          play_frequency?: string | null
           push_token?: string | null
           selected_course?: Json | null
           swipes_today?: number | null

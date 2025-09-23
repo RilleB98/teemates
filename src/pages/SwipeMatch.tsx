@@ -127,7 +127,6 @@ export const SwipeMatch = () => {
                 profile={currentProfile}
                 onSwipeLeft={() => swipeLeft(currentProfile.user_id)}
                 onSwipeRight={() => swipeRight(currentProfile.user_id)}
-                onRefresh={refetch}
               />
             ) : (
               <Card className="bg-card/95 backdrop-blur-sm border-golf-green-light shadow-golf">

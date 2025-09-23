@@ -4,15 +4,31 @@ import { useAuth } from '@/hooks/useAuth';
 
 export interface CourseUserProfile {
   user_id: string;
-  name: string;
-  avatar_url: string;
-  age: number;
-  handicap: number;
-  gender: string;
-  home_club: string;
-  birth_date: string;
-  bio: string;
-  home_city: string;
+  name: string | null;
+  avatar_url: string | null;
+  age: number | null;
+  handicap: number | null;
+  gender: string | null;
+  home_club: string | null;
+  birth_date: string | null;
+  bio: string | null;
+  home_city: string | null;
+  play_frequency: string | null;
+  availability: string | null;
+  mutual_friends?: Array<{
+    user_id: string;
+    name: string;
+    avatar_url: string | null;
+  }>;
+  mutual_favorite_courses?: Array<{
+    id: string;
+    name: string;
+  }>;
+  user_photos?: Array<{
+    photo_url: string;
+    is_main_photo: boolean;
+    display_order: number;
+  }>;
 }
 
 export const useCourseProfiles = (courseName: string) => {
@@ -31,7 +47,7 @@ export const useCourseProfiles = (courseName: string) => {
       // Get users with this course as home club (excluding myself)
       let query = supabase
         .from('profiles')
-        .select('user_id, name, avatar_url, age, handicap, gender, home_club, birth_date, bio, home_city')
+        .select('user_id, name, avatar_url, age, handicap, gender, home_club, birth_date, bio, home_city, play_frequency, availability')
         .eq('home_club', courseName)
         .neq('user_id', user.id)
         .not('name', 'is', null);
@@ -56,7 +72,9 @@ export const useCourseProfiles = (courseName: string) => {
           const filteredProfiles = data.filter(profile => !friendIds.includes(profile.user_id)).map(profile => ({
             ...profile,
             bio: profile.bio || "",
-            home_city: profile.home_city || ""
+            home_city: profile.home_city || "",
+            play_frequency: profile.play_frequency || null,
+            availability: profile.availability || null
           }));
           
           // Randomize the order
@@ -70,7 +88,9 @@ export const useCourseProfiles = (courseName: string) => {
           const randomizedProfiles = data.map(profile => ({
             ...profile,
             bio: profile.bio || "",
-            home_city: profile.home_city || ""
+            home_city: profile.home_city || "",
+            play_frequency: profile.play_frequency || null,
+            availability: profile.availability || null
           })).sort(() => Math.random() - 0.5);
           setProfiles(randomizedProfiles);
           setCurrentIndex(0);

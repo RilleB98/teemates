@@ -121,7 +121,6 @@ export const CourseSwipeModal = ({
                 profile={currentProfile}
                 onSwipeLeft={handleSwipeLeft}
                 onSwipeRight={handleSwipeRight}
-                onRefresh={handleRefresh}
               />
             )}
           </div>

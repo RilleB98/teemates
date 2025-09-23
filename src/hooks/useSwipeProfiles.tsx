@@ -4,15 +4,31 @@ import { useAuth } from '@/hooks/useAuth';
 
 export interface UserProfile {
   user_id: string;
-  name: string;
-  avatar_url: string;
-  age: number;
-  handicap: number;
-  gender: string;
-  home_club: string;
-  birth_date: string;
-  bio: string;
-  home_city: string;
+  name: string | null;
+  avatar_url: string | null;
+  age: number | null;
+  handicap: number | null;
+  gender: string | null;
+  home_club: string | null;
+  birth_date: string | null;
+  bio: string | null;
+  home_city: string | null;
+  play_frequency: string | null;
+  availability: string | null;
+  mutual_friends?: Array<{
+    user_id: string;
+    name: string;
+    avatar_url: string | null;
+  }>;
+  mutual_favorite_courses?: Array<{
+    id: string;
+    name: string;
+  }>;
+  user_photos?: Array<{
+    photo_url: string;
+    is_main_photo: boolean;
+    display_order: number;
+  }>;
 }
 
 export interface SwipeFilters {
@@ -72,7 +88,7 @@ export const useSwipeProfiles = () => {
       console.log("🔍 DEBUG: Fetching profiles...");
       const { data, error } = await supabase
         .from('profiles')
-        .select(`user_id, name, avatar_url, age, handicap, gender, home_club, birth_date, bio, home_city`)
+        .select(`user_id, name, avatar_url, age, handicap, gender, home_club, birth_date, bio, home_city, play_frequency, availability`)
         .neq('user_id', user.id)
         .not('name', 'is', null)
         .limit(200);

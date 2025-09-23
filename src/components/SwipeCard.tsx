@@ -1,39 +1,64 @@
-import { useState, useRef, useEffect } from 'react';
-import { Heart, X, MapPin } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import React, { useState, useEffect } from 'react';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { UserProfile } from '@/hooks/useSwipeProfiles';
+import { Heart, X, MapPin, User } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { PremiumUpgradeModal } from '@/components/PremiumUpgradeModal';
 import { useSwipeLimit } from '@/hooks/useSwipeLimit';
-import { PremiumUpgradeModal } from './PremiumUpgradeModal';
+import { MutualFriends } from '@/components/MutualFriends';
+import { MutualFavoriteCourses } from '@/components/MutualFavoriteCourses';
+import { InfoBadges } from '@/components/InfoBadges';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface SwipeCardProps {
-  profile: UserProfile;
+  profile: {
+    user_id: string;
+    name: string | null;
+    avatar_url: string | null;
+    age: number | null;
+    handicap: number | null;
+    gender: string | null;
+    home_club: string | null;
+    birth_date: string | null;
+    bio: string | null;
+    home_city: string | null;
+    play_frequency: string | null;
+    availability: string | null;
+    mutual_friends?: Array<{
+      user_id: string;
+      name: string;
+      avatar_url: string | null;
+    }>;
+    mutual_favorite_courses?: Array<{
+      id: string;
+      name: string;
+    }>;
+    user_photos?: Array<{
+      photo_url: string;
+      is_main_photo: boolean;
+      display_order: number;
+    }>;
+  };
   onSwipeLeft: () => void;
   onSwipeRight: () => void;
-  onRefresh?: () => void;
 }
 
-export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: SwipeCardProps) => {
+export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
+  const [dragOffset, setDragOffset] = useState(0);
+  const [startPos, setStartPos] = useState(0);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
   const { canSwipeYes, incrementYesSwipeCount } = useSwipeLimit();
 
-  const handleStart = (clientX: number, clientY: number) => {
+  const handleStart = (clientX: number) => {
     setIsDragging(true);
-    setStartPos({ x: clientX, y: clientY });
+    setStartPos(clientX);
   };
 
-  const handleMove = (clientX: number, clientY: number) => {
+  const handleMove = (clientX: number) => {
     if (!isDragging) return;
-    
-    const deltaX = clientX - startPos.x;
-    const deltaY = clientY - startPos.y;
-    setDragOffset({ x: deltaX, y: deltaY });
+    const deltaX = clientX - startPos;
+    setDragOffset(deltaX);
   };
 
   const handleEnd = () => {
@@ -41,30 +66,23 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
     
     const threshold = 100;
     
-    if (dragOffset.x > threshold) {
-      // Swipe right
+    if (dragOffset > threshold) {
       handleSwipeRight();
-    } else if (dragOffset.x < -threshold) {
-      // Swipe left
+    } else if (dragOffset < -threshold) {
       handleSwipeLeft();
     } else {
-      // Snap back
-      setDragOffset({ x: 0, y: 0 });
+      setDragOffset(0);
     }
     
     setIsDragging(false);
   };
 
   const handleSwipeLeft = async () => {
-    // Left swipes are always allowed
-    if (cardRef.current) {
-      cardRef.current.style.transform = 'translateX(-100%) rotate(-30deg)';
-      cardRef.current.style.opacity = '0';
-      setTimeout(() => {
-        onSwipeLeft();
-        resetCard();
-      }, 300);
-    }
+    setDragOffset(0);
+    setTimeout(() => {
+      onSwipeLeft();
+      resetCard();
+    }, 100);
   };
 
   const handleSwipeRight = async () => {
@@ -76,29 +94,23 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
     const success = await incrementYesSwipeCount();
     if (!success) return;
 
-    if (cardRef.current) {
-      cardRef.current.style.transform = 'translateX(100%) rotate(30deg)';
-      cardRef.current.style.opacity = '0';
-      setTimeout(() => {
-        onSwipeRight();
-        resetCard();
-      }, 300);
-    }
+    setDragOffset(0);
+    setTimeout(() => {
+      onSwipeRight();
+      resetCard();
+    }, 100);
   };
 
   const resetCard = () => {
-    setDragOffset({ x: 0, y: 0 });
-    if (cardRef.current) {
-      cardRef.current.style.transform = '';
-      cardRef.current.style.opacity = '1';
-    }
+    setDragOffset(0);
+    setIsDragging(false);
   };
 
-  // Global mouse events for better preview support
+  // Global mouse events
   useEffect(() => {
     const handleGlobalMouseMove = (e: MouseEvent) => {
       if (isDragging) {
-        handleMove(e.clientX, e.clientY);
+        handleMove(e.clientX);
       }
     };
 
@@ -117,25 +129,22 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
       document.removeEventListener('mousemove', handleGlobalMouseMove);
       document.removeEventListener('mouseup', handleGlobalMouseUp);
     };
-  }, [isDragging, dragOffset.x, startPos.x]);
+  }, [isDragging, dragOffset, startPos]);
 
-  // Mouse events - improved for preview
+  // Mouse events
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
-    e.stopPropagation();
-    handleStart(e.clientX, e.clientY);
+    handleStart(e.clientX);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     e.preventDefault();
-    e.stopPropagation();
-    handleMove(e.clientX, e.clientY);
+    handleMove(e.clientX);
   };
 
   const handleMouseUp = (e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
-      e.stopPropagation();
     }
     handleEnd();
   };
@@ -143,27 +152,25 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
   // Touch events
   const handleTouchStart = (e: React.TouchEvent) => {
     const touch = e.touches[0];
-    handleStart(touch.clientX, touch.clientY);
+    handleStart(touch.clientX);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     const touch = e.touches[0];
-    handleMove(touch.clientX, touch.clientY);
+    handleMove(touch.clientX);
   };
 
   const handleTouchEnd = () => {
     handleEnd();
   };
 
-  // Calculate rotation and opacity based on drag offset
-  const rotation = Math.min(Math.max(dragOffset.x / 10, -30), 30);
-  const opacity = Math.max(1 - Math.abs(dragOffset.x) / 300, 0);
+  // Calculate visual feedback
+  const rotation = Math.min(Math.max(dragOffset / 10, -15), 15);
+  const opacity = Math.max(1 - Math.abs(dragOffset) / 400, 0.7);
 
   return (
-    <div className="relative w-full max-w-sm mx-auto h-[500px] sm:h-[600px]">
-
-      <div
-        ref={cardRef}
+    <div className="relative w-full max-w-sm mx-auto">
+      <Card
         onMouseDown={handleMouseDown}
         onMouseMove={isDragging ? handleMouseMove : undefined}
         onMouseUp={handleMouseUp}
@@ -171,122 +178,157 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className="absolute inset-0 cursor-grab active:cursor-grabbing select-none transition-transform duration-300 ease-out"
+        className={`
+          relative w-full max-w-sm mx-auto bg-gradient-to-br from-card to-card/95 
+          shadow-xl border-0 cursor-grab active:cursor-grabbing select-none
+          transition-all duration-200 ease-out overflow-hidden
+          ${isDragging ? 'scale-105 shadow-2xl' : ''}
+          hover:shadow-xl
+        `}
         style={{
-          transform: `translateX(${dragOffset.x}px) translateY(${dragOffset.y * 0.1}px) rotate(${rotation}deg)`,
+          transform: `translateX(${dragOffset}px) rotate(${rotation}deg)`,
           opacity: isDragging ? opacity : 1,
-          willChange: 'transform, opacity',
-          userSelect: 'none',
-          touchAction: 'none'
+          height: '750px', // Increased height for more content
         }}
-        >
-        <Card className="h-full shadow-xl border-2 border-muted overflow-hidden bg-white">
-          <CardContent className="p-0 h-full flex flex-col">
-            {/* Profile Image */}
-            <div className="relative h-2/3 bg-gradient-to-br from-gray-100 to-gray-200">
-              {profile.avatar_url ? (
-                <img 
-                  src={profile.avatar_url} 
-                  alt={profile.name}
-                  className="w-full h-full object-cover"
-                  draggable={false}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-subtle">
-                  <Avatar className="w-24 sm:w-32 h-24 sm:h-32">
-                    <AvatarFallback className="text-2xl sm:text-4xl">
-                      {profile.name?.charAt(0) || '?'}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-              )}
-            </div>
-
-            {/* Profile Info */}
-            <div className="h-1/3 p-3 sm:p-4 bg-white flex flex-col justify-between">
-              <div className="space-y-1 sm:space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg sm:text-xl font-bold text-foreground truncate">
-                    {profile.name || 'Okänd användare'}
-                  </h3>
-                  {profile.age && (
-                    <span className="text-base sm:text-lg text-muted-foreground">{profile.age}</span>
-                  )}
-                </div>
-                
-                <div className="flex flex-wrap gap-1 sm:gap-2">
-                  {profile.handicap !== null && profile.handicap !== undefined && (
-                    <Badge variant="outline" className="text-xs">
-                      HCP {profile.handicap}
-                    </Badge>
-                  )}
-                  {profile.gender && (
-                    <Badge variant="secondary" className="text-xs">
-                      {profile.gender === 'man' ? 'Man' : profile.gender === 'kvinna' ? 'Kvinna' : profile.gender}
-                    </Badge>
-                  )}
-                </div>
-                
-                {/* Bio Section */}
-                {profile.bio && (
-                  <div className="mt-2 p-2 bg-muted/50 rounded-md">
-                    <p className="text-xs sm:text-sm text-foreground leading-relaxed">
-                      "{profile.bio}"
-                    </p>
-                  </div>
-                )}
-                
-                {profile.home_club && (
-                  <div className="flex items-center text-xs sm:text-sm text-muted-foreground mt-2">
-                    <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
-                    <span className="truncate">{profile.home_club}</span>
-                  </div>
-                )}
+      >
+        {/* Main profile image with gradient overlay */}
+        <div className="relative h-80 overflow-hidden">
+          <img
+            src={profile.avatar_url || '/placeholder.svg'}
+            alt={profile.name || 'Profile'}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = '/placeholder.svg';
+            }}
+          />
+          
+          {/* Gradient overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          
+          {/* Name and age overlay */}
+          <div className="absolute bottom-4 left-4 text-white">
+            <h2 className="text-3xl font-bold tracking-tight">
+              {profile.name || 'Okänt namn'}
+              {profile.age && <span className="text-2xl font-normal">, {profile.age}</span>}
+            </h2>
+            {profile.home_city && (
+              <div className="flex items-center gap-1 mt-1">
+                <MapPin size={14} />
+                <span className="text-sm">{profile.home_city}</span>
+              </div>
+            )}
+          </div>
+          
+          {/* Dislike overlay */}
+          {dragOffset < -50 && (
+            <div className="absolute inset-0 bg-red-500/80 flex items-center justify-center z-10">
+              <div className="bg-white/20 backdrop-blur-sm rounded-full p-4">
+                <X size={40} className="text-white" />
               </div>
             </div>
-          </CardContent>
-        </Card>
-        
-        {/* Mobile action buttons at bottom of card */}
-        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-8 z-20 md:hidden">
+          )}
+          
+          {/* Like overlay */}
+          {dragOffset > 50 && (
+            <div className="absolute inset-0 bg-green-500/80 flex items-center justify-center z-10">
+              <div className="bg-white/20 backdrop-blur-sm rounded-full p-4">
+                <Heart size={40} className="text-white" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Scrollable profile content */}
+        <ScrollArea className="flex-1 px-6 pb-20">
+          <div className="space-y-4 py-4">
+            {/* Quick info badges */}
+            <InfoBadges 
+              playFrequency={profile.play_frequency}
+              availability={profile.availability}
+              handicap={profile.handicap}
+              homeCity={profile.home_city}
+            />
+
+            {/* Golf info */}
+            {profile.home_club && (
+              <div className="space-y-2">
+                <h3 className="font-semibold text-foreground flex items-center gap-2">
+                  <User size={16} />
+                  Golfinfo
+                </h3>
+                <div className="bg-secondary/50 rounded-lg p-3">
+                  <div className="text-sm">
+                    <span className="font-medium">Hemklubb:</span>
+                    <span className="ml-2">{profile.home_club}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Bio */}
+            {profile.bio && (
+              <div className="space-y-2">
+                <h3 className="font-semibold text-foreground">Om mig</h3>
+                <div className="bg-secondary/50 rounded-lg p-3">
+                  <p className="text-sm leading-relaxed">{profile.bio}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Mutual friends */}
+            {profile.mutual_friends && (
+              <MutualFriends mutualFriends={profile.mutual_friends} />
+            )}
+
+            {/* Mutual favorite courses */}
+            {profile.mutual_favorite_courses && (
+              <MutualFavoriteCourses mutualCourses={profile.mutual_favorite_courses} />
+            )}
+          </div>
+        </ScrollArea>
+      </Card>
+      
+      {/* Fixed action buttons - always visible */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-6 z-20">
+        {/* Desktop buttons */}
+        <div className="hidden md:flex gap-4">
           <Button
             variant="outline"
-            size="icon"
-            className="w-14 h-14 rounded-full bg-red-500/90 hover:bg-red-600/90 border-red-600 text-white shadow-lg"
+            size="lg"
             onClick={handleSwipeLeft}
+            className="w-16 h-16 rounded-full border-2 border-red-200 hover:border-red-300 hover:bg-red-50 bg-card/95 backdrop-blur-sm shadow-lg transition-colors"
           >
-            <X className="h-7 w-7" />
+            <X size={24} className="text-red-500" />
           </Button>
           <Button
             variant="outline"
-            size="icon"
-            className="w-14 h-14 rounded-full bg-green-500/90 hover:bg-green-600/90 border-green-600 text-white shadow-lg"
+            size="lg"
             onClick={handleSwipeRight}
+            className="w-16 h-16 rounded-full border-2 border-green-200 hover:border-green-300 hover:bg-green-50 bg-card/95 backdrop-blur-sm shadow-lg transition-colors"
           >
-            <Heart className="h-7 w-7" />
+            <Heart size={24} className="text-green-500" />
           </Button>
         </div>
-      </div>
-
-      {/* Desktop action buttons - Hidden on mobile */}
-      <div className="absolute bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2 hidden md:flex gap-4 z-10">
-        <Button
-          variant="outline"
-          size="icon"
-          className="w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-white border-2 border-red-200 hover:bg-red-50 hover:border-red-300"
-          onClick={handleSwipeLeft}
-        >
-          <X className="h-4 sm:h-5 w-4 sm:w-5 text-red-500" />
-        </Button>
         
-        <Button
-          variant="outline"
-          size="icon"
-          className="w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-white border-2 border-green-200 hover:bg-green-50 hover:border-green-300"
-          onClick={handleSwipeRight}
-        >
-          <Heart className="h-4 sm:h-5 w-4 sm:w-5 text-green-500" />
-        </Button>
+        {/* Mobile buttons */}
+        <div className="flex gap-4 md:hidden">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleSwipeLeft}
+            className="w-14 h-14 rounded-full border-2 border-red-200 hover:border-red-300 hover:bg-red-50 bg-card/95 backdrop-blur-sm shadow-lg transition-colors"
+          >
+            <X size={20} className="text-red-500" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleSwipeRight}
+            className="w-14 h-14 rounded-full border-2 border-green-200 hover:border-green-300 hover:bg-green-50 bg-card/95 backdrop-blur-sm shadow-lg transition-colors"
+          >
+            <Heart size={20} className="text-green-500" />
+          </Button>
+        </div>
       </div>
 
       <PremiumUpgradeModal
