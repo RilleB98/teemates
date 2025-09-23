@@ -106,8 +106,7 @@ export const Courses = () => {
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 mb-3 sm:mb-4 text-shadow-lg leading-tight">
               Golfbanor i Sverige
             </h1>
-            <p className="text-sm sm:text-base text-gray-600 backdrop-blur-sm bg-white/10 rounded-full px-3 sm:px-4 py-2 inline-block mt-2 max-w-full">Favorisera dina närliggande golfbanor för att hitta fler spelare i närområdet.
-Du kan även klicka på en specifik bana för att se användare just på den banan!</p>
+            <p className="text-sm sm:text-base text-gray-600 backdrop-blur-sm bg-white/10 rounded-full px-3 sm:px-4 py-2 inline-block mt-2 max-w-full">Favorisera dina närliggande golfbanor för att hitta fler spelare i närområdet. Du kan klicka på en specifik bana för att se användare just på den banan!</p>
           </div>
 
           {/* Search */}
