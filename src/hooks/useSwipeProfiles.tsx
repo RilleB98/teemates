@@ -40,12 +40,15 @@ export const useSwipeProfiles = () => {
 
   const fetchProfiles = async () => {
     if (!user) {
-      console.log("No user, returning early");
+      console.log("❌ DEBUG: No user, returning early");
       return;
     }
 
-    console.log("Setting loading to true");
+    console.log("🔍 DEBUG: Starting fetchProfiles");
+    console.log("🔍 DEBUG: Current user.id:", user.id);
+    console.log("🔍 DEBUG: Current filters:", filters);
     setLoading(true);
+    
     try {
       // Get users that are not me and not already friends
       let query = supabase
@@ -53,6 +56,8 @@ export const useSwipeProfiles = () => {
         .select('user_id, name, avatar_url, age, handicap, gender, home_club, birth_date, bio, home_city')
         .neq('user_id', user.id)
         .not('name', 'is', null);
+
+      console.log("🔍 DEBUG: Base query created, excluding user_id:", user.id);
 
       // Apply filters
       if (filters.minAge || filters.maxAge) {
@@ -71,8 +76,13 @@ export const useSwipeProfiles = () => {
 
       const { data, error } = await query.limit(50); // Increase limit to account for filtering
 
+      console.log("🔍 DEBUG: Raw Supabase query result:");
+      console.log("🔍 DEBUG: - Error:", error);
+      console.log("🔍 DEBUG: - Data count:", data?.length);
+      console.log("🔍 DEBUG: - Raw data:", data);
+
       if (error) {
-        console.error('Error fetching profiles:', error);
+        console.error('❌ Error fetching profiles:', error);
         return;
       }
 
@@ -99,11 +109,20 @@ export const useSwipeProfiles = () => {
           const friendIds = friendData?.map(f => f.friend_id) || [];
           const swipedUserIds = swipeData?.map(s => s.target_user_id) || [];
           const excludedIds = [...friendIds, ...swipedUserIds];
+
+          console.log("🔍 DEBUG: Filtering data:");
+          console.log("🔍 DEBUG: - Friend IDs to exclude:", friendIds);
+          console.log("🔍 DEBUG: - Swiped user IDs to exclude:", swipedUserIds);
+          console.log("🔍 DEBUG: - Total excluded IDs:", excludedIds);
           
           let filteredProfiles = data.filter(profile => !excludedIds.includes(profile.user_id)).map(profile => ({
             ...profile,
             bio: profile.bio || ""
           }));
+
+          console.log("🔍 DEBUG: After filtering out friends/swipes:");
+          console.log("🔍 DEBUG: - Filtered profiles count:", filteredProfiles.length);
+          console.log("🔍 DEBUG: - Filtered profiles:", filteredProfiles.map(p => ({ user_id: p.user_id, name: p.name })));
 
           // Sort by local city priority if enabled
           if (filters.prioritizeLocalCity) {
@@ -133,7 +152,10 @@ export const useSwipeProfiles = () => {
             }
           }
           
-          console.log('Fetched profiles:', filteredProfiles.length);
+          console.log("🔍 DEBUG: Final profiles to set:");
+          console.log("🔍 DEBUG: - Final count:", filteredProfiles.length);
+          console.log("🔍 DEBUG: - Final profiles:", filteredProfiles.map(p => ({ user_id: p.user_id, name: p.name, age: p.age, handicap: p.handicap, gender: p.gender, home_city: p.home_city })));
+          
           setProfiles(filteredProfiles);
           setCurrentIndex(0);
         } catch (friendError) {

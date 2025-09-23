@@ -107,6 +107,21 @@ export const SwipeMatch = () => {
               onFiltersChange={setFilters} 
             />
 
+            {/* Debug refresh button */}
+            <div className="text-center">
+              <Button 
+                onClick={() => {
+                  console.log("🔧 DEBUG: Manual refresh triggered");
+                  refetch();
+                }} 
+                variant="outline"
+                size="sm"
+                className="text-xs"
+              >
+                🔧 Debug Refresh
+              </Button>
+            </div>
+
             {/* Profile Card with Swipe Functionality */}
             {currentProfile ? (
               <SwipeCard
