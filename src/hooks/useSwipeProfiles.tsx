@@ -418,12 +418,17 @@ export const useSwipeProfiles = () => {
   };
 
   const swipeRight = async (profileId: string) => {
-    console.log('Swipe right called for profile:', profileId);
-    if (!user) return;
+    console.log('🎯 Swipe right called for profile:', profileId);
+    console.log('🎯 Current user ID:', user?.id);
+    if (!user) {
+      console.error('🎯 No user found for swipe right');
+      return;
+    }
 
     try {
+      console.log('🎯 Step 1: Saving right swipe to database...');
       // Save right swipe to database
-      await supabase
+      const swipeResult = await supabase
         .from('user_swipes')
         .upsert({
           user_id: user.id,
@@ -433,6 +438,9 @@ export const useSwipeProfiles = () => {
           onConflict: 'user_id,target_user_id'
         });
 
+      console.log('🎯 Swipe save result:', swipeResult);
+
+      console.log('🎯 Step 2: Creating friend request...');
       // Send friend request
       const { error } = await supabase
         .from('friends')
@@ -442,11 +450,20 @@ export const useSwipeProfiles = () => {
           status: 'pending'
         });
 
+      console.log('🎯 Friend request result:', { error });
+
       if (error && error.code !== '23505') {
+        console.error('🎯 Friend request error:', error);
         throw error;
       }
+
+      if (error?.code === '23505') {
+        console.log('🎯 Friend request already exists (duplicate key)');
+      } else {
+        console.log('🎯 Friend request created successfully!');
+      }
     } catch (error) {
-      console.error('Error processing right swipe:', error);
+      console.error('🎯 Error processing right swipe:', error);
     }
 
     setCurrentIndex(prev => prev + 1);
