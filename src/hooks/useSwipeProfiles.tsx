@@ -30,7 +30,7 @@ export const useSwipeProfiles = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<SwipeFilters>({
-    minAge: 16,
+    minAge: 18,
     maxAge: 80,
     minHandicap: 0,
     maxHandicap: 54,
@@ -46,6 +46,7 @@ export const useSwipeProfiles = () => {
 
       console.log("🔍 DEBUG: Starting fetchProfiles with complex filtering");
       console.log("🔍 DEBUG: Current user ID:", user.id);
+      console.log("🔍 DEBUG: Applied filters:", JSON.stringify(filters));
       setLoading(true);
     
     try {
@@ -56,19 +57,30 @@ export const useSwipeProfiles = () => {
         .neq('user_id', user.id)
         .not('name', 'is', null);
 
-      // Apply filters
+      // Apply filters with detailed logging
+      console.log("🔍 DEBUG: Applying age filter - minAge:", filters.minAge, "maxAge:", filters.maxAge);
       if (filters.minAge || filters.maxAge) {
-        if (filters.minAge > 0) query = query.gte('age', filters.minAge);
-        if (filters.maxAge < 80) query = query.lte('age', filters.maxAge);
+        if (filters.minAge > 0) {
+          query = query.gte('age', filters.minAge);
+          console.log("🔍 DEBUG: Added minAge filter:", filters.minAge);
+        }
+        if (filters.maxAge < 80) {
+          query = query.lte('age', filters.maxAge);
+          console.log("🔍 DEBUG: Added maxAge filter:", filters.maxAge);
+        }
       }
 
+      console.log("🔍 DEBUG: Applying handicap filter - minHandicap:", filters.minHandicap, "maxHandicap:", filters.maxHandicap);
       if (filters.minHandicap > 0 || filters.maxHandicap < 54) {
         query = query.gte('handicap', filters.minHandicap);
         query = query.lte('handicap', filters.maxHandicap);
+        console.log("🔍 DEBUG: Added handicap filters:", filters.minHandicap, "-", filters.maxHandicap);
       }
 
+      console.log("🔍 DEBUG: Applying gender filter:", filters.gender);
       if (filters.gender !== 'all') {
         query = query.eq('gender', filters.gender);
+        console.log("🔍 DEBUG: Added gender filter:", filters.gender);
       }
 
       const { data, error } = await query.limit(100);
@@ -178,6 +190,7 @@ export const useSwipeProfiles = () => {
 
   useEffect(() => {
     if (user) {
+      console.log("🔍 DEBUG: useEffect triggered - user:", user.id, "filters changed:", JSON.stringify(filters));
       fetchProfiles().catch(console.error);
     }
   }, [user, filters]);
