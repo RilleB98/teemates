@@ -125,6 +125,10 @@ export const SwipeMatch = () => {
                     <span className="font-mono">{user?.id ? `${user.id.slice(0,8)}...` : 'Ingen'}</span>
                   </div>
                   <div className="flex justify-between">
+                    <span className="text-muted-foreground">Namn:</span>
+                    <span className="font-mono">{user?.email?.split('@')[0] || 'Okänd'}</span>
+                  </div>
+                  <div className="flex justify-between">
                     <span className="text-muted-foreground">Profiler laddade:</span>
                     <span className="font-mono">{totalProfiles}</span>
                   </div>

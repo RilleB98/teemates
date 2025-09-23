@@ -67,8 +67,16 @@ export const Auth = () => {
     });
     if (error) {
       console.log(error.message);
+      toast({
+        title: "Registreringsfel",
+        description: error.message,
+        variant: "destructive",
+      });
     } else {
-      // Konto skapat! Kontrollera din e-post för bekräftelse.
+      toast({
+        title: "Konto skapat!",
+        description: "Kontrollera din e-post för bekräftelse.",
+      });
     }
     setLoading(false);
   };
@@ -87,8 +95,16 @@ export const Auth = () => {
     });
     if (error) {
       console.log(error.message);
+      toast({
+        title: "Inloggningsfel",
+        description: error.message,
+        variant: "destructive",
+      });
     } else {
-      // Inloggning lyckades - navigera till app
+      toast({
+        title: "Välkommen!",
+        description: "Du är nu inloggad.",
+      });
       navigate("/app");
     }
     setLoading(false);
