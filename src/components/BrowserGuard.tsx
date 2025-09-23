@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 
 interface BrowserGuardProps {
   children: React.ReactNode;
@@ -12,9 +11,9 @@ const BrowserGuard = ({ children }: BrowserGuardProps) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Only run detection once when component mounts
-
   useEffect(() => {
+    console.log('🔒 BrowserGuard: useEffect running');
+    
     const detectAppEnvironment = () => {
       const userAgent = navigator.userAgent.toLowerCase();
       const currentUrl = window.location.href;
@@ -64,9 +63,10 @@ const BrowserGuard = ({ children }: BrowserGuardProps) => {
       setIsWebViewOrApp(allowAccess);
     };
 
-    // Only run detection once when component mounts
     detectAppEnvironment();
   }, []); // Empty dependency array to run only once
+
+  console.log('🔒 BrowserGuard render state:', { isWebViewOrApp, pathname: location.pathname });
 
   if (isWebViewOrApp === null) {
     // Loading state
