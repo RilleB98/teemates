@@ -189,18 +189,18 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
                 <Button
                   variant="outline"
                   size="icon"
-                  className="absolute bottom-2 left-2 w-10 h-10 rounded-full bg-red-500/90 hover:bg-red-600/90 border-red-600 text-white shadow-lg"
+                  className="absolute bottom-4 left-6 w-14 h-14 rounded-full bg-red-500/90 hover:bg-red-600/90 border-red-600 text-white shadow-lg"
                   onClick={handleSwipeLeft}
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-7 w-7" />
                 </Button>
                 <Button
                   variant="outline"
                   size="icon"
-                  className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-green-500/90 hover:bg-green-600/90 border-green-600 text-white shadow-lg"
+                  className="absolute bottom-4 right-6 w-14 h-14 rounded-full bg-green-500/90 hover:bg-green-600/90 border-green-600 text-white shadow-lg"
                   onClick={handleSwipeRight}
                 >
-                  <Heart className="h-5 w-5" />
+                  <Heart className="h-7 w-7" />
                 </Button>
               </div>
               {profile.avatar_url ? (
