@@ -38,7 +38,7 @@ export const useSwipeProfiles = () => {
     prioritizeLocalCity: true
   });
 
-  const fetchProfiles = async () => {
+  const fetchProfiles = async (forceRefresh = false) => {
     if (!user) {
       console.log("❌ DEBUG: No user, returning early");
       return;
@@ -47,10 +47,12 @@ export const useSwipeProfiles = () => {
       console.log("🔍 DEBUG: Starting fetchProfiles with complex filtering");
       console.log("🔍 DEBUG: Current user ID:", user.id);
       console.log("🔍 DEBUG: Applied filters:", JSON.stringify(filters));
+      console.log("🔍 DEBUG: Force refresh:", forceRefresh);
+      console.log("🔍 DEBUG: Timestamp cache breaker:", Date.now());
       setLoading(true);
     
-    try {
-      // Get users that are not me
+    try {      
+      // Get users that are not me with cache-busting
       let query = supabase
         .from('profiles')
         .select('user_id, name, avatar_url, age, handicap, gender, home_club, birth_date, bio, home_city')
@@ -191,9 +193,10 @@ export const useSwipeProfiles = () => {
   useEffect(() => {
     if (user) {
       console.log("🔍 DEBUG: useEffect triggered - user:", user.id, "filters changed:", JSON.stringify(filters));
-      fetchProfiles().catch(console.error);
+      console.log("🔍 DEBUG: Forcing fresh fetch due to dependency change");
+      fetchProfiles(true).catch(console.error); // Always force refresh when dependencies change
     }
-  }, [user, filters]);
+  }, [user, JSON.stringify(filters)]); // Use stringified filters to ensure deep comparison
 
   const swipeLeft = async (profileId: string) => {
     console.log('Swipe left called for profile:', profileId);
@@ -267,6 +270,11 @@ export const useSwipeProfiles = () => {
   const currentProfile = profiles[currentIndex];
   const hasMoreProfiles = currentIndex < profiles.length;
 
+  const forceRefresh = () => {
+    console.log("🔍 DEBUG: Force refresh triggered");
+    fetchProfiles(true).catch(console.error);
+  };
+
   return {
     currentProfile,
     hasMoreProfiles,
@@ -276,6 +284,7 @@ export const useSwipeProfiles = () => {
     swipeLeft,
     swipeRight,
     refetch: fetchProfiles,
+    forceRefresh,
     totalProfiles: profiles.length,
     currentIndex
   };

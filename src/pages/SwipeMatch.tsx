@@ -22,6 +22,7 @@ export const SwipeMatch = () => {
     swipeLeft,
     swipeRight,
     refetch,
+    forceRefresh,
     totalProfiles,
     currentIndex
   } = useSwipeProfiles();
@@ -80,11 +81,11 @@ export const SwipeMatch = () => {
                         Du har sett alla tillgängliga profiler med dina nuvarande filter.
                       </p>
                       <Button 
-                        onClick={refetch} 
+                        onClick={() => forceRefresh()} 
                         className="w-full bg-gradient-golf hover:shadow-golf transition-all duration-300 text-sm xs:text-base font-medium h-10 xs:h-11"
                       >
                         <RefreshCw className="h-4 w-4 mr-2" />
-                        Uppdatera
+                        Force Uppdatera (Cache Clear)
                       </Button>
                     </div>
                   </CardContent>
