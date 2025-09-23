@@ -230,109 +230,101 @@ export const useSwipeProfiles = () => {
         }
       }
 
+      // Fetch user's own favorite courses once for efficiency  
+      console.log("🔍 DEBUG: Fetching user's favorite courses...");
+      const { data: currentUserFavorites } = await supabase
+        .from('favorite_golf_courses')
+        .select('golf_course_id')
+        .eq('user_id', user.id);
+
+      console.log(`🔍 DEBUG: Current user has ${currentUserFavorites?.length || 0} favorite courses`);
+      const userCourseIds = new Set(currentUserFavorites?.map(f => f.golf_course_id) || []);
+
       // Fetch mutual data for each profile
-      console.log("🔍 DEBUG: Fetching mutual data...");
+      console.log("🔍 DEBUG: Fetching mutual data for each profile...");
       const profilesWithMutualData = await Promise.all(
         finalProfiles.map(async (profile) => {
           try {
+            console.log(`🔍 DEBUG: Processing ${profile.name}...`);
+            
             // Fetch mutual friends and favorite courses in parallel
-            const [mutualFriendsResult, mutualCoursesResult] = await Promise.allSettled([
-              // Get mutual friends
+            const [profileFriends, profileFavorites, userPhotos] = await Promise.allSettled([
+              // Get profile's friends to find mutual ones
               supabase
                 .from('friends')
-                .select(`
-                  friend_id,
-                  user_id,
-                  profiles!friends_friend_id_fkey(name, avatar_url, user_id),
-                  profiles!friends_user_id_fkey(name, avatar_url, user_id)
-                `)
-                .or(`and(user_id.eq.${user.id},friend_id.eq.${profile.user_id}),and(user_id.eq.${profile.user_id},friend_id.eq.${user.id})`)
+                .select('friend_id, user_id')
+                .or(`user_id.eq.${profile.user_id},friend_id.eq.${profile.user_id}`)
                 .eq('status', 'accepted'),
               
-              // Get user's favorite courses (we'll compute mutual courses below)
+              // Get profile's favorite courses
               supabase
                 .from('favorite_golf_courses')
                 .select('golf_course_id')
-                .eq('user_id', user.id)
+                .eq('user_id', profile.user_id),
+              
+              // Get user photos
+              supabase
+                .from('user_photos')
+                .select('photo_url, is_main_photo, display_order')
+                .eq('user_id', profile.user_id)
+                .order('display_order')
             ]);
 
             // Process mutual friends
             let mutual_friends: Array<{ user_id: string; name: string; avatar_url: string | null }> = [];
-            if (mutualFriendsResult.status === 'fulfilled' && mutualFriendsResult.value.data) {
-              const friendsData = mutualFriendsResult.value.data;
-              
-              // Get all friend IDs for current user
+            if (profileFriends.status === 'fulfilled' && profileFriends.value.data) {
+              // Get current user's friend IDs
               const currentUserFriends = new Set(
                 friendData
                   .filter(f => f.user_id === user.id || f.friend_id === user.id)
                   .map(f => f.user_id === user.id ? f.friend_id : f.user_id)
               );
               
-              // Get all friend IDs for target profile
-              const profileFriends = await supabase
-                .from('friends')
-                .select('friend_id, user_id')
-                .or(`user_id.eq.${profile.user_id},friend_id.eq.${profile.user_id}`)
-                .eq('status', 'accepted');
+              // Get profile's friend IDs
+              const profileFriendIds = new Set(
+                profileFriends.value.data.map(f => f.user_id === profile.user_id ? f.friend_id : f.user_id)
+              );
               
-              if (profileFriends.data) {
-                const profileFriendIds = new Set(
-                  profileFriends.data.map(f => f.user_id === profile.user_id ? f.friend_id : f.user_id)
-                );
+              // Find mutual friend IDs
+              const mutualFriendIds = Array.from(currentUserFriends).filter(id => profileFriendIds.has(id));
+              console.log(`🔍 DEBUG: ${profile.name} has ${mutualFriendIds.length} mutual friends`);
+              
+              // Get profile details for mutual friends
+              if (mutualFriendIds.length > 0) {
+                const { data: mutualFriendProfiles } = await supabase
+                  .from('profiles')
+                  .select('user_id, name, avatar_url')
+                  .in('user_id', mutualFriendIds)
+                  .limit(5);
                 
-                // Find mutual friend IDs
-                const mutualFriendIds = Array.from(currentUserFriends).filter(id => profileFriendIds.has(id));
-                
-                // Get profile details for mutual friends
-                if (mutualFriendIds.length > 0) {
-                  const { data: mutualFriendProfiles } = await supabase
-                    .from('profiles')
-                    .select('user_id, name, avatar_url')
-                    .in('user_id', mutualFriendIds)
-                    .limit(5);
-                  
-                  mutual_friends = mutualFriendProfiles || [];
-                }
+                mutual_friends = mutualFriendProfiles || [];
               }
             }
 
             // Process mutual favorite courses
             let mutual_favorite_courses: Array<{ id: string; name: string }> = [];
-            if (mutualCoursesResult.status === 'fulfilled' && mutualCoursesResult.value.data) {
-              const userFavorites = mutualCoursesResult.value.data;
+            if (profileFavorites.status === 'fulfilled' && profileFavorites.value.data) {
+              const profileCourseIds = profileFavorites.value.data.map(f => f.golf_course_id);
+              console.log(`🔍 DEBUG: ${profile.name} has ${profileCourseIds.length} favorite courses`);
               
-              // Get profile's favorite courses
-              const { data: profileFavorites } = await supabase
-                .from('favorite_golf_courses')
-                .select('golf_course_id')
-                .eq('user_id', profile.user_id);
+              // Find mutual course IDs
+              const mutualCourseIds = profileCourseIds.filter(id => userCourseIds.has(id));
+              console.log(`🔍 DEBUG: Found ${mutualCourseIds.length} mutual courses with ${profile.name}`);
               
-              if (userFavorites && profileFavorites) {
-                const userCourseIds = new Set(userFavorites.map(f => f.golf_course_id));
-                const mutualCourseIds = profileFavorites
-                  .filter(f => userCourseIds.has(f.golf_course_id))
-                  .map(f => f.golf_course_id);
+              if (mutualCourseIds.length > 0) {
+                const { data: courseDetails } = await supabase
+                  .from('golf_courses')
+                  .select('id, name')
+                  .in('id', mutualCourseIds)
+                  .limit(5);
                 
-                if (mutualCourseIds.length > 0) {
-                  const { data: courseDetails } = await supabase
-                    .from('golf_courses')
-                    .select('id, name')
-                    .in('id', mutualCourseIds)
-                    .limit(5);
-                  
-                  mutual_favorite_courses = courseDetails || [];
-                }
+                mutual_favorite_courses = courseDetails || [];
+                console.log(`🔍 DEBUG: Final mutual courses for ${profile.name}:`, mutual_favorite_courses.map(c => c.name));
               }
             }
 
-            // Get user photos
-            const { data: userPhotos } = await supabase
-              .from('user_photos')
-              .select('photo_url, is_main_photo, display_order')
-              .eq('user_id', profile.user_id)
-              .order('display_order');
-            
-            const user_photos = userPhotos || [];
+            // Process user photos
+            const user_photos = userPhotos.status === 'fulfilled' && userPhotos.value.data ? userPhotos.value.data : [];
 
             return {
               ...profile,
