@@ -44,8 +44,9 @@ export const useSwipeProfiles = () => {
       return;
     }
 
-    console.log("🔍 DEBUG: Starting fetchProfiles with complex filtering");
-    setLoading(true);
+      console.log("🔍 DEBUG: Starting fetchProfiles with complex filtering");
+      console.log("🔍 DEBUG: Current user ID:", user.id);
+      setLoading(true);
     
     try {
       // Get users that are not me
@@ -115,8 +116,11 @@ export const useSwipeProfiles = () => {
           }));
 
         console.log("🔍 DEBUG: Filtered profiles:", filteredProfiles.length);
+        console.log("🔍 DEBUG: Profile names:", filteredProfiles.map(p => p.name));
         console.log("🔍 DEBUG: Friends filtered out:", friendIds.size);
+        console.log("🔍 DEBUG: Friend IDs:", Array.from(friendIds));
         console.log("🔍 DEBUG: Restricted users filtered out:", restrictedIds.size);
+        console.log("🔍 DEBUG: Restricted IDs:", Array.from(restrictedIds));
 
         // Sort by local city priority if enabled
         if (filters.prioritizeLocalCity) {
