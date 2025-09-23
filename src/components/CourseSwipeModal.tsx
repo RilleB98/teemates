@@ -53,7 +53,7 @@ export const CourseSwipeModal = ({
       return;
     }
     if (currentProfile) {
-      swipeLeft();
+      swipeLeft(currentProfile.user_id); // Pass profile ID to save swipe
     }
   };
 

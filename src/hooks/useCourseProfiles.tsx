@@ -60,16 +60,29 @@ export const useCourseProfiles = (courseName: string) => {
       }
 
       if (data) {
-        // Filter out existing friends
+        // Filter out existing friends AND already swiped profiles (same as main swipe)
         try {
-          const { data: friendData } = await supabase
-            .from('friends')
-            .select('friend_id')
-            .eq('user_id', user.id)
-            .eq('status', 'accepted');
+          const [friendResult, swipeResult] = await Promise.all([
+            supabase
+              .from('friends')
+              .select('friend_id')
+              .eq('user_id', user.id)
+              .eq('status', 'accepted'),
+            
+            supabase
+              .from('user_swipes')
+              .select('target_user_id')
+              .eq('user_id', user.id)
+          ]);
 
-          const friendIds = friendData?.map(f => f.friend_id) || [];
-          const filteredProfiles = data.filter(profile => !friendIds.includes(profile.user_id)).map(profile => ({
+          const friendIds = friendResult.data?.map(f => f.friend_id) || [];
+          const swipedIds = swipeResult.data?.map(s => s.target_user_id) || [];
+          
+          // Filter out friends AND already swiped profiles (just like main swipe)
+          const filteredProfiles = data.filter(profile => 
+            !friendIds.includes(profile.user_id) && 
+            !swipedIds.includes(profile.user_id)
+          ).map(profile => ({
             ...profile,
             bio: profile.bio || "",
             home_city: profile.home_city || "",
@@ -82,9 +95,9 @@ export const useCourseProfiles = (courseName: string) => {
           
           setProfiles(randomizedProfiles);
           setCurrentIndex(0);
-        } catch (friendError) {
-          console.error('Error fetching friends:', friendError);
-          // Still set profiles even if friends query fails, randomized
+        } catch (filterError) {
+          console.error('Error fetching friends/swipes:', filterError);
+          // Still set profiles even if filter queries fail, randomized
           const randomizedProfiles = data.map(profile => ({
             ...profile,
             bio: profile.bio || "",
@@ -110,7 +123,27 @@ export const useCourseProfiles = (courseName: string) => {
     }
   }, [user, courseName]);
 
-  const swipeLeft = () => {
+  const swipeLeft = async (profileId?: string) => {
+    if (!user || !profileId) {
+      setCurrentIndex(prev => prev + 1);
+      return;
+    }
+
+    try {
+      // Save left swipe to database (same as main swipe)
+      await supabase
+        .from('user_swipes')
+        .upsert({
+          user_id: user.id,
+          target_user_id: profileId,
+          swipe_direction: 'left'
+        }, {
+          onConflict: 'user_id,target_user_id'
+        });
+    } catch (error) {
+      console.error('Error saving left swipe:', error);
+    }
+
     setCurrentIndex(prev => prev + 1);
   };
 
@@ -118,6 +151,17 @@ export const useCourseProfiles = (courseName: string) => {
     if (!user) return;
 
     try {
+      // Save right swipe to database (same as main swipe)
+      await supabase
+        .from('user_swipes')
+        .upsert({
+          user_id: user.id,
+          target_user_id: profileId,
+          swipe_direction: 'right'
+        }, {
+          onConflict: 'user_id,target_user_id'
+        });
+
       // Send friend request
       const { error } = await supabase
         .from('friends')
