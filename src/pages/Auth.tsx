@@ -136,10 +136,8 @@ export const Auth = () => {
       await supabase.auth.signOut();
       localStorage.clear();
       
-      // Use custom scheme for native iOS to trigger proper ASWebAuthenticationSession callback
-      const redirectUrl = Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios'
-        ? 'teemates://auth-callback' 
-        : `${window.location.origin}/auth-callback`;
+      // Use HTTPS callback for all platforms to match ASWebAuthenticationSession expectations
+      const redirectUrl = `${window.location.origin}/auth-callback`;
       console.log('🔄 DEBUG: Using redirect URL:', redirectUrl);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -177,18 +175,28 @@ export const Auth = () => {
             // Process the callback URL immediately if we get one
             if (result?.url) {
               console.log('🔄 DEBUG: Processing callback URL from WebAuth:', result.url);
-              console.log('🔄 DEBUG: Callback URL length:', result.url.length);
-              console.log('🔄 DEBUG: Callback URL starts with teemates:', result.url.startsWith('teemates://'));
+              console.log('🔄 DEBUG: Callback URL starts with https:', result.url.startsWith('https://'));
               
-              // Navigate to AuthCallback with the URL as a parameter
-              const callbackUrl = encodeURIComponent(result.url);
-              console.log('🚀 DEBUG: Navigating to auth-callback with encoded URL:', callbackUrl);
-              navigate(`/auth-callback?url=${callbackUrl}`, { replace: true });
+              // Since we're using HTTPS callbacks, navigate directly to the callback URL
+              window.location.href = result.url;
             } else {
               console.error('❌ DEBUG: WebAuth returned no URL');
             }
-          } catch (webAuthError) {
+          } catch (webAuthError: any) {
             console.error('❌ DEBUG: WebAuth failed:', webAuthError);
+            
+            // Handle user cancellation gracefully
+            if (webAuthError.message === 'USER_CANCELLED' || webAuthError.message?.includes('cancelled')) {
+              console.log('🔄 DEBUG: User cancelled authentication');
+              toast({
+                title: "Inloggning avbruten",
+                description: "Inloggning avbröts av användaren",
+                variant: "default",
+              });
+              setLoading(false);
+              return;
+            }
+            
             toast({
               title: "Native auth misslyckades",
               description: "Försöker med webbläsare istället...",
@@ -203,6 +211,7 @@ export const Auth = () => {
                 description: "Kunde inte öppna inloggningssida",
                 variant: "destructive",
               });
+              setLoading(false);
             }
           }
         } else if (Capacitor.isNativePlatform()) {
@@ -212,6 +221,8 @@ export const Auth = () => {
           // Web browser - standard redirect
           window.location.href = data.url;
         }
+      } else {
+        setLoading(false);
       }
     } catch (err) {
       console.log("❌ Unexpected error during Apple sign-in:", err);
