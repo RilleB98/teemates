@@ -66,71 +66,70 @@ export const useSwipeProfiles = () => {
     console.log("🔍 DEBUG: Starting fetchProfiles - attempt", retryCount + 1);
     console.log("🔍 DEBUG: Current user ID:", user.id);
     console.log("🔍 DEBUG: Force refresh:", forceRefresh);
+    
+    // Create unique cache buster with multiple strategies
     const timestamp = Date.now();
-    console.log("🔍 DEBUG: Cache breaker timestamp:", timestamp);
+    const randomId = Math.random().toString(36).substr(2, 9);
+    const uniqueParam = `${timestamp}_${randomId}`;
+    console.log("💥 CACHE BUSTER: Unique parameter:", uniqueParam);
+    
     setLoading(true);
     
     try {
-      // Clear Supabase cache explicitly if force refresh
+      // STRATEGY 1: Clear all Supabase channels and connections
       if (forceRefresh) {
-        console.log("🔍 DEBUG: Clearing Supabase client cache");
-        // Clear any potential client-side caching
+        console.log("🧹 CACHE CLEAR: Removing all Supabase channels");
         await supabase.removeAllChannels();
+        
+        // STRATEGY 2: Force a new auth session check to reset client state
+        console.log("🧹 CACHE CLEAR: Refreshing auth session");
+        await supabase.auth.refreshSession();
       }
       
-      // Build query with explicit cache-busting
+      // STRATEGY 3: Use completely fresh query with cache-busting techniques
+      console.log("🔍 DEBUG: Building fresh query with cache busting...");
+      
+      // Start with a basic query but use timestamp ordering for cache busting
       let query = supabase
         .from('profiles')
         .select(`user_id, name, avatar_url, age, handicap, gender, home_club, birth_date, bio, home_city`)
         .neq('user_id', user.id)
-        .not('name', 'is', null)
-        .not('age', 'is', null)
-        .not('handicap', 'is', null);
+        .not('name', 'is', null);
 
-      // Add cache-busting parameter to the actual query
-      if (forceRefresh) {
-        query = query.gte('created_at', '1970-01-01'); // Always true condition that forces fresh fetch
-      }
-
-      // Apply current filters - use memoized version to prevent dependency cycles
-      const currentFilters = memoizedFilters;
-      console.log("🔍 DEBUG: Applying filters:", currentFilters);
+      // STRATEGY 4: Add timestamp-based ordering to force different result sets
+      query = query.order('created_at', { ascending: timestamp % 2 === 0 });
       
-      // Apply age filters
-      query = query.gte('age', currentFilters.minAge);
-      query = query.lte('age', currentFilters.maxAge);
-      console.log("🔍 DEBUG: Added age filters:", currentFilters.minAge, "-", currentFilters.maxAge);
-
-      // Apply handicap filters  
-      query = query.gte('handicap', currentFilters.minHandicap);
-      query = query.lte('handicap', currentFilters.maxHandicap);
-      console.log("🔍 DEBUG: Added handicap filters:", currentFilters.minHandicap, "-", currentFilters.maxHandicap);
-
-      // Apply gender filter
-      if (currentFilters.gender !== 'all') {
-        query = query.eq('gender', currentFilters.gender);
-        console.log("🔍 DEBUG: Added gender filter:", currentFilters.gender);
-      }
-
-      console.log("🔍 DEBUG: Executing Supabase query...");
-      const { data, error } = await query.limit(100);
+      // STRATEGY 5: Add a fake filter that's always true but changes the query signature
+      query = query.gte('created_at', '1900-01-01T00:00:00.000Z');
+      
+      console.log("🔍 DEBUG: Executing query with cache busting...");
+      const { data, error } = await query.limit(200); // Increased limit to ensure we get all users
 
       if (error) {
         console.error('❌ Error fetching profiles:', error);
-        console.error('❌ Full error details:', error);
         
-        // Retry mechanism for failed requests
-        if (retryCount < 2) {
-          console.log(`🔄 Retrying fetchProfiles (attempt ${retryCount + 2}/3)`);
+        // Enhanced retry mechanism
+        if (retryCount < 3) {
+          console.log(`🔄 RETRY: Attempt ${retryCount + 2}/4 with exponential backoff`);
           fetchingRef.current = false;
-          return fetchProfiles(forceRefresh, retryCount + 1);
+          const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s delays
+          setTimeout(() => fetchProfiles(true, retryCount + 1), delay);
         }
-        
         return;
       }
 
-      console.log("🔍 DEBUG: Raw profiles from database:", data?.length);
-      console.log("🔍 DEBUG: Raw profile names:", data?.map(p => `${p.name} (age: ${p.age})`));
+      console.log("✅ RAW DATA: Fetched", data?.length, "profiles from database");
+      console.log("📋 RAW NAMES:", data?.map(p => `${p.name} (ID: ${p.user_id.slice(-6)})`).join(', '));
+      
+      if (!data || data.length === 0) {
+        console.log("⚠️ NO DATA: Database returned empty result");
+        if (retryCount < 2) {
+          console.log("🔄 RETRY: Empty result, trying again...");
+          fetchingRef.current = false;
+          setTimeout(() => fetchProfiles(true, retryCount + 1), 2000);
+        }
+        return;
+      }
 
       if (data) {
         // Get accepted friends to filter out
@@ -158,40 +157,71 @@ export const useSwipeProfiles = () => {
           restrictionsData?.map(r => r.target_user_id) || []
         );
 
-        // Filter out friends and restricted users with detailed logging
-        console.log("🔍 DEBUG: Before filtering - profiles:", data.map(p => `${p.name} (${p.user_id})`));
+        // Get existing swipes to filter out
+        const { data: swipesData } = await supabase
+          .from('user_swipes')
+          .select('target_user_id')
+          .eq('user_id', user.id);
+
+        const swipedIds = new Set(
+          swipesData?.map(s => s.target_user_id) || []
+        );
+
+        console.log("🔍 FILTERING: Starting with", data.length, "profiles");
+        console.log("🔍 FILTERING: Friend IDs to exclude:", Array.from(friendIds));
+        console.log("🔍 FILTERING: Restricted IDs to exclude:", Array.from(restrictedIds));
+        console.log("🔍 FILTERING: Swiped IDs to exclude:", Array.from(swipedIds));
         
+        // Apply all filters
         let filteredProfiles = data.filter(profile => {
           const isFriend = friendIds.has(profile.user_id);
           const isRestricted = restrictedIds.has(profile.user_id);
+          const isAlreadySwiped = swipedIds.has(profile.user_id);
           
-          if (isFriend) {
-            console.log(`🔍 DEBUG: FILTERED OUT (friend): ${profile.name} (${profile.user_id})`);
-          }
-          if (isRestricted) {
-            console.log(`🔍 DEBUG: FILTERED OUT (restricted): ${profile.name} (${profile.user_id})`);
-          }
-          if (!isFriend && !isRestricted) {
-            console.log(`🔍 DEBUG: KEPT: ${profile.name} (${profile.user_id}) - age: ${profile.age}, handicap: ${profile.handicap}`);
+          if (isFriend || isRestricted || isAlreadySwiped) {
+            console.log(`❌ FILTERED OUT: ${profile.name} - Friend:${isFriend} Restricted:${isRestricted} Swiped:${isAlreadySwiped}`);
+            return false;
           }
           
-          return !isFriend && !isRestricted;
+          console.log(`✅ KEPT: ${profile.name} (ID: ${profile.user_id.slice(-6)})`);
+          return true;
+        });
+
+        // Apply age and handicap filters from current state
+        const currentFilters = memoizedFilters;
+        console.log("🎯 APPLYING FILTERS:", currentFilters);
+        
+        filteredProfiles = filteredProfiles.filter(profile => {
+          // Age filter
+          if (profile.age < currentFilters.minAge || profile.age > currentFilters.maxAge) {
+            console.log(`❌ AGE FILTERED: ${profile.name} (age: ${profile.age})`);
+            return false;
+          }
+          
+          // Handicap filter
+          if (profile.handicap < currentFilters.minHandicap || profile.handicap > currentFilters.maxHandicap) {
+            console.log(`❌ HANDICAP FILTERED: ${profile.name} (handicap: ${profile.handicap})`);
+            return false;
+          }
+          
+          // Gender filter
+          if (currentFilters.gender !== 'all' && profile.gender !== currentFilters.gender) {
+            console.log(`❌ GENDER FILTERED: ${profile.name} (gender: ${profile.gender})`);
+            return false;
+          }
+          
+          return true;
         }).map(profile => ({
           ...profile,
           bio: profile.bio || ""
         }));
 
-        console.log("🔍 DEBUG: After friend/restriction filtering:", filteredProfiles.length);
-        console.log("🔍 DEBUG: Remaining profile names:", filteredProfiles.map(p => p.name));
-        console.log("🔍 DEBUG: Friends filtered out:", friendIds.size);
-        console.log("🔍 DEBUG: Friend IDs:", Array.from(friendIds));
-        console.log("🔍 DEBUG: Restricted users filtered out:", restrictedIds.size);
-        console.log("🔍 DEBUG: Restricted IDs:", Array.from(restrictedIds));
+        console.log("✅ FINAL RESULT:", filteredProfiles.length, "profiles after all filtering");
+        console.log("📋 FINAL NAMES:", filteredProfiles.map(p => p.name).join(', '));
 
         // Sort by local city priority if enabled
         if (currentFilters.prioritizeLocalCity) {
           try {
-            // Get current user's home_city
             const { data: currentUserData } = await supabase
               .from('profiles')
               .select('home_city')
@@ -200,22 +230,21 @@ export const useSwipeProfiles = () => {
 
             if (currentUserData?.home_city) {
               const userHomeCity = currentUserData.home_city;
-              console.log("🔍 DEBUG: Sorting by local city priority. User city:", userHomeCity);
+              console.log("🏠 CITY SORT: User city is", userHomeCity);
               
-              // Sort profiles: same city first, then others
               filteredProfiles.sort((a, b) => {
                 const aIsLocal = a.home_city === userHomeCity;
                 const bIsLocal = b.home_city === userHomeCity;
                 
                 if (aIsLocal && !bIsLocal) return -1;
                 if (!aIsLocal && bIsLocal) return 1;
-                return 0; // Keep original order for profiles in same category
+                return 0;
               });
               
-              console.log("🔍 DEBUG: After city sorting:", filteredProfiles.map(p => `${p.name} (${p.home_city})`));
+              console.log("🏠 CITY SORTED:", filteredProfiles.map(p => `${p.name} (${p.home_city})`));
             }
           } catch (cityError) {
-            console.error('Error sorting by city:', cityError);
+            console.error('❌ City sorting error:', cityError);
           }
         }
         
