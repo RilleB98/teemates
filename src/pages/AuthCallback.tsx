@@ -45,6 +45,47 @@ export const AuthCallback = () => {
         const urlSearchParams = new URLSearchParams(window.location.search);
         const passedUrl = urlSearchParams.get('url');
         
+        // Check for direct query parameters (Swift fallback case)
+        const directAccessToken = urlSearchParams.get('access_token');
+        const directRefreshToken = urlSearchParams.get('refresh_token');
+        const fallbackMode = urlSearchParams.get('fallback');
+        
+        if (directAccessToken && fallbackMode === 'swift_error') {
+          console.log('🍎 AuthCallback: Processing Swift fallback tokens from query params');
+          console.log('🎫 AuthCallback: Found direct tokens:', { 
+            hasAccessToken: !!directAccessToken, 
+            hasRefreshToken: !!directRefreshToken,
+            tokenPreview: directAccessToken.substring(0, 20) + '...'
+          });
+          
+          console.log('🔑 AuthCallback: Setting session with Swift fallback tokens...');
+          const { data, error } = await supabase.auth.setSession({
+            access_token: directAccessToken,
+            refresh_token: directRefreshToken || ''
+          });
+
+          // Clean up URL
+          if (window.history.replaceState) {
+            window.history.replaceState(null, '', window.location.pathname);
+          }
+
+          if (error) {
+            console.error('❌ AuthCallback: Error setting session with Swift fallback tokens:', error);
+            if (isMounted) {
+              setStatus('error');
+              setErrorMessage(error.message);
+            }
+            return;
+          }
+
+          if (data.session?.user && isMounted) {
+            console.log('✅ AuthCallback: Swift fallback session set successfully, redirecting to app');
+            setStatus('success');
+            setTimeout(() => navigate('/app', { replace: true }), 500);
+            return;
+          }
+        }
+        
         if (passedUrl) {
           console.log('🔗 AuthCallback: Processing URL from parameter:', passedUrl);
           const decodedUrl = decodeURIComponent(passedUrl);
