@@ -51,7 +51,7 @@ export const useSwipeProfiles = () => {
   ]);
 
   const fetchProfiles = useCallback(async (forceRefresh = false, retryCount = 0) => {
-    if (!user) {
+    if (!user?.id) {
       console.log("❌ DEBUG: No user, returning early");
       return;
     }
@@ -64,46 +64,17 @@ export const useSwipeProfiles = () => {
 
     fetchingRef.current = true;
     console.log("🔍 DEBUG: Starting fetchProfiles - attempt", retryCount + 1);
-    console.log("🔍 DEBUG: Current user ID:", user.id);
-    console.log("🔍 DEBUG: Force refresh:", forceRefresh);
-    
-    // Create unique cache buster with multiple strategies
-    const timestamp = Date.now();
-    const randomId = Math.random().toString(36).substr(2, 9);
-    const uniqueParam = `${timestamp}_${randomId}`;
-    console.log("💥 CACHE BUSTER: Unique parameter:", uniqueParam);
     
     setLoading(true);
     
     try {
-      // STRATEGY 1: Clear all Supabase channels and connections
-      if (forceRefresh) {
-        console.log("🧹 CACHE CLEAR: Removing all Supabase channels");
-        await supabase.removeAllChannels();
-        
-        // STRATEGY 2: Force a new auth session check to reset client state
-        console.log("🧹 CACHE CLEAR: Refreshing auth session");
-        await supabase.auth.refreshSession();
-      }
-      
-      // STRATEGY 3: Use completely fresh query with cache-busting techniques
-      console.log("🔍 DEBUG: Building fresh query with cache busting...");
-      
-      // Start with a basic query but use timestamp ordering for cache busting
-      let query = supabase
+      // Simple query without dangerous auth operations
+      const { data, error } = await supabase
         .from('profiles')
         .select(`user_id, name, avatar_url, age, handicap, gender, home_club, birth_date, bio, home_city`)
         .neq('user_id', user.id)
-        .not('name', 'is', null);
-
-      // STRATEGY 4: Add timestamp-based ordering to force different result sets
-      query = query.order('created_at', { ascending: timestamp % 2 === 0 });
-      
-      // STRATEGY 5: Add a fake filter that's always true but changes the query signature
-      query = query.gte('created_at', '1900-01-01T00:00:00.000Z');
-      
-      console.log("🔍 DEBUG: Executing query with cache busting...");
-      const { data, error } = await query.limit(200); // Increased limit to ensure we get all users
+        .not('name', 'is', null)
+        .limit(200);
 
       if (error) {
         console.error('❌ Error fetching profiles:', error);
@@ -262,13 +233,11 @@ export const useSwipeProfiles = () => {
 
 
   useEffect(() => {
-    if (user) {
+    if (user?.id && !fetchingRef.current) {
       console.log("🔍 DEBUG: useEffect triggered - user:", user.id);
-      console.log("🔍 DEBUG: Forcing fresh fetch due to dependency change");
-      console.log("🔍 DEBUG: Current filters:", memoizedFilters);
-      fetchProfiles(true).catch(console.error); // Always force refresh when dependencies change
+      fetchProfiles(false).catch(console.error);
     }
-  }, [user, memoizedFilters, refreshTrigger, fetchProfiles]);
+  }, [user?.id, memoizedFilters, refreshTrigger]);
 
   const swipeLeft = async (profileId: string) => {
     console.log('Swipe left called for profile:', profileId);
@@ -343,21 +312,13 @@ export const useSwipeProfiles = () => {
   const hasMoreProfiles = currentIndex < profiles.length;
 
   const forceRefresh = useCallback(() => {
-    console.log("🔍 DEBUG: Force refresh triggered - complete cache clear");
+    if (fetchingRef.current) return; // Prevent multiple concurrent refreshes
     
-    // Clear all local state first
+    console.log("🔍 DEBUG: Force refresh triggered");
     setProfiles([]);
     setCurrentIndex(0);
-    setLoading(true);
-    
-    // Force a complete refresh
     setRefreshTrigger(prev => prev + 1);
-    
-    // Fetch with explicit cache busting
-    setTimeout(() => {
-      fetchProfiles(true, 0).catch(console.error);
-    }, 100); // Small delay to ensure state is cleared
-  }, [fetchProfiles]);
+  }, []);
 
   return {
     currentProfile,
