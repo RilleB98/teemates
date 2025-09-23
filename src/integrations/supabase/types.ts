@@ -582,31 +582,34 @@ export type Database = {
         Row: {
           created_at: string | null
           created_by_ip: unknown | null
+          expires_at: string
           id: string
+          ip_hash: string | null
           last_used_at: string | null
           platform: string
-          token: string
-          token_hash: string | null
+          token_hash: string
           user_id: string | null
         }
         Insert: {
           created_at?: string | null
           created_by_ip?: unknown | null
+          expires_at?: string
           id?: string
+          ip_hash?: string | null
           last_used_at?: string | null
           platform: string
-          token: string
-          token_hash?: string | null
+          token_hash: string
           user_id?: string | null
         }
         Update: {
           created_at?: string | null
           created_by_ip?: unknown | null
+          expires_at?: string
           id?: string
+          ip_hash?: string | null
           last_used_at?: string | null
           platform?: string
-          token?: string
-          token_hash?: string | null
+          token_hash?: string
           user_id?: string | null
         }
         Relationships: []
@@ -619,6 +622,10 @@ export type Database = {
       can_access_chat_room: {
         Args: { _chat_room_id: string; _user_id: string }
         Returns: boolean
+      }
+      cleanup_expired_tokens: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       cleanup_old_notifications: {
         Args: Record<PropertyKey, never>
