@@ -15,6 +15,9 @@ const config: CapacitorConfig = {
   plugins: {
     Browser: {
       androidScheme: 'https'
+    },
+    PurchasesPlugin: {
+      useAmazon: false
     }
   }
 };

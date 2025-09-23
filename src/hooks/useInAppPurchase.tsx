@@ -1,0 +1,117 @@
+import { useState, useEffect } from 'react';
+import { purchaseService } from '@/services/purchaseService';
+import { PurchasesPackage, CustomerInfo, PurchasesOffering } from '@revenuecat/purchases-capacitor';
+import { useAuth } from './useAuth';
+import { toast } from '@/hooks/use-toast';
+import { Capacitor } from '@capacitor/core';
+
+export function useInAppPurchase() {
+  const { user } = useAuth();
+  const [offerings, setOfferings] = useState<PurchasesOffering[]>([]);
+  const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [purchasing, setPurchasing] = useState(false);
+
+  const isPremiumActive = customerInfo ? purchaseService.isPremiumActive(customerInfo) : false;
+
+  // Initialize and fetch data
+  useEffect(() => {
+    const initializePurchases = async () => {
+      if (!Capacitor.isNativePlatform()) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        await purchaseService.initialize();
+        
+        // Identify user if logged in
+        if (user?.id) {
+          await purchaseService.identify(user.id);
+        }
+
+        // Fetch offerings and customer info
+        const offeringsData = await purchaseService.getOfferings();
+        const customerData = await purchaseService.getCustomerInfo();
+
+        setOfferings(offeringsData);
+        setCustomerInfo((customerData as any)?.customerInfo || customerData);
+      } catch (error) {
+        console.error('💰 Failed to initialize purchases:', error);
+        toast({
+          title: "Fel",
+          description: "Kunde inte ladda köpinformation",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializePurchases();
+  }, [user?.id]);
+
+  const purchasePackage = async (packageToPurchase: PurchasesPackage) => {
+    if (purchasing) return;
+
+    setPurchasing(true);
+    try {
+      const result = await purchaseService.purchasePackage(packageToPurchase);
+      setCustomerInfo((result as any)?.customerInfo || result);
+      toast({
+        title: "Köp genomfört!",
+        description: "Du har nu tillgång till alla premium-funktioner",
+      });
+    } catch (error: any) {
+      console.error('💰 Purchase failed:', error);
+      
+      // Handle different error types
+      if (error.code === 'PURCHASE_CANCELLED') {
+        // User cancelled, don't show error
+        return;
+      }
+      
+      toast({
+        title: "Köp misslyckades",
+        description: error.message || "Ett fel uppstod vid köpet",
+        variant: "destructive"
+      });
+    } finally {
+      setPurchasing(false);
+    }
+  };
+
+  const restorePurchases = async () => {
+    if (purchasing) return;
+
+    setPurchasing(true);
+    try {
+      const result = await purchaseService.restorePurchases();
+      setCustomerInfo((result as any)?.customerInfo || result);
+      toast({
+        title: "Köp återställda!",
+        description: "Dina tidigare köp har återställts",
+      });
+    } catch (error: any) {
+      console.error('💰 Restore failed:', error);
+      toast({
+        title: "Återställning misslyckades",
+        description: error.message || "Kunde inte återställa köp",
+        variant: "destructive"
+      });
+    } finally {
+      setPurchasing(false);
+    }
+  };
+
+  return {
+    offerings,
+    customerInfo,
+    isPremiumActive,
+    loading,
+    purchasing,
+    purchasePackage,
+    restorePurchases,
+    isNativeApp: Capacitor.isNativePlatform()
+  };
+}

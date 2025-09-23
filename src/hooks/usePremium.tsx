@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { useInAppPurchase } from './useInAppPurchase';
 
 export function usePremium() {
   const { user } = useAuth();
+  const { isPremiumActive: isSubscribed, loading: purchaseLoading } = useInAppPurchase();
   const [manualPremium, setManualPremium] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
-  
-  // For now, isSubscribed is always false (no Stripe integration yet)
-  const isSubscribed = false;
   
   const fetchPremiumStatus = async () => {
     if (!user?.id) {
@@ -65,11 +64,13 @@ export function usePremium() {
     isAdmin
   });
 
+  const finalLoading = loading || purchaseLoading;
+
   return {
     isPremium,
     manualPremium,
     isAdmin,
     isSubscribed,
-    loading,
+    loading: finalLoading,
   };
 }

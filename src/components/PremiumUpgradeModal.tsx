@@ -9,7 +9,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Check, Crown, Star, Zap } from 'lucide-react';
+import { Check, Crown, Star, Zap, RefreshCw } from 'lucide-react';
+import { useInAppPurchase } from '@/hooks/useInAppPurchase';
 
 
 interface PremiumUpgradeModalProps {
@@ -19,20 +20,34 @@ interface PremiumUpgradeModalProps {
 }
 
 export function PremiumUpgradeModal({ isOpen, onClose, onUpgrade }: PremiumUpgradeModalProps) {
-  const [loading, setLoading] = useState(false);
+  const { offerings, purchasing, purchasePackage, restorePurchases, isNativeApp } = useInAppPurchase();
   
-
   const handleUpgrade = async () => {
-    setLoading(true);
+    if (!isNativeApp) {
+      // För webläsare, visa info om att ladda ner appen
+      return;
+    }
+
     try {
-      // Här skulle du normalt öppna App Store för köp
-      // För nu stänger vi bara modalen
+      // Använd det första tillgängliga paketet
+      const firstOffering = offerings[0];
+      if (firstOffering?.availablePackages?.[0]) {
+        await purchasePackage(firstOffering.availablePackages[0]);
+        onUpgrade?.();
+        onClose();
+      }
+    } catch (error) {
+      console.error('Error during upgrade:', error);
+    }
+  };
+
+  const handleRestore = async () => {
+    try {
+      await restorePurchases();
       onUpgrade?.();
       onClose();
     } catch (error) {
-      console.error('Error during upgrade:', error);
-    } finally {
-      setLoading(false);
+      console.error('Error during restore:', error);
     }
   };
 
@@ -83,10 +98,10 @@ export function PremiumUpgradeModal({ isOpen, onClose, onUpgrade }: PremiumUpgra
         <div className="flex flex-col gap-2">
           <Button 
             onClick={handleUpgrade}
-            disabled={loading}
+            disabled={purchasing}
             className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white"
           >
-            {loading ? (
+            {purchasing ? (
               <div className="flex items-center gap-2">
                 <Zap className="h-4 w-4 animate-pulse" />
                 Laddar...
@@ -94,10 +109,22 @@ export function PremiumUpgradeModal({ isOpen, onClose, onUpgrade }: PremiumUpgra
             ) : (
               <div className="flex items-center gap-2">
                 <Crown className="h-4 w-4" />
-                Skaffa Premium
+                {isNativeApp ? 'Skaffa Premium' : 'Ladda ner appen'}
               </div>
             )}
           </Button>
+          
+          {isNativeApp && (
+            <Button 
+              variant="outline" 
+              onClick={handleRestore}
+              disabled={purchasing}
+              className="w-full"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Återställ köp
+            </Button>
+          )}
           
           <Button variant="ghost" onClick={onClose} className="w-full">
             Inte nu
@@ -105,7 +132,10 @@ export function PremiumUpgradeModal({ isOpen, onClose, onUpgrade }: PremiumUpgra
         </div>
 
         <p className="text-xs text-muted-foreground text-center">
-          Betalning sker via App Store. Avsluta prenumeration när som helst.
+          {isNativeApp 
+            ? "Betalning sker via App Store. Avsluta prenumeration när som helst."
+            : "Premium-funktioner kräver iOS-appen. Ladda ner från App Store."
+          }
         </p>
       </DialogContent>
     </Dialog>
