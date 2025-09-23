@@ -27,9 +27,9 @@ export const AuthCallback = () => {
           // Verify we have a valid session
           const { data: { session } } = await supabase.auth.getSession();
           if (session?.user && isMounted) {
-            console.log('✅ AuthCallback: Valid session found, redirecting to app');
+            console.log('✅ AuthCallback: Valid session found, redirecting to welcome');
             setStatus('success');
-            setTimeout(() => navigate('/app', { replace: true }), 500);
+            setTimeout(() => navigate('/welcome', { replace: true }), 500);
             return;
           }
         }
@@ -79,9 +79,9 @@ export const AuthCallback = () => {
           }
 
           if (data.session?.user && isMounted) {
-            console.log('✅ AuthCallback: Swift fallback session set successfully, redirecting to app');
+            console.log('✅ AuthCallback: Swift fallback session set successfully, redirecting to welcome');
             setStatus('success');
-            setTimeout(() => navigate('/app', { replace: true }), 500);
+            setTimeout(() => navigate('/welcome', { replace: true }), 500);
             return;
           }
         }
@@ -189,12 +189,12 @@ export const AuthCallback = () => {
             return;
           }
 
-          if (data.session?.user && isMounted) {
-            console.log('✅ AuthCallback: Session set successfully, redirecting to app');
-            setStatus('success');
-            setTimeout(() => navigate('/app', { replace: true }), 500);
-            return;
-          }
+        if (data.session?.user && isMounted) {
+          console.log('✅ AuthCallback: Session set successfully, redirecting to welcome');
+          setStatus('success');
+          setTimeout(() => navigate('/welcome', { replace: true }), 500);
+          return;
+        }
         }
 
         // Fallback: Try to get session from Supabase (standard OAuth flow)
@@ -210,10 +210,10 @@ export const AuthCallback = () => {
           return;
         }
 
-        if (data.session?.user && isMounted) {
-          console.log('✅ AuthCallback: OAuth successful via fallback, redirecting to app');
-          setStatus('success');
-          setTimeout(() => navigate('/app', { replace: true }), 500);
+          if (data.session?.user && isMounted) {
+            console.log('✅ AuthCallback: OAuth successful via fallback, redirecting to welcome');
+            setStatus('success');
+            setTimeout(() => navigate('/welcome', { replace: true }), 500);
         } else {
           console.log('⚠️ AuthCallback: No session found, redirecting to auth');
           if (isMounted) {

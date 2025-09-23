@@ -18,6 +18,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AdminOnlyRoute } from "./components/AdminOnlyRoute";
 import NotFound from "./pages/NotFound";
 import WebViewGuard from "./components/WebViewGuard";
+import { Welcome } from "./pages/Welcome";
 import { useNotificationProcessor } from "./hooks/useNotificationProcessor";
 import { usePushNotifications } from "./hooks/usePushNotifications";
 
@@ -60,6 +61,7 @@ const App = () => {
               } />
               <Route path="/auth" element={<Auth />} />
               <Route path="/auth-callback" element={<AuthCallback />} />
+              <Route path="/welcome" element={<Welcome />} />
               <Route path="/courses" element={
                 <ProtectedRoute>
                   <Courses />
