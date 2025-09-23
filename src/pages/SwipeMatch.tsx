@@ -4,12 +4,16 @@ import { useSwipeProfiles } from '@/hooks/useSwipeProfiles';
 import { SwipeCard } from '@/components/SwipeCard';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Users, RefreshCw, Bug, UserCheck } from 'lucide-react';
+import { Loader2, Users, RefreshCw, Bug, UserCheck, Crown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
+import { useSwipeLimit } from '@/hooks/useSwipeLimit';
+import { PremiumUpgradeModal } from '@/components/PremiumUpgradeModal';
+import { useState } from 'react';
 
 export const SwipeMatch = () => {
   const { user } = useAuth();
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const {
     currentProfile,
     hasMoreProfiles,
@@ -24,6 +28,14 @@ export const SwipeMatch = () => {
     currentIndex,
     debugInfo
   } = useSwipeProfiles();
+  
+  const {
+    swipeCount,
+    canSwipe,
+    getRemainingSwipes,
+    loading: swipeLoading,
+    FREE_SWIPE_LIMIT
+  } = useSwipeLimit();
 
   if (loading) {
     return (
@@ -103,6 +115,17 @@ export const SwipeMatch = () => {
                 <h1 className="text-xl xs:text-2xl md:text-3xl font-bold text-golf-premium">Golf Match</h1>
               </div>
               <p className="text-muted-foreground text-sm xs:text-base mb-3">Hitta din nästa golfpartner</p>
+              
+              {/* Premium Upgrade Button */}
+              {!canSwipe() && (
+                <Button
+                  onClick={() => setShowPremiumModal(true)}
+                  className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white mb-4"
+                >
+                  <Crown className="h-4 w-4 mr-2" />
+                  Uppgradera till Premium
+                </Button>
+              )}
             </div>
 
             {/* Filters */}
@@ -140,19 +163,38 @@ export const SwipeMatch = () => {
                     <span className="text-muted-foreground">Har fler:</span>
                     <span className="font-mono">{hasMoreProfiles ? 'Ja' : 'Nej'}</span>
                   </div>
+                  
+                  {/* Swipe Status Information */}
+                  <div className="border-t pt-2 mt-2">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Swipes idag:</span>
+                      <span className="font-mono">{swipeLoading ? '...' : `${swipeCount}/${FREE_SWIPE_LIMIT}`}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Kvarvarande:</span>
+                      <span className="font-mono">{swipeLoading ? '...' : getRemainingSwipes()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Kan swipea:</span>
+                      <span className="font-mono">{swipeLoading ? '...' : (canSwipe() ? 'Ja' : 'Nej')}</span>
+                    </div>
+                  </div>
+                  
                   {debugInfo && (
                     <>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Rådata count:</span>
-                        <span className="font-mono">{debugInfo.rawDataCount || 0}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Exkluderade vänner:</span>
-                        <span className="font-mono">{debugInfo.excludedFriends || 0}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Exkluderade swipes:</span>
-                        <span className="font-mono">{debugInfo.excludedSwipes || 0}</span>
+                      <div className="border-t pt-2 mt-2">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Rådata count:</span>
+                          <span className="font-mono">{debugInfo.rawDataCount || 0}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Exkluderade vänner:</span>
+                          <span className="font-mono">{debugInfo.excludedFriends || 0}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Exkluderade swipes:</span>
+                          <span className="font-mono">{debugInfo.excludedSwipes || 0}</span>
+                        </div>
                       </div>
                     </>
                   )}
@@ -217,6 +259,12 @@ export const SwipeMatch = () => {
           </div>
         </div>
       </div>
+      
+      {/* Premium Upgrade Modal */}
+      <PremiumUpgradeModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+      />
     </div>
   );
 };
