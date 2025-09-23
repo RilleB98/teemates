@@ -248,7 +248,7 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
         </Card>
         
         {/* Mobile action buttons at bottom of card */}
-        <div className="absolute bottom-2 left-0 right-0 flex justify-between px-6 z-20 md:hidden">
+        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-8 z-20 md:hidden">
           <Button
             variant="outline"
             size="icon"
