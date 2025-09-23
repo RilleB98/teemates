@@ -26,8 +26,15 @@ export const CourseSwipeModal = ({
   courseName, 
   courseLocation 
 }: CourseSwipeModalProps) => {
-  const { isPremium } = usePremium();
+  const { isPremium, loading: premiumLoading, isAdmin, manualPremium } = usePremium();
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  
+  console.log('🎯 CourseSwipeModal Premium Status:', { 
+    isPremium, 
+    premiumLoading, 
+    isAdmin, 
+    manualPremium 
+  });
   
   const {
     currentProfile,
