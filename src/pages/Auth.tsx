@@ -6,8 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Target, Mail, Lock, User, ArrowLeft, Apple } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Capacitor } from '@capacitor/core';
-import { Browser } from '@capacitor/browser';
 import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import teeMatesLogo from "@/assets/teemates-icon.png";
@@ -136,10 +134,8 @@ export const Auth = () => {
       await supabase.auth.signOut();
       localStorage.clear();
       
-      // Use custom URL scheme for OAuth on iOS
-      const redirectUrl = Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios'
-        ? 'teemates://auth-callback' 
-        : `${window.location.origin}/auth-callback`;
+      // Use custom URL scheme for iOS WebView
+      const redirectUrl = 'teemates://auth-callback';
       console.log('🔄 DEBUG: Using redirect URL:', redirectUrl);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -161,94 +157,16 @@ export const Auth = () => {
       }
       
       if (data?.url) {
-        console.log('🍎 DEBUG: Opening Apple OAuth URL:', data.url);
+        console.log('🍎 DEBUG: Generated OAuth URL:', data.url);
         
-        if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios') {
-          // Use ASWebAuthenticationSession for iOS (auto-closes Safari)
-          try {
-            console.log('🍎 DEBUG: Attempting to import WebAuthPlugin...');
-            const WebAuth = (await import('../plugins/WebAuthPlugin')).default;
-            console.log('🍎 DEBUG: WebAuthPlugin imported successfully, starting auth...');
-            console.log('🍎 DEBUG: OAuth URL being sent to WebAuth:', data.url);
-            
-            const result = await WebAuth.startWebAuth({ url: data.url });
-            console.log('✅ DEBUG: WebAuth completed successfully:', result);
-            
-            // After WebAuth completes, check for session directly
-            console.log('🔄 DEBUG: Checking for session after WebAuth...');
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session?.user) {
-              console.log('✅ DEBUG: Session found after WebAuth, navigating to app');
-              navigate('/app', { replace: true });
-              return;
-            }
-            
-            // If no session yet, process the callback URL
-            if (result?.url) {
-              console.log('🔄 DEBUG: No immediate session, processing callback URL:', result.url);
-              const callbackUrl = encodeURIComponent(result.url);
-              navigate(`/auth-callback?url=${callbackUrl}`, { replace: true });
-            } else {
-              console.error('❌ DEBUG: WebAuth returned no URL and no session found');
-              toast({
-                title: "Inloggning misslyckades",
-                description: "Ingen callback-URL mottagen",
-                variant: "destructive",
-              });
-              setLoading(false);
-            }
-          } catch (webAuthError: any) {
-            console.error('❌ DEBUG: WebAuth failed:', webAuthError);
-            
-            // Handle user cancellation - check if they actually logged in first
-            if (webAuthError.message === 'USER_CANCELLED' || webAuthError.message?.includes('cancelled')) {
-              console.log('🔄 DEBUG: User cancelled/closed Safari, checking session...');
-              
-              // Small delay to allow auth state to update
-              setTimeout(async () => {
-                try {
-                  const { data: { session } } = await supabase.auth.getSession();
-                  if (session?.user) {
-                    console.log('✅ DEBUG: Session found despite Safari closure, navigating to app');
-                    navigate("/app", { replace: true });
-                  } else {
-                    console.log('❌ DEBUG: No session found, login was cancelled');
-                    toast({
-                      title: "Inloggning avbruten",
-                      description: "Om du lyckades logga in, stäng Safari och återgå till appen",
-                    });
-                    setLoading(false);
-                  }
-                } catch (sessionError) {
-                  console.error('❌ DEBUG: Error checking session:', sessionError);
-                  setLoading(false);
-                }
-              }, 1000);
-              return;
-            }
-            
-            toast({
-              title: "Native auth misslyckades",
-              description: "Försöker med webbläsare istället...",
-            });
-            // Fallback to browser method
-            try {
-              await Browser.open({ url: data.url });
-            } catch (browserError) {
-              console.error('❌ Browser fallback also failed:', browserError);
-              toast({
-                title: "Inloggning misslyckades",
-                description: "Kunde inte öppna inloggningssida",
-                variant: "destructive",
-              });
-              setLoading(false);
-            }
-          }
-        } else if (Capacitor.isNativePlatform()) {
-          // Android - use browser
-          await Browser.open({ url: data.url });
+        // Post message to iOS WebView to handle OAuth
+        const webkit = (window as any).webkit;
+        if (webkit?.messageHandlers?.appleOAuth) {
+          console.log('🍎 DEBUG: Sending OAuth URL to iOS handler');
+          webkit.messageHandlers.appleOAuth.postMessage({ url: data.url });
         } else {
-          // Web browser - standard redirect
+          // Fallback: Open in current window (web environment)
+          console.log('🍎 DEBUG: No iOS handler found, opening in current window');
           window.location.href = data.url;
         }
       } else {
