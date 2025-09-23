@@ -46,8 +46,14 @@ const BrowserGuard = ({ children }: BrowserGuardProps) => {
       const urlParams = new URLSearchParams(window.location.search);
       const hasForceHideBadge = urlParams.has('forceHideBadge');
       
-      // Block desktop browsers explicitly, allow only iOS/WebView/Capacitor
-      const allowAccess = !isDesktopBrowser && (isIOS || isCapacitorApp || isWebView || hasForceHideBadge);
+      // Check if we're in Lovable development environment
+      const isLovableDev = currentUrl.includes('lovableproject.com');
+      
+      // Allow access for:
+      // - iOS/WebView/Capacitor (mobile app users)
+      // - Special URL parameter
+      // - Lovable development environment (for editing)
+      const allowAccess = !isDesktopBrowser && (isIOS || isCapacitorApp || isWebView || hasForceHideBadge) || isLovableDev;
       
       console.log('🔒 Detection Results:');
       console.log('🔒 Is Desktop Safari:', isDesktopSafari);
@@ -58,6 +64,7 @@ const BrowserGuard = ({ children }: BrowserGuardProps) => {
       console.log('🔒 Is Capacitor:', isCapacitorApp);
       console.log('🔒 Is WebView:', isWebView);
       console.log('🔒 Has ForceHideBadge:', hasForceHideBadge);
+      console.log('🔒 Is Lovable Dev:', isLovableDev);
       console.log('🔒 Allow Access:', allowAccess);
       
       setIsWebViewOrApp(allowAccess);
