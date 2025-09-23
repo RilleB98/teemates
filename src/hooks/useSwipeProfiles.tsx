@@ -40,7 +40,17 @@ export const useSwipeProfiles = () => {
     prioritizeLocalCity: true
   });
 
-  const fetchProfiles = useCallback(async (forceRefresh = false) => {
+  // Memoize filters to prevent unnecessary re-renders and dependency cycles
+  const memoizedFilters = useMemo(() => filters, [
+    filters.minAge,
+    filters.maxAge, 
+    filters.minHandicap,
+    filters.maxHandicap,
+    filters.gender,
+    filters.prioritizeLocalCity
+  ]);
+
+  const fetchProfiles = useCallback(async (forceRefresh = false, retryCount = 0) => {
     if (!user) {
       console.log("❌ DEBUG: No user, returning early");
       return;
@@ -53,47 +63,69 @@ export const useSwipeProfiles = () => {
     }
 
     fetchingRef.current = true;
-    console.log("🔍 DEBUG: Starting fetchProfiles with complex filtering");
+    console.log("🔍 DEBUG: Starting fetchProfiles - attempt", retryCount + 1);
     console.log("🔍 DEBUG: Current user ID:", user.id);
-    console.log("🔍 DEBUG: Applied filters:", filters);
     console.log("🔍 DEBUG: Force refresh:", forceRefresh);
-    console.log("🔍 DEBUG: Timestamp cache breaker:", Date.now());
+    const timestamp = Date.now();
+    console.log("🔍 DEBUG: Cache breaker timestamp:", timestamp);
     setLoading(true);
     
-    try {      
-      // Get users that are not me with proper cache-busting
-      const cacheBreaker = forceRefresh ? `&t=${Date.now()}` : '';
+    try {
+      // Clear Supabase cache explicitly if force refresh
+      if (forceRefresh) {
+        console.log("🔍 DEBUG: Clearing Supabase client cache");
+        // Clear any potential client-side caching
+        await supabase.removeAllChannels();
+      }
+      
+      // Build query with explicit cache-busting
       let query = supabase
         .from('profiles')
-        .select('user_id, name, avatar_url, age, handicap, gender, home_club, birth_date, bio, home_city')
+        .select(`user_id, name, avatar_url, age, handicap, gender, home_club, birth_date, bio, home_city`)
         .neq('user_id', user.id)
         .not('name', 'is', null)
         .not('age', 'is', null)
         .not('handicap', 'is', null);
 
-      // Apply filters with detailed logging - fixed logic
-      console.log("🔍 DEBUG: Applying age filter - minAge:", filters.minAge, "maxAge:", filters.maxAge);
-      // Always apply age filters since we have min/max values
-      query = query.gte('age', filters.minAge);
-      query = query.lte('age', filters.maxAge);
-      console.log("🔍 DEBUG: Added age filters:", filters.minAge, "-", filters.maxAge);
-
-      console.log("🔍 DEBUG: Applying handicap filter - minHandicap:", filters.minHandicap, "maxHandicap:", filters.maxHandicap);
-      // Always apply handicap filters since we have min/max values
-      query = query.gte('handicap', filters.minHandicap);
-      query = query.lte('handicap', filters.maxHandicap);
-      console.log("🔍 DEBUG: Added handicap filters:", filters.minHandicap, "-", filters.maxHandicap);
-
-      console.log("🔍 DEBUG: Applying gender filter:", filters.gender);
-      if (filters.gender !== 'all') {
-        query = query.eq('gender', filters.gender);
-        console.log("🔍 DEBUG: Added gender filter:", filters.gender);
+      // Add cache-busting parameter to the actual query
+      if (forceRefresh) {
+        query = query.gte('created_at', '1970-01-01'); // Always true condition that forces fresh fetch
       }
 
+      // Apply current filters - use memoized version to prevent dependency cycles
+      const currentFilters = memoizedFilters;
+      console.log("🔍 DEBUG: Applying filters:", currentFilters);
+      
+      // Apply age filters
+      query = query.gte('age', currentFilters.minAge);
+      query = query.lte('age', currentFilters.maxAge);
+      console.log("🔍 DEBUG: Added age filters:", currentFilters.minAge, "-", currentFilters.maxAge);
+
+      // Apply handicap filters  
+      query = query.gte('handicap', currentFilters.minHandicap);
+      query = query.lte('handicap', currentFilters.maxHandicap);
+      console.log("🔍 DEBUG: Added handicap filters:", currentFilters.minHandicap, "-", currentFilters.maxHandicap);
+
+      // Apply gender filter
+      if (currentFilters.gender !== 'all') {
+        query = query.eq('gender', currentFilters.gender);
+        console.log("🔍 DEBUG: Added gender filter:", currentFilters.gender);
+      }
+
+      console.log("🔍 DEBUG: Executing Supabase query...");
       const { data, error } = await query.limit(100);
 
       if (error) {
         console.error('❌ Error fetching profiles:', error);
+        console.error('❌ Full error details:', error);
+        
+        // Retry mechanism for failed requests
+        if (retryCount < 2) {
+          console.log(`🔄 Retrying fetchProfiles (attempt ${retryCount + 2}/3)`);
+          fetchingRef.current = false;
+          return fetchProfiles(forceRefresh, retryCount + 1);
+        }
+        
         return;
       }
 
@@ -157,7 +189,7 @@ export const useSwipeProfiles = () => {
         console.log("🔍 DEBUG: Restricted IDs:", Array.from(restrictedIds));
 
         // Sort by local city priority if enabled
-        if (filters.prioritizeLocalCity) {
+        if (currentFilters.prioritizeLocalCity) {
           try {
             // Get current user's home_city
             const { data: currentUserData } = await supabase
@@ -168,6 +200,7 @@ export const useSwipeProfiles = () => {
 
             if (currentUserData?.home_city) {
               const userHomeCity = currentUserData.home_city;
+              console.log("🔍 DEBUG: Sorting by local city priority. User city:", userHomeCity);
               
               // Sort profiles: same city first, then others
               filteredProfiles.sort((a, b) => {
@@ -178,6 +211,8 @@ export const useSwipeProfiles = () => {
                 if (!aIsLocal && bIsLocal) return 1;
                 return 0; // Keep original order for profiles in same category
               });
+              
+              console.log("🔍 DEBUG: After city sorting:", filteredProfiles.map(p => `${p.name} (${p.home_city})`));
             }
           } catch (cityError) {
             console.error('Error sorting by city:', cityError);
@@ -194,25 +229,17 @@ export const useSwipeProfiles = () => {
       setLoading(false);
       fetchingRef.current = false;
     }
-  }, [user, filters]);
+  }, [user, memoizedFilters]);
 
-  // Memoize filters to prevent unnecessary re-renders
-  const memoizedFilters = useMemo(() => filters, [
-    filters.minAge,
-    filters.maxAge, 
-    filters.minHandicap,
-    filters.maxHandicap,
-    filters.gender,
-    filters.prioritizeLocalCity
-  ]);
 
   useEffect(() => {
     if (user) {
-      console.log("🔍 DEBUG: useEffect triggered - user:", user.id, "filters changed");
+      console.log("🔍 DEBUG: useEffect triggered - user:", user.id);
       console.log("🔍 DEBUG: Forcing fresh fetch due to dependency change");
+      console.log("🔍 DEBUG: Current filters:", memoizedFilters);
       fetchProfiles(true).catch(console.error); // Always force refresh when dependencies change
     }
-  }, [user, fetchProfiles, refreshTrigger]);
+  }, [user, memoizedFilters, refreshTrigger, fetchProfiles]);
 
   const swipeLeft = async (profileId: string) => {
     console.log('Swipe left called for profile:', profileId);
@@ -287,9 +314,20 @@ export const useSwipeProfiles = () => {
   const hasMoreProfiles = currentIndex < profiles.length;
 
   const forceRefresh = useCallback(() => {
-    console.log("🔍 DEBUG: Force refresh triggered - clearing cache and fetching");
+    console.log("🔍 DEBUG: Force refresh triggered - complete cache clear");
+    
+    // Clear all local state first
+    setProfiles([]);
+    setCurrentIndex(0);
+    setLoading(true);
+    
+    // Force a complete refresh
     setRefreshTrigger(prev => prev + 1);
-    fetchProfiles(true).catch(console.error);
+    
+    // Fetch with explicit cache busting
+    setTimeout(() => {
+      fetchProfiles(true, 0).catch(console.error);
+    }, 100); // Small delay to ensure state is cleared
   }, [fetchProfiles]);
 
   return {
