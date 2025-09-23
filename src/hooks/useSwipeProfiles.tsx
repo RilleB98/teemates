@@ -231,6 +231,7 @@ export const useSwipeProfiles = () => {
       }
 
       // Fetch user's own favorite courses once for efficiency  
+      console.log("🔍 DEBUG: Starting mutual courses fetch process at", new Date().toISOString());
       console.log("🔍 DEBUG: Fetching user's favorite courses...");
       const { data: currentUserFavorites } = await supabase
         .from('favorite_golf_courses')
@@ -353,7 +354,7 @@ export const useSwipeProfiles = () => {
         mutualCourses: p.mutual_favorite_courses?.length || 0
       })));
 
-      setProfiles(profilesWithMutualData);
+      console.log("🔍 DEBUG: About to set profiles with mutual data:", profilesWithMutualData.map(p => ({name: p.name, courses: p.mutual_favorite_courses?.length})));
       setCurrentIndex(0);
       setLoading(false);
       fetchingRef.current = false;
@@ -458,11 +459,13 @@ export const useSwipeProfiles = () => {
   const forceRefresh = useCallback(() => {
     if (fetchingRef.current) return; // Prevent multiple concurrent refreshes
     
-    console.log("🔍 DEBUG: Force refresh triggered");
+    console.log("🔍 DEBUG: Force refresh triggered with timestamp:", Date.now());
     setProfiles([]);
     setCurrentIndex(0);
     setRefreshTrigger(prev => prev + 1);
-  }, []);
+    // Also force immediate refetch
+    fetchProfiles(true).catch(console.error);
+  }, [fetchProfiles]);
 
   return {
     currentProfile,
