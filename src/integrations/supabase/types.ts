@@ -434,6 +434,33 @@ export type Database = {
           },
         ]
       }
+      swipe_restrictions: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          restriction_type: string
+          target_user_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          restriction_type: string
+          target_user_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          restriction_type?: string
+          target_user_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_photos: {
         Row: {
           created_at: string

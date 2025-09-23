@@ -82,108 +82,141 @@ export const useSwipeProfiles = () => {
       return;
     }
 
-    console.log("🔍 DEBUG: Starting fetchProfiles");
+    console.log("🔍 DEBUG: Starting fetchProfiles with new filtering logic");
     console.log("🔍 DEBUG: Current user.id:", user.id);
-    console.log("🔍 DEBUG: Current filters:", filters);
     setLoading(true);
     
     try {
-      // Get users that are not me and not already friends
+      // Step 1: Get accepted friends to exclude from swipe
+      const { data: friendsData } = await supabase
+        .from('friends')
+        .select('friend_id, user_id')
+        .or(`user_id.eq.${user.id},friend_id.eq.${user.id}`)
+        .eq('status', 'accepted');
+
+      const friendIds = friendsData?.map(f => 
+        f.user_id === user.id ? f.friend_id : f.user_id
+      ) || [];
+
+      console.log("🔍 DEBUG: Found friend IDs to exclude:", friendIds);
+
+      // Step 2: Get active restrictions (rejected requests that haven't expired)
+      const { data: restrictionsData } = await supabase
+        .from('swipe_restrictions')
+        .select('target_user_id')
+        .eq('user_id', user.id)
+        .or('expires_at.is.null,expires_at.gt.now()');
+
+      const restrictedIds = restrictionsData?.map(r => r.target_user_id) || [];
+
+      console.log("🔍 DEBUG: Found restricted IDs to exclude:", restrictedIds);
+
+      // Step 3: Get users with mutual NO swipes to exclude them from seeing current user
+      const { data: myLeftSwipes } = await supabase
+        .from('user_swipes')
+        .select('target_user_id')
+        .eq('user_id', user.id)
+        .eq('swipe_direction', 'left');
+
+      const myLeftSwipeIds = myLeftSwipes?.map(s => s.target_user_id) || [];
+
+      // Step 4: Build base query excluding friends and restricted users
       let query = supabase
         .from('profiles')
         .select('user_id, name, avatar_url, age, handicap, gender, home_club, birth_date, bio, home_city')
         .neq('user_id', user.id)
         .not('name', 'is', null);
 
-      console.log("🔍 DEBUG: Base query created, excluding user_id:", user.id);
-
-      // Apply filters
-      if (filters.minAge || filters.maxAge) {
-        if (filters.minAge > 0) query = query.gte('age', filters.minAge);
-        if (filters.maxAge < 80) query = query.lte('age', filters.maxAge);
+      // Exclude friends
+      if (friendIds.length > 0) {
+        query = query.not('user_id', 'in', `(${friendIds.join(',')})`);
       }
 
+      // Exclude restricted users (rejected friend requests)
+      if (restrictedIds.length > 0) {
+        query = query.not('user_id', 'in', `(${restrictedIds.join(',')})`);
+      }
+
+      // Apply age filters
+      if (filters.minAge > 0) query = query.gte('age', filters.minAge);
+      if (filters.maxAge < 80) query = query.lte('age', filters.maxAge);
+
+      // Apply handicap filters
       if (filters.minHandicap > 0 || filters.maxHandicap < 54) {
         query = query.gte('handicap', filters.minHandicap);
         query = query.lte('handicap', filters.maxHandicap);
       }
 
+      // Apply gender filter
       if (filters.gender !== 'all') {
         query = query.eq('gender', filters.gender);
       }
 
-      const { data, error } = await query.limit(50); // Increase limit to account for filtering
+      const { data, error } = await query.limit(50);
 
-      console.log("🔍 DEBUG: Raw Supabase query result:");
+      console.log("🔍 DEBUG: Raw query result:");
       console.log("🔍 DEBUG: - Error:", error);
       console.log("🔍 DEBUG: - Data count:", data?.length);
-      console.log("🔍 DEBUG: - Raw data:", data);
 
       if (error) {
         console.error('❌ Error fetching profiles:', error);
         return;
       }
 
-      // No filtering - show all profiles that match filters
       if (data) {
-        try {
-          let filteredProfiles = data.map(profile => ({
+        // Step 5: Add mutual protection - don't show users who swiped left on current user  
+        const { data: theirLeftSwipes } = await supabase
+          .from('user_swipes')
+          .select('user_id')
+          .eq('swipe_direction', 'left')
+          .in('user_id', data.map(p => p.user_id))
+          .eq('target_user_id', user.id);
+
+        const usersWhoLeftSwipedMe = theirLeftSwipes?.map(s => s.user_id) || [];
+
+        // Filter out users who left-swiped the current user
+        let filteredProfiles = data
+          .filter(profile => !usersWhoLeftSwipedMe.includes(profile.user_id))
+          .map(profile => ({
             ...profile,
             bio: profile.bio || ""
           }));
 
-          console.log("🔍 DEBUG: All profiles after basic filters:");
-          console.log("🔍 DEBUG: - Profiles count:", filteredProfiles.length);
-          console.log("🔍 DEBUG: - Profiles:", filteredProfiles.map(p => ({ user_id: p.user_id, name: p.name })));
+        console.log("🔍 DEBUG: Profiles after mutual protection filter:");
+        console.log("🔍 DEBUG: - Count:", filteredProfiles.length);
 
-          // Sort by local city priority if enabled
-          if (filters.prioritizeLocalCity) {
-            try {
-              // Get current user's home_city
-              const { data: currentUserData } = await supabase
-                .from('profiles')
-                .select('home_city')
-                .eq('user_id', user.id)
-                .single();
+        // Sort by local city priority if enabled
+        if (filters.prioritizeLocalCity) {
+          try {
+            const { data: currentUserData } = await supabase
+              .from('profiles')
+              .select('home_city')
+              .eq('user_id', user.id)
+              .single();
 
-              if (currentUserData?.home_city) {
-                const userHomeCity = currentUserData.home_city;
+            if (currentUserData?.home_city) {
+              const userHomeCity = currentUserData.home_city;
+              
+              filteredProfiles.sort((a, b) => {
+                const aIsLocal = a.home_city === userHomeCity;
+                const bIsLocal = b.home_city === userHomeCity;
                 
-                // Sort profiles: same city first, then others
-                filteredProfiles.sort((a, b) => {
-                  const aIsLocal = a.home_city === userHomeCity;
-                  const bIsLocal = b.home_city === userHomeCity;
-                  
-                  if (aIsLocal && !bIsLocal) return -1;
-                  if (!aIsLocal && bIsLocal) return 1;
-                  return 0; // Keep original order for profiles in same category
-                });
-              }
-            } catch (cityError) {
-              console.error('Error sorting by city:', cityError);
+                if (aIsLocal && !bIsLocal) return -1;
+                if (!aIsLocal && bIsLocal) return 1;
+                return 0;
+              });
             }
+          } catch (cityError) {
+            console.error('Error sorting by city:', cityError);
           }
-          
-          console.log("🔍 DEBUG: Final profiles to set:");
-          console.log("🔍 DEBUG: - Final count:", filteredProfiles.length);
-          console.log("🔍 DEBUG: - Final profiles:", filteredProfiles.map(p => ({ user_id: p.user_id, name: p.name, age: p.age, handicap: p.handicap, gender: p.gender, home_city: p.home_city })));
-          
-          // Update debug info with final count
-          setDebugInfo({ rawDataCount: data?.length || 0, finalCount: filteredProfiles.length });
-          
-          setProfiles(filteredProfiles);
-          setCurrentIndex(0);
-        } catch (cityError) {
-          console.error('Error sorting by city:', cityError);
-          // Still set profiles even if city sorting fails
-          const mappedProfiles = data.map(profile => ({
-            ...profile,
-            bio: profile.bio || ""
-          }));
-          setProfiles(mappedProfiles);
-          setCurrentIndex(0);
-          setDebugInfo({ rawDataCount: data?.length || 0, finalCount: mappedProfiles.length });
         }
+        
+        console.log("🔍 DEBUG: Final profiles to set:");
+        console.log("🔍 DEBUG: - Final count:", filteredProfiles.length);
+        
+        setDebugInfo({ rawDataCount: data?.length || 0, finalCount: filteredProfiles.length });
+        setProfiles(filteredProfiles);
+        setCurrentIndex(0);
       }
     } catch (error) {
       console.error('Error in fetchProfiles:', error);
@@ -214,6 +247,8 @@ export const useSwipeProfiles = () => {
         }, {
           onConflict: 'user_id,target_user_id'
         });
+
+      console.log('✅ Left swipe saved successfully');
     } catch (error) {
       console.error('Error saving left swipe:', error);
     }

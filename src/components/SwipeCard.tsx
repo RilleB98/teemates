@@ -56,14 +56,7 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
   };
 
   const handleSwipeLeft = async () => {
-    if (!canSwipe()) {
-      setShowPremiumModal(true);
-      return;
-    }
-
-    const success = await incrementSwipeCount();
-    if (!success) return;
-
+    // Left swipes (NO) are always allowed - no limit check needed
     if (cardRef.current) {
       cardRef.current.style.transform = 'translateX(-100%) rotate(-30deg)';
       cardRef.current.style.opacity = '0';
@@ -75,12 +68,13 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight, onRefresh }: Swi
   };
 
   const handleSwipeRight = async () => {
-    if (!canSwipe()) {
+    // Right swipes (YES) check the limit
+    if (!canSwipe(true)) {
       setShowPremiumModal(true);
       return;
     }
 
-    const success = await incrementSwipeCount();
+    const success = await incrementSwipeCount(true);
     if (!success) return;
 
     if (cardRef.current) {
