@@ -62,16 +62,20 @@ const BrowserGuard = ({ children }: BrowserGuardProps) => {
       
       setIsWebViewOrApp(allowAccess);
       
-      // If not allowed and not on root path and haven't redirected yet, redirect to landing
+      // If not allowed and not on root path, use window.location to avoid React Router issues
       if (!allowAccess && location.pathname !== '/' && !hasRedirected) {
         console.log('🔒 Redirecting browser user to landing page');
         setHasRedirected(true);
-        navigate('/', { replace: true });
+        window.location.href = '/';
+        return;
       }
     };
 
-    detectAppEnvironment();
-  }, [location.pathname, navigate, hasRedirected]);
+    // Only run detection once
+    if (isWebViewOrApp === null) {
+      detectAppEnvironment();
+    }
+  }, [location.pathname]); // Removed navigate and hasRedirected from dependencies
 
   if (isWebViewOrApp === null) {
     // Loading state
