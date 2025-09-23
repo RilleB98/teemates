@@ -67,8 +67,9 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
           }
         });
     }
+    console.log(`🖼️ Available images for ${profile.name}:`, images);
     return images;
-  }, [profile.avatar_url, profile.user_photos]);
+  }, [profile.avatar_url, profile.user_photos, profile.name]);
 
   // Reset image index when profile changes
   useEffect(() => {
@@ -78,13 +79,23 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
   // Handle image navigation
   const handleImageNavigation = (direction: 'prev' | 'next', e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent swipe detection
+    e.preventDefault();
     
-    if (availableImages.length <= 1) return;
+    console.log(`🖼️ Image navigation: ${direction}, current: ${currentImageIndex}, total: ${availableImages.length}`);
+    
+    if (availableImages.length <= 1) {
+      console.log(`🖼️ Only ${availableImages.length} image(s), no navigation needed`);
+      return;
+    }
     
     if (direction === 'next') {
-      setCurrentImageIndex(prev => (prev + 1) % availableImages.length);
+      const newIndex = (currentImageIndex + 1) % availableImages.length;
+      console.log(`🖼️ Moving to next image: ${newIndex}`);
+      setCurrentImageIndex(newIndex);
     } else {
-      setCurrentImageIndex(prev => prev === 0 ? availableImages.length - 1 : prev - 1);
+      const newIndex = currentImageIndex === 0 ? availableImages.length - 1 : currentImageIndex - 1;
+      console.log(`🖼️ Moving to previous image: ${newIndex}`);
+      setCurrentImageIndex(newIndex);
     }
   };
 
@@ -289,18 +300,26 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
           {availableImages.length > 1 && (
             <>
               {/* Left navigation area (previous image) */}
-              <button
-                className="absolute left-0 top-0 w-1/3 h-full z-20 bg-transparent"
+              <div
+                className="absolute left-0 top-0 w-1/2 h-full z-20 cursor-pointer flex items-center justify-start pl-4"
                 onClick={(e) => handleImageNavigation('prev', e)}
-                aria-label="Previous image"
-              />
+                style={{ background: 'transparent' }}
+              >
+                <div className="opacity-0 hover:opacity-100 transition-opacity bg-black/20 rounded-full p-2">
+                  <div className="w-2 h-2 border-l-2 border-b-2 border-white transform rotate-45"></div>
+                </div>
+              </div>
               
               {/* Right navigation area (next image) */}
-              <button
-                className="absolute right-0 top-0 w-1/3 h-full z-20 bg-transparent"
+              <div
+                className="absolute right-0 top-0 w-1/2 h-full z-20 cursor-pointer flex items-center justify-end pr-4"
                 onClick={(e) => handleImageNavigation('next', e)}
-                aria-label="Next image"
-              />
+                style={{ background: 'transparent' }}
+              >
+                <div className="opacity-0 hover:opacity-100 transition-opacity bg-black/20 rounded-full p-2">
+                  <div className="w-2 h-2 border-r-2 border-b-2 border-white transform -rotate-45"></div>
+                </div>
+              </div>
               
               {/* Image indicators */}
               <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex gap-1 z-30">
