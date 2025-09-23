@@ -48,7 +48,45 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
   const [dragOffset, setDragOffset] = useState(0);
   const [startPos, setStartPos] = useState(0);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { canSwipeYes, incrementYesSwipeCount } = useSwipeLimit();
+
+  
+  // Get all available images (avatar + user_photos)
+  const availableImages = useMemo(() => {
+    const images = [];
+    if (profile.avatar_url) {
+      images.push(profile.avatar_url);
+    }
+    if (profile.user_photos && profile.user_photos.length > 0) {
+      profile.user_photos
+        .sort((a, b) => a.display_order - b.display_order)
+        .forEach(photo => {
+          if (photo.photo_url && photo.photo_url !== profile.avatar_url) {
+            images.push(photo.photo_url);
+          }
+        });
+    }
+    return images;
+  }, [profile.avatar_url, profile.user_photos]);
+
+  // Reset image index when profile changes
+  useEffect(() => {
+    setCurrentImageIndex(0);
+  }, [profile.user_id]);
+
+  // Handle image navigation
+  const handleImageNavigation = (direction: 'prev' | 'next', e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent swipe detection
+    
+    if (availableImages.length <= 1) return;
+    
+    if (direction === 'next') {
+      setCurrentImageIndex(prev => (prev + 1) % availableImages.length);
+    } else {
+      setCurrentImageIndex(prev => prev === 0 ? availableImages.length - 1 : prev - 1);
+    }
+  };
 
   // Calculate content sections and determine if scrolling is needed
   const { cardHeight, needsScroll } = useMemo(() => {
@@ -239,13 +277,46 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
         {/* Main profile image with gradient overlay */}
         <div className="relative h-80 overflow-hidden">
           <img
-            src={profile.avatar_url || '/placeholder.svg'}
+            src={availableImages[currentImageIndex] || '/placeholder.svg'}
             alt={profile.name || 'Profile'}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-opacity duration-300"
             onError={(e) => {
               (e.target as HTMLImageElement).src = '/placeholder.svg';
             }}
           />
+          
+          {/* Image navigation areas - only show if multiple images */}
+          {availableImages.length > 1 && (
+            <>
+              {/* Left navigation area (previous image) */}
+              <button
+                className="absolute left-0 top-0 w-1/3 h-full z-20 bg-transparent"
+                onClick={(e) => handleImageNavigation('prev', e)}
+                aria-label="Previous image"
+              />
+              
+              {/* Right navigation area (next image) */}
+              <button
+                className="absolute right-0 top-0 w-1/3 h-full z-20 bg-transparent"
+                onClick={(e) => handleImageNavigation('next', e)}
+                aria-label="Next image"
+              />
+              
+              {/* Image indicators */}
+              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex gap-1 z-30">
+                {availableImages.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                      index === currentImageIndex 
+                        ? 'bg-white' 
+                        : 'bg-white/50'
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
           
           {/* Gradient overlay for better text readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
