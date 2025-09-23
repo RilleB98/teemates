@@ -12,30 +12,31 @@ import { MutualFavoriteCourses } from "@/components/MutualFavoriteCourses";
 import { usePremium } from "@/hooks/usePremium";
 import { PremiumUpgradeModal } from "./PremiumUpgradeModal";
 import { useState } from "react";
-
 interface CourseSwipeModalProps {
   isOpen: boolean;
   onClose: () => void;
   courseName: string;
   courseLocation: string;
 }
-
-export const CourseSwipeModal = ({ 
-  isOpen, 
-  onClose, 
-  courseName, 
-  courseLocation 
+export const CourseSwipeModal = ({
+  isOpen,
+  onClose,
+  courseName,
+  courseLocation
 }: CourseSwipeModalProps) => {
-  const { isPremium, loading: premiumLoading, isAdmin, manualPremium } = usePremium();
+  const {
+    isPremium,
+    loading: premiumLoading,
+    isAdmin,
+    manualPremium
+  } = usePremium();
   const [showPremiumModal, setShowPremiumModal] = useState(false);
-  
-  console.log('🎯 CourseSwipeModal Premium Status:', { 
-    isPremium, 
-    premiumLoading, 
-    isAdmin, 
-    manualPremium 
+  console.log('🎯 CourseSwipeModal Premium Status:', {
+    isPremium,
+    premiumLoading,
+    isAdmin,
+    manualPremium
   });
-  
   const {
     currentProfile,
     hasMoreProfiles,
@@ -46,15 +47,13 @@ export const CourseSwipeModal = ({
     totalProfiles,
     currentIndex
   } = useCourseProfiles(courseName);
-
   const handleSwipeLeft = () => {
-    console.log('🎯 CourseSwipeModal - Swipe Left Attempt:', { 
-      isPremium, 
-      premiumLoading, 
-      isAdmin, 
-      manualPremium 
+    console.log('🎯 CourseSwipeModal - Swipe Left Attempt:', {
+      isPremium,
+      premiumLoading,
+      isAdmin,
+      manualPremium
     });
-    
     if (!isPremium) {
       console.log('🎯 CourseSwipeModal - Non-premium user, showing upgrade modal');
       setShowPremiumModal(true);
@@ -64,15 +63,13 @@ export const CourseSwipeModal = ({
       swipeLeft(currentProfile.user_id); // Pass profile ID to save swipe
     }
   };
-
   const handleSwipeRight = () => {
-    console.log('🎯 CourseSwipeModal - Swipe Right Attempt:', { 
-      isPremium, 
-      premiumLoading, 
-      isAdmin, 
-      manualPremium 
+    console.log('🎯 CourseSwipeModal - Swipe Right Attempt:', {
+      isPremium,
+      premiumLoading,
+      isAdmin,
+      manualPremium
     });
-    
     if (!isPremium) {
       console.log('🎯 CourseSwipeModal - Non-premium user, showing upgrade modal');
       setShowPremiumModal(true);
@@ -82,26 +79,20 @@ export const CourseSwipeModal = ({
       swipeRight(currentProfile.user_id);
     }
   };
-
   const handleRefresh = () => {
     refetch();
   };
-
   if (loading) {
-    return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
+    return <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-md mx-auto">
           <div className="flex items-center justify-center p-8">
             <RefreshCw className="w-8 h-8 animate-spin text-golf-green" />
             <span className="ml-2 text-lg">Laddar spelare...</span>
           </div>
         </DialogContent>
-      </Dialog>
-    );
+      </Dialog>;
   }
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+  return <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[95vw] sm:max-w-lg mx-auto p-0 bg-gradient-to-br from-golf-green via-background to-golf-green-light border-0 overflow-hidden">
         <div className="p-4 sm:p-6 pb-8">{/* Reduced bottom padding since buttons are now fixed */}
           <DialogHeader className="mb-3 sm:mb-4">
@@ -115,26 +106,11 @@ export const CourseSwipeModal = ({
               </div>
             </div>
             
-            {totalProfiles > 0 && (
-              <div className="flex items-center justify-between mt-2 sm:mt-3">
-                <Badge variant="outline" className="bg-white/80 text-xs sm:text-sm">
-                  {currentIndex + 1} av {totalProfiles} spelare
-                </Badge>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleRefresh}
-                  className="h-7 w-7 sm:h-8 sm:w-8 p-0 touch-target"
-                >
-                  <RefreshCw className="w-3 sm:w-4 h-3 sm:h-4" />
-                </Button>
-              </div>
-            )}
+            {totalProfiles > 0}
           </DialogHeader>
 
           <div className="relative flex items-center justify-center">
-            {!isPremium ? (
-              <Card className="w-full max-w-sm h-[500px] flex items-center justify-center bg-card/95 backdrop-blur-sm">
+            {!isPremium ? <Card className="w-full max-w-sm h-[500px] flex items-center justify-center bg-card/95 backdrop-blur-sm">
                 <div className="text-center p-6 space-y-4">
                   <Crown className="w-16 h-16 text-yellow-500 mx-auto" />
                   <h3 className="text-xl font-bold text-foreground">
@@ -144,10 +120,7 @@ export const CourseSwipeModal = ({
                     För att swipea på spelare från specifika golfbanor behöver du Premium.
                   </p>
                   <div className="space-y-3">
-                    <Button 
-                      onClick={() => setShowPremiumModal(true)}
-                      className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white"
-                    >
+                    <Button onClick={() => setShowPremiumModal(true)} className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white">
                       <Crown className="w-4 h-4 mr-2" />
                       Uppgradera till Premium
                     </Button>
@@ -156,19 +129,14 @@ export const CourseSwipeModal = ({
                     </Button>
                   </div>
                 </div>
-              </Card>
-            ) : !hasMoreProfiles || !currentProfile ? (
-              <Card className="w-full max-w-sm h-[500px] flex items-center justify-center bg-card/95 backdrop-blur-sm">
+              </Card> : !hasMoreProfiles || !currentProfile ? <Card className="w-full max-w-sm h-[500px] flex items-center justify-center bg-card/95 backdrop-blur-sm">
                 <div className="text-center p-6 space-y-4">
                   <Heart className="w-16 h-16 text-muted-foreground mx-auto" />
                   <h3 className="text-xl font-bold text-foreground">
                     {totalProfiles === 0 ? 'Inga spelare hittades' : 'Inga fler spelare'}
                   </h3>
                   <p className="text-muted-foreground leading-relaxed">
-                    {totalProfiles === 0 
-                      ? `Det finns inga andra spelare med ${courseName} som hemmabana just nu.`
-                      : 'Du har sett alla spelare från denna golfbana.'
-                    }
+                    {totalProfiles === 0 ? `Det finns inga andra spelare med ${courseName} som hemmabana just nu.` : 'Du har sett alla spelare från denna golfbana.'}
                   </p>
                   <div className="space-y-3">
                     <Button onClick={handleRefresh} variant="outline" className="w-full">
@@ -180,22 +148,11 @@ export const CourseSwipeModal = ({
                     </Button>
                   </div>
                 </div>
-              </Card>
-            ) : (
-              <SwipeCard
-                profile={currentProfile}
-                onSwipeLeft={handleSwipeLeft}
-                onSwipeRight={handleSwipeRight}
-              />
-            )}
+              </Card> : <SwipeCard profile={currentProfile} onSwipeLeft={handleSwipeLeft} onSwipeRight={handleSwipeRight} />}
           </div>
         </div>
         
-        <PremiumUpgradeModal
-          isOpen={showPremiumModal}
-          onClose={() => setShowPremiumModal(false)}
-        />
+        <PremiumUpgradeModal isOpen={showPremiumModal} onClose={() => setShowPremiumModal(false)} />
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
