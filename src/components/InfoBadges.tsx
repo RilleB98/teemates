@@ -1,6 +1,35 @@
 import { Clock, Calendar, Award, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
+// Mapping functions for translating database values to Swedish labels
+const getPlayFrequencyLabel = (frequency: string | null): string | null => {
+  if (!frequency) return null;
+  
+  const mappings: { [key: string]: string } = {
+    'every_day': 'Varje dag',
+    'several_times_week': 'Flera gånger i veckan',
+    'once_week': 'En gång i veckan',
+    'few_times_month': 'Några gånger i månaden',
+    'rarely': 'Sällan'
+  };
+  
+  return mappings[frequency] || frequency;
+};
+
+const getAvailabilityLabel = (availability: string | null): string | null => {
+  if (!availability) return null;
+  
+  const mappings: { [key: string]: string } = {
+    'weekdays': 'Vardagar',
+    'weekends': 'Helger',
+    'evenings': 'Kvällar',
+    'flexible': 'Flexibel',
+    'mornings': 'Morgon/förmiddag'
+  };
+  
+  return mappings[availability] || availability;
+};
+
 interface InfoBadgesProps {
   playFrequency?: string | null;
   availability?: string | null;
@@ -14,7 +43,7 @@ export const InfoBadges = ({ playFrequency, availability, handicap, homeCity }: 
   if (playFrequency) {
     badges.push({
       icon: Clock,
-      label: playFrequency,
+      label: getPlayFrequencyLabel(playFrequency),
       variant: "secondary" as const
     });
   }
@@ -22,7 +51,7 @@ export const InfoBadges = ({ playFrequency, availability, handicap, homeCity }: 
   if (availability) {
     badges.push({
       icon: Calendar,
-      label: availability,
+      label: getAvailabilityLabel(availability),
       variant: "outline" as const
     });
   }
