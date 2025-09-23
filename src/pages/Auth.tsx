@@ -136,9 +136,9 @@ export const Auth = () => {
       await supabase.auth.signOut();
       localStorage.clear();
       
-      // Use HTTPS Universal Link for iOS instead of custom scheme
+      // Use custom URL scheme for OAuth on iOS
       const redirectUrl = Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios'
-        ? 'https://teemates.app/auth-callback' 
+        ? 'teemates://auth-callback' 
         : `${window.location.origin}/auth-callback`;
       console.log('🔄 DEBUG: Using redirect URL:', redirectUrl);
       
