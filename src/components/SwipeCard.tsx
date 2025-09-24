@@ -49,7 +49,7 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
   const [startPos, setStartPos] = useState(0);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const { canSwipeYes, incrementYesSwipeCount } = useSwipeLimit();
+  const { canSwipeYes, incrementYesSwipeCount, swipeCount, FREE_SWIPE_LIMIT } = useSwipeLimit();
 
   // Debug mutual favorite courses
   console.log(`🏌️ Profile ${profile.name} mutual_favorite_courses:`, profile.mutual_favorite_courses);
@@ -183,12 +183,20 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
   };
 
   const handleSwipeRight = async () => {
+    console.log('💖 handleSwipeRight called');
+    console.log('💖 canSwipeYes():', canSwipeYes());
+    console.log('💖 swipeCount:', swipeCount, 'FREE_SWIPE_LIMIT:', FREE_SWIPE_LIMIT);
+    
     if (!canSwipeYes()) {
+      console.log('💖 Cannot swipe yes, showing premium modal');
       setShowPremiumModal(true);
       return;
     }
 
+    console.log('💖 Can swipe yes, incrementing count');
     const success = await incrementYesSwipeCount();
+    console.log('💖 Increment success:', success);
+    
     if (!success) return;
 
     setDragOffset(0);

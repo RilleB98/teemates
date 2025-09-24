@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
-
+import { usePremium } from './usePremium';
 
 export function useSwipeLimit() {
   const { user } = useAuth();
-  const isSubscribed = false; // Set to false to enable premium features
+  const { isPremium, loading: premiumLoading } = usePremium();
   const [swipeCount, setSwipeCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [manualPremium, setManualPremium] = useState(false);
   
   const FREE_SWIPE_LIMIT = 3;
 
@@ -18,17 +17,10 @@ export function useSwipeLimit() {
       return;
     }
 
-    try {
-      // First check if user has manual premium
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('manual_premium')
-        .eq('user_id', user.id)
-        .single();
+    console.log('🎯 Fetching swipe count for user:', user.id);
+    console.log('🎯 User isPremium:', isPremium);
 
-      if (profileData) {
-        setManualPremium(profileData.manual_premium || false);
-      }
+    try {
 
       const { data, error } = await supabase
         .from('user_swipe_counts')
@@ -94,9 +86,15 @@ export function useSwipeLimit() {
   };
 
   const incrementYesSwipeCount = async () => {
-    if (!user?.id || isSubscribed || manualPremium) return true; // Premium användare har obegränsat
+    console.log('🎯 Incrementing swipe count. Current:', swipeCount, 'isPremium:', isPremium);
+    
+    if (!user?.id || isPremium) {
+      console.log('🎯 Premium user or no user ID, allowing unlimited swipes');
+      return true; // Premium användare har obegränsat
+    }
 
     const newCount = swipeCount + 1;
+    console.log('🎯 New swipe count would be:', newCount, 'Limit:', FREE_SWIPE_LIMIT);
     
     try {
       const { error } = await supabase
@@ -121,8 +119,9 @@ export function useSwipeLimit() {
   };
 
   const canSwipeYes = () => {
-    if (isSubscribed || manualPremium) return true; // Premium användare kan alltid swipea ja
-    return swipeCount < FREE_SWIPE_LIMIT;
+    const canSwipe = isPremium || swipeCount < FREE_SWIPE_LIMIT;
+    console.log('🎯 Can swipe yes:', canSwipe, 'isPremium:', isPremium, 'swipeCount:', swipeCount, 'limit:', FREE_SWIPE_LIMIT);
+    return canSwipe;
   };
 
   const canSwipe = () => {
@@ -130,13 +129,15 @@ export function useSwipeLimit() {
   };
 
   const getRemainingSwipes = () => {
-    if (isSubscribed || manualPremium) return 999; // "Obegränsat" för premium
+    if (isPremium) return 999; // "Obegränsat" för premium
     return Math.max(0, FREE_SWIPE_LIMIT - swipeCount);
   };
 
   useEffect(() => {
     fetchSwipeCount();
-  }, [user?.id, isSubscribed]);
+  }, [user?.id, isPremium]);
+
+  const finalLoading = loading || premiumLoading;
 
   return {
     swipeCount,
@@ -144,7 +145,7 @@ export function useSwipeLimit() {
     canSwipeYes,
     incrementYesSwipeCount,
     getRemainingSwipes,
-    loading,
+    loading: finalLoading,
     FREE_SWIPE_LIMIT,
   };
 }
