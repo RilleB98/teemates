@@ -23,21 +23,35 @@ export function PremiumUpgradeModal({ isOpen, onClose, onUpgrade }: PremiumUpgra
   const { offerings, purchasing, purchasePackage, restorePurchases, isNativeApp } = useInAppPurchase();
   
   const handleUpgrade = async () => {
+    console.log('💰 HandleUpgrade called, isNativeApp:', isNativeApp);
+    console.log('💰 Available offerings:', offerings);
+    
     if (!isNativeApp) {
+      console.log('💰 Not native app, showing download info');
       // För webläsare, visa info om att ladda ner appen
+      return;
+    }
+
+    if (offerings.length === 0) {
+      console.log('💰 No offerings available');
       return;
     }
 
     try {
       // Använd det första tillgängliga paketet
       const firstOffering = offerings[0];
+      console.log('💰 First offering:', firstOffering);
+      
       if (firstOffering?.availablePackages?.[0]) {
+        console.log('💰 Attempting to purchase package:', firstOffering.availablePackages[0]);
         await purchasePackage(firstOffering.availablePackages[0]);
         onUpgrade?.();
         onClose();
+      } else {
+        console.log('💰 No packages available in first offering');
       }
     } catch (error) {
-      console.error('Error during upgrade:', error);
+      console.error('💰 Error during upgrade:', error);
     }
   };
 

@@ -11,8 +11,11 @@ class PurchaseService {
 
     try {
       // Initialize RevenueCat with your API key
+      const apiKey = 'appl_dKwOmCXUHWGgKVLfAHZJUUCBJRK'; // iOS API key
+      console.log('💰 Initializing RevenueCat with API key:', apiKey ? 'Key present' : 'No key');
+      
       await Purchases.configure({
-        apiKey: 'YOUR_REVENUECAT_API_KEY', // Replace with your actual key
+        apiKey: apiKey,
         appUserID: undefined, // Use default anonymous ID for now
       });
 
@@ -29,8 +32,16 @@ class PurchaseService {
     }
 
     try {
+      console.log('💰 Fetching offerings...');
       const offerings = await Purchases.getOfferings();
-      return offerings.all ? Object.values(offerings.all) : [];
+      console.log('💰 Raw offerings response:', offerings);
+      console.log('💰 Available offerings:', offerings.all ? Object.keys(offerings.all) : 'No offerings');
+      console.log('💰 Current offering:', offerings.current);
+      
+      const offeringsArray = offerings.all ? Object.values(offerings.all) : [];
+      console.log('💰 Offerings array:', offeringsArray);
+      
+      return offeringsArray;
     } catch (error) {
       console.error('💰 Failed to get offerings:', error);
       return [];

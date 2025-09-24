@@ -54,9 +54,11 @@ export function useInAppPurchase() {
   const purchasePackage = async (packageToPurchase: PurchasesPackage) => {
     if (purchasing) return;
 
+    console.log('💰 Starting purchase for package:', packageToPurchase);
     setPurchasing(true);
     try {
       const result = await purchaseService.purchasePackage(packageToPurchase);
+      console.log('💰 Purchase result:', result);
       setCustomerInfo((result as any)?.customerInfo || result);
       toast({
         title: "Köp genomfört!",
@@ -64,10 +66,15 @@ export function useInAppPurchase() {
       });
     } catch (error: any) {
       console.error('💰 Purchase failed:', error);
+      console.error('💰 Error details:', {
+        code: error.code,
+        message: error.message,
+        userCancelled: error.userCancelled
+      });
       
       // Handle different error types
-      if (error.code === 'PURCHASE_CANCELLED') {
-        // User cancelled, don't show error
+      if (error.code === 'PURCHASE_CANCELLED' || error.userCancelled) {
+        console.log('💰 User cancelled purchase');
         return;
       }
       
