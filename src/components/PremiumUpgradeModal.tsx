@@ -11,6 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Check, Crown, Star, Zap, RefreshCw } from 'lucide-react';
 import { useInAppPurchase } from '@/hooks/useInAppPurchase';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 
 interface PremiumUpgradeModalProps {
@@ -21,14 +23,35 @@ interface PremiumUpgradeModalProps {
 
 export function PremiumUpgradeModal({ isOpen, onClose, onUpgrade }: PremiumUpgradeModalProps) {
   const { offerings, purchasing, purchasePackage, restorePurchases, isNativeApp } = useInAppPurchase();
+  const { user } = useAuth();
   
   const handleUpgrade = async () => {
     console.log('💰 HandleUpgrade called, isNativeApp:', isNativeApp);
     console.log('💰 Available offerings:', offerings);
     
     if (!isNativeApp) {
-      console.log('💰 Not native app, showing download info');
-      // För webläsare, visa info om att ladda ner appen
+      console.log('💰 Not native app, enabling premium for web testing');
+      
+      if (user?.id) {
+        try {
+          // Sätt manual_premium till true i databasen
+          const { error } = await supabase
+            .from('profiles')
+            .update({ manual_premium: true })
+            .eq('user_id', user.id);
+            
+          if (error) {
+            console.error('💰 Error updating manual_premium:', error);
+          } else {
+            console.log('💰 Successfully enabled manual premium for user');
+          }
+        } catch (error) {
+          console.error('💰 Error in premium upgrade:', error);
+        }
+      }
+      
+      onUpgrade?.();
+      onClose();
       return;
     }
 
@@ -123,7 +146,7 @@ export function PremiumUpgradeModal({ isOpen, onClose, onUpgrade }: PremiumUpgra
             ) : (
               <div className="flex items-center gap-2">
                 <Crown className="h-4 w-4" />
-                {isNativeApp ? 'Skaffa Premium' : 'Ladda ner appen'}
+                {isNativeApp ? 'Skaffa Premium' : 'Testa Premium (Web)'}
               </div>
             )}
           </Button>
@@ -148,7 +171,7 @@ export function PremiumUpgradeModal({ isOpen, onClose, onUpgrade }: PremiumUpgra
         <p className="text-xs text-muted-foreground text-center">
           {isNativeApp 
             ? "Betalning sker via App Store. Avsluta prenumeration när som helst."
-            : "Premium-funktioner kräver iOS-appen. Ladda ner från App Store."
+            : "Test av premium-funktioner i webläsaren. Riktiga köp kräver iOS-appen."
           }
         </p>
       </DialogContent>
