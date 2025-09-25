@@ -1,9 +1,3 @@
 {
-  "plugins": {
-    "WebAuth": {
-      "ios": {
-        "className": "WebAuthPlugin"
-      }
-    }
-  }
+  "plugins": {}
 }

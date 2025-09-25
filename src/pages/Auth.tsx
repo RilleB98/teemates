@@ -123,7 +123,7 @@ export const Auth = () => {
       localStorage.clear();
       
       // Use custom URL scheme for iOS WebView
-      const redirectUrl = 'teemates://auth-callback';
+      const redirectUrl = 'com.teemates.app://auth-callback';
       console.log('🔄 DEBUG: Using redirect URL:', redirectUrl);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
