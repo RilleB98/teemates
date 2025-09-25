@@ -14,10 +14,24 @@ export function useInAppPurchase() {
 
   const isPremiumActive = customerInfo ? purchaseService.isPremiumActive(customerInfo) : false;
 
+  // Check if we're in a Capacitor environment (including iOS WebView)
+  const isCapacitorEnvironment = () => {
+    const platform = Capacitor.getPlatform();
+    const isNative = Capacitor.isNativePlatform();
+    console.log('🔍 Platform Debug:', { platform, isNative, userAgent: navigator.userAgent });
+    
+    // Return true for iOS/Android or if we detect Capacitor in the environment
+    return isNative || platform === 'ios' || platform === 'android';
+  };
+
   // Initialize and fetch data
   useEffect(() => {
     const initializePurchases = async () => {
-      if (!Capacitor.isNativePlatform()) {
+      const isCapacitor = isCapacitorEnvironment();
+      console.log('💰 Initialize purchases - isCapacitor:', isCapacitor);
+      
+      if (!isCapacitor) {
+        console.log('💰 Not on Capacitor platform, skipping RevenueCat initialization');
         setLoading(false);
         return;
       }
@@ -119,6 +133,6 @@ export function useInAppPurchase() {
     purchasing,
     purchasePackage,
     restorePurchases,
-    isNativeApp: Capacitor.isNativePlatform()
+    isNativeApp: isCapacitorEnvironment()
   };
 }

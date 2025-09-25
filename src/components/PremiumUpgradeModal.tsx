@@ -146,7 +146,7 @@ export function PremiumUpgradeModal({ isOpen, onClose, onUpgrade }: PremiumUpgra
             ) : (
               <div className="flex items-center gap-2">
                 <Crown className="h-4 w-4" />
-                {isNativeApp ? 'Skaffa Premium' : 'Testa Premium (Web)'}
+                Skaffa Premium
               </div>
             )}
           </Button>
