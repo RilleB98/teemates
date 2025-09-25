@@ -6,11 +6,11 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   bundledWebRuntime: false,
   ios: {
-    scheme: 'com.teemates.app',
+    scheme: 'teemates',
     contentInset: 'automatic'
   },
   android: {
-    scheme: 'com.teemates.app'
+    scheme: 'teemates'
   },
   plugins: {
     Browser: {
