@@ -12,6 +12,9 @@ import { Auth } from "./pages/Auth";
 import { AuthCallback } from "./pages/AuthCallback";
 import { PublicLanding } from "./pages/PublicLanding";
 import { AuthProvider } from "./hooks/useAuth";
+import GolfPartner from "./pages/GolfPartner";
+import Golfbanor from "./pages/Golfbanor";
+import BokaGolf from "./pages/BokaGolf";
 
 import { AdminGolf } from "./pages/AdminGolf";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -53,6 +56,9 @@ const App = () => {
             <Routes>
               {/* Public routes - always accessible */}
               <Route path="/" element={<PublicLanding />} />
+              <Route path="/golfpartner" element={<GolfPartner />} />
+              <Route path="/golfbanor" element={<Golfbanor />} />
+              <Route path="/boka-golf" element={<BokaGolf />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/auth-callback" element={<AuthCallback />} />
               

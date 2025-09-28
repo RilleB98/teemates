@@ -91,7 +91,9 @@ export const PublicLanding = () => {
             <CardContent className="p-6 text-center">
               <Users className="w-12 h-12 text-golf-premium mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-golf-premium mb-2">
-                Hitta Golfkompisar
+                <a href="/golfpartner" className="hover:text-golf-accent transition-colors">
+                  Hitta Golfkompisar
+                </a>
               </h3>
               <p className="text-golf-premium/70 text-sm">
                 Möt nya golfare i ditt område och bygg ditt golfnätverk baserat på spelstil och nivå
@@ -103,7 +105,9 @@ export const PublicLanding = () => {
             <CardContent className="p-6 text-center">
               <Flag className="w-12 h-12 text-golf-premium mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-golf-premium mb-2">
-                Boka Rundor
+                <a href="/boka-golf" className="hover:text-golf-accent transition-colors">
+                  Boka Rundor
+                </a>
               </h3>
               <p className="text-golf-premium/70 text-sm">
                 Föreslå och delta i golfrundor på dina favoritbanor. Hitta spelare för alla tider på dygnet
@@ -127,7 +131,9 @@ export const PublicLanding = () => {
             <CardContent className="p-6 text-center">
               <MapPin className="w-12 h-12 text-golf-premium mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-golf-premium mb-2">
-                Svenska Golfbanor
+                <a href="/golfbanor" className="hover:text-golf-accent transition-colors">
+                  Svenska Golfbanor
+                </a>
               </h3>
               <p className="text-golf-premium/70 text-sm">
                 Upptäck golfbanor i hela Sverige och utforska nya platser med dina nya golfkompisar
