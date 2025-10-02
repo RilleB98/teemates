@@ -13,6 +13,7 @@ interface FriendRequest {
   friend_id: string;
   status: 'pending' | 'accepted' | 'rejected';
   created_at: string;
+  source?: 'golf_id' | 'swipe';
   sender_profile?: {
     name: string;
     avatar_url: string;
@@ -38,6 +39,10 @@ export const FriendRequests = ({
   onReject,
   onRemove
 }: FriendRequestsProps) => {
+  // Separate requests by source
+  const golfIdRequests = pendingRequests.filter(r => r.source === 'golf_id');
+  const swipeRequests = pendingRequests.filter(r => r.source === 'swipe' || !r.source);
+
   if (pendingRequests.length === 0 && sentRequests.length === 0) {
     return (
       <Card>
@@ -84,45 +89,105 @@ export const FriendRequests = ({
                 Inga mottagna förfrågningar
               </div>
             ) : (
-              pendingRequests.map((request) => (
-                <div key={request.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Avatar>
-                      <AvatarImage src={request.sender_profile?.avatar_url || ''} />
-                      <AvatarFallback>
-                        {request.sender_profile?.name?.charAt(0) || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">
-                        {request.sender_profile?.name || 'Okänd användare'}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {formatDistanceToNow(new Date(request.created_at), { 
-                          addSuffix: true, 
-                          locale: sv 
-                        })}
-                      </p>
+              <>
+                {/* Golf-ID requests first */}
+                {golfIdRequests.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      Via Golf-ID
                     </div>
+                    {golfIdRequests.map((request) => (
+                      <div key={request.id} className="flex items-center justify-between p-3 border rounded-lg bg-accent/50">
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={request.sender_profile?.avatar_url || ''} />
+                            <AvatarFallback>
+                              {request.sender_profile?.name?.charAt(0) || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">
+                              {request.sender_profile?.name || 'Okänd användare'}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {formatDistanceToNow(new Date(request.created_at), { 
+                                addSuffix: true, 
+                                locale: sv 
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => onAccept(request.id, request.user_id)}
+                            variant="default"
+                          >
+                            <Check className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => onReject(request.id)}
+                            variant="outline"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => onAccept(request.id, request.user_id)}
-                      variant="default"
-                    >
-                      <Check className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => onReject(request.id)}
-                      variant="outline"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                )}
+
+                {/* Swipe requests second */}
+                {swipeRequests.length > 0 && (
+                  <div className="space-y-3">
+                    {golfIdRequests.length > 0 && (
+                      <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mt-4">
+                        Via Swipe
+                      </div>
+                    )}
+                    {swipeRequests.map((request) => (
+                      <div key={request.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={request.sender_profile?.avatar_url || ''} />
+                            <AvatarFallback>
+                              {request.sender_profile?.name?.charAt(0) || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">
+                              {request.sender_profile?.name || 'Okänd användare'}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {formatDistanceToNow(new Date(request.created_at), { 
+                                addSuffix: true, 
+                                locale: sv 
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => onAccept(request.id, request.user_id)}
+                            variant="default"
+                          >
+                            <Check className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => onReject(request.id)}
+                            variant="outline"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
-              ))
+                )}
+              </>
             )}
           </TabsContent>
 

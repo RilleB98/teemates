@@ -18,7 +18,7 @@ interface UserProfile {
 }
 
 interface UserSearchProps {
-  onSendRequest: (userId: string) => void;
+  onSendRequest: (userId: string, source?: 'golf_id' | 'swipe') => void;
   sentRequests: Array<{ friend_id: string }>;
   friends: Array<{ friend_id: string }>;
 }
@@ -142,7 +142,7 @@ export const UserSearch = ({ onSendRequest, sentRequests, friends }: UserSearchP
                       </Button>
                     ) : (
                       <Button 
-                        onClick={() => onSendRequest(profile.user_id)}
+                        onClick={() => onSendRequest(profile.user_id, 'golf_id')}
                         variant="default"
                       >
                         <UserPlus className="h-4 w-4 mr-2" />

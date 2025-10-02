@@ -9,6 +9,7 @@ export interface FriendRequest {
   friend_id: string;
   status: 'pending' | 'accepted' | 'rejected';
   created_at: string;
+  source?: 'golf_id' | 'swipe';
   sender_profile?: {
     name: string;
     avatar_url: string;
@@ -162,7 +163,7 @@ export const useFriends = () => {
     try {
       const { data: requests, error } = await supabase
         .from('friends')
-        .select('id, user_id, friend_id, status, created_at')
+        .select('id, user_id, friend_id, status, created_at, source')
         .eq('status', 'pending')
         .eq('friend_id', user.id);
 
@@ -188,6 +189,7 @@ export const useFriends = () => {
         friend_id: request.friend_id,
         status: request.status as 'pending',
         created_at: request.created_at,
+        source: request.source as 'golf_id' | 'swipe',
         sender_profile: {
           name: profiles?.find(p => p.user_id === request.user_id)?.name || 'Okänd användare',
           avatar_url: profiles?.find(p => p.user_id === request.user_id)?.avatar_url || ''
@@ -244,7 +246,7 @@ export const useFriends = () => {
     }
   };
 
-  const sendFriendRequest = async (friendId: string) => {
+  const sendFriendRequest = async (friendId: string, source: 'golf_id' | 'swipe' = 'swipe') => {
     if (!user) return false;
 
     try {
@@ -253,7 +255,8 @@ export const useFriends = () => {
         .insert({
           user_id: user.id,
           friend_id: friendId,
-          status: 'pending'
+          status: 'pending',
+          source: source
         });
 
       if (error) throw error;
