@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, MapPin, Calendar, Trophy } from "lucide-react";
+import { MessageCircle, MapPin, Trophy, Hash } from "lucide-react";
 
 interface FriendProfile {
   name: string;
@@ -9,6 +9,7 @@ interface FriendProfile {
   home_club?: string;
   age?: number | null;
   handicap?: number;
+  golf_id?: string;
 }
 
 interface FriendProfileModalProps {
@@ -42,18 +43,34 @@ export const FriendProfileModal = ({ isOpen, onClose, profile, onMessage }: Frie
             <h2 className="text-2xl font-bold text-gray-900">
               {profile.name?.split(' ')[0] || 'Okänd vän'}{profile.age ? `, ${profile.age} år` : ''}
             </h2>
-            {profile.home_club && (
-              <p className="text-lg text-gray-600 mt-1">{profile.home_club}</p>
-            )}
           </div>
 
           {/* Profile Details */}
-          <div className="w-full space-y-4">
+          <div className="w-full space-y-3">
+            {profile.home_club && (
+              <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg border border-primary/20">
+                <MapPin className="w-5 h-5 text-primary flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm text-gray-600">Hemmaklubb</p>
+                  <p className="font-semibold text-gray-900">{profile.home_club}</p>
+                </div>
+              </div>
+            )}
+
+            {profile.golf_id && (
+              <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg border border-primary/20">
+                <Hash className="w-5 h-5 text-primary flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm text-gray-600">Golf ID</p>
+                  <p className="font-semibold text-gray-900">{profile.golf_id}</p>
+                </div>
+              </div>
+            )}
 
             {profile.handicap !== null && profile.handicap !== undefined && (
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                <Trophy className="w-5 h-5 text-primary" />
-                <div>
+              <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg border border-primary/20">
+                <Trophy className="w-5 h-5 text-primary flex-shrink-0" />
+                <div className="flex-1">
                   <p className="text-sm text-gray-600">Handicap</p>
                   <p className="font-semibold text-gray-900">HCP {profile.handicap}</p>
                 </div>
