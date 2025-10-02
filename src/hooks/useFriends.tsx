@@ -64,8 +64,28 @@ export const useFriends = () => {
         )
         .subscribe();
 
+      // Set up real-time subscription for friends table updates
+      const friendsChannel = supabase
+        .channel('friends-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'friends'
+          },
+          () => {
+            // Refetch all friend-related data when friends table changes
+            fetchFriends();
+            fetchPendingRequests();
+            fetchSentRequests();
+          }
+        )
+        .subscribe();
+
       return () => {
         supabase.removeChannel(profilesChannel);
+        supabase.removeChannel(friendsChannel);
       };
     }
   }, [user]);
@@ -274,8 +294,8 @@ export const useFriends = () => {
 
       // Vänförfrågan accepterad - ni är nu vänner!
 
-      fetchFriends();
-      fetchPendingRequests();
+      await fetchFriends();
+      await fetchPendingRequests();
     } catch (error) {
       console.error('Error accepting friend request:', error);
       console.log("Kunde inte acceptera vänförfrågan.");
@@ -286,14 +306,14 @@ export const useFriends = () => {
     try {
       const { error } = await supabase
         .from('friends')
-        .update({ status: 'rejected' })
+        .delete()
         .eq('id', requestId);
 
       if (error) throw error;
 
       // Vänförfrågan avvisad
 
-      fetchPendingRequests();
+      await fetchPendingRequests();
     } catch (error) {
       console.error('Error rejecting friend request:', error);
       console.log("Kunde inte avvisa vänförfrågan.");
