@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Flag, Users, MessageCircle, MapPin, Download, Smartphone } from "lucide-react";
+import { Flag, Users, MessageCircle, MapPin, Trophy, Smartphone } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -44,10 +44,10 @@ export const PublicLanding = () => {
             TeeMates
           </h1>
           <p className="text-2xl text-golf-premium/90 max-w-3xl mx-auto mb-8">
-            Sveriges första app för golfare som vill hitta spelkompisar och spela mer golf
+            Hitta golfpartner i Sverige - Matcha med golfare, boka rundor och upptäck nya golfbanor
           </p>
           <p className="text-lg text-golf-premium/80 max-w-2xl mx-auto mb-12">
-            Anslut med golfare i ditt område, boka rundor tillsammans och bygg ditt golfnätverk
+            Anslut med golfare i ditt område, boka golf på över 500 svenska golfbanor och bygg ditt golfnätverk
           </p>
           
           {/* Download Buttons */}
@@ -91,9 +91,7 @@ export const PublicLanding = () => {
             <CardContent className="p-6 text-center">
               <Users className="w-12 h-12 text-golf-premium mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-golf-premium mb-2">
-                <a href="/golfpartner" className="hover:text-golf-accent transition-colors">
-                  Hitta Golfkompisar
-                </a>
+                Hitta Golfpartner
               </h3>
               <p className="text-golf-premium/70 text-sm">
                 Möt nya golfare i ditt område och bygg ditt golfnätverk baserat på spelstil och nivå
@@ -105,9 +103,7 @@ export const PublicLanding = () => {
             <CardContent className="p-6 text-center">
               <Flag className="w-12 h-12 text-golf-premium mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-golf-premium mb-2">
-                <a href="/boka-golf" className="hover:text-golf-accent transition-colors">
-                  Boka Rundor
-                </a>
+                Boka Golf
               </h3>
               <p className="text-golf-premium/70 text-sm">
                 Föreslå och delta i golfrundor på dina favoritbanor. Hitta spelare för alla tider på dygnet
@@ -131,15 +127,103 @@ export const PublicLanding = () => {
             <CardContent className="p-6 text-center">
               <MapPin className="w-12 h-12 text-golf-premium mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-golf-premium mb-2">
-                <a href="/golfbanor" className="hover:text-golf-accent transition-colors">
-                  Svenska Golfbanor
-                </a>
+                Svenska Golfbanor
               </h3>
               <p className="text-golf-premium/70 text-sm">
-                Upptäck golfbanor i hela Sverige och utforska nya platser med dina nya golfkompisar
+                Upptäck över 500 golfbanor i hela Sverige och utforska nya platser med dina nya golfkompisar
               </p>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Benefits Section */}
+        <div className="max-w-6xl mx-auto mb-16">
+          <h2 className="text-4xl font-bold text-golf-premium text-center mb-12">
+            Varför Välja TeeMates?
+          </h2>
+          <div className="grid md:grid-cols-2 gap-8 mb-12">
+            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+              <CardContent className="p-8">
+                <Trophy className="w-10 h-10 text-golf-premium mb-4" />
+                <h3 className="text-2xl font-semibold text-golf-premium mb-4">För Nybörjare</h3>
+                <ul className="space-y-3 text-golf-premium/80">
+                  <li>• Hitta erfarna golfpartners som kan hjälpa dig förbättra ditt spel</li>
+                  <li>• Lär dig golfetiketten på rätt sätt från början</li>
+                  <li>• Upptäck nya golfbanor i Sverige med lokala guider</li>
+                  <li>• Bygg självförtroende genom att spela med vänliga partners</li>
+                </ul>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+              <CardContent className="p-8">
+                <Flag className="w-10 h-10 text-golf-premium mb-4" />
+                <h3 className="text-2xl font-semibold text-golf-premium mb-4">För Erfarna Golfare</h3>
+                <ul className="space-y-3 text-golf-premium/80">
+                  <li>• Hitta golfpartners på din nivå för utmanande rundor</li>
+                  <li>• Utforska nya svenska golfbanor med kunniga companions</li>
+                  <li>• Dela din kunskap och hjälp andra utvecklas</li>
+                  <li>• Skapa ett nätverk av golfvänner över hela Sverige</li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* FAQ Section */}
+        <div className="max-w-4xl mx-auto mb-16">
+          <h2 className="text-3xl font-bold text-golf-premium text-center mb-10">
+            Vanliga Frågor
+          </h2>
+          <div className="space-y-6">
+            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-semibold text-golf-premium mb-3">
+                  Hur hittar jag golfpartner i min stad?
+                </h3>
+                <p className="text-golf-premium/80">
+                  TeeMates använder din plats för att matcha dig med golfare i ditt område. Du kan filtrera 
+                  efter handicap, favoritgolfbanor och spelstil för att hitta din perfekta golfpartner.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-semibold text-golf-premium mb-3">
+                  Hur fungerar bokningssystemet för golf?
+                </h3>
+                <p className="text-golf-premium/80">
+                  Du kan föreslå tider och golfbanor, och andra användare kan gå med i din runda. 
+                  Perfekt för att boka golf när du vill spela men saknar sällskap.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-semibold text-golf-premium mb-3">
+                  Vilka golfbanor finns med i appen?
+                </h3>
+                <p className="text-golf-premium/80">
+                  TeeMates täcker över 500 svenska golfbanor från Malmö till Kiruna. Hitta allt från 
+                  prestigefyllda championship-banor till mysiga lokala golfklubbar.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-semibold text-golf-premium mb-3">
+                  Kostar det något att använda TeeMates?
+                </h3>
+                <p className="text-golf-premium/80">
+                  TeeMates är gratis att ladda ner och använda. Du kan hitta golfpartner, boka rundor 
+                  och chatta med andra golfare helt utan kostnad.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* About Section */}
@@ -148,7 +232,7 @@ export const PublicLanding = () => {
             Om TeeMates
           </h2>
           <p className="text-xl text-golf-premium/80 leading-relaxed mb-8">
-            TeeMates är Sveriges första app speciellt designad för golfare som vill hitta spelkompisar 
+            TeeMates är Sveriges första app speciellt designad för golfare som vill hitta golfpartner 
             och spela mer golf. Vi förstår att golf är roligast när man spelar med andra som delar 
             samma passion för spelet.
           </p>
