@@ -4,17 +4,13 @@ import { useSwipeProfiles } from '@/hooks/useSwipeProfiles';
 import { SwipeCard } from '@/components/SwipeCard';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Users, RefreshCw, Crown } from 'lucide-react';
+import { Loader2, Users, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useSwipeLimit } from '@/hooks/useSwipeLimit';
-import { PremiumUpgradeModal } from '@/components/PremiumUpgradeModal';
-import { useState } from 'react';
 import { resetSwipesForUsers } from '@/utils/resetSwipes';
 import { toast } from '@/hooks/use-toast';
 
 export const SwipeMatch = () => {
   const { user } = useAuth();
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   const handleResetSwipes = async () => {
     try {
@@ -45,14 +41,6 @@ export const SwipeMatch = () => {
     totalProfiles,
     currentIndex
   } = useSwipeProfiles();
-  
-  const {
-    swipeCount,
-    canSwipeYes,
-    getRemainingSwipes,
-    loading: swipeLoading,
-    FREE_SWIPE_LIMIT
-  } = useSwipeLimit();
 
   if (loading) {
     return (
@@ -159,12 +147,6 @@ export const SwipeMatch = () => {
           </div>
         </div>
       </div>
-      
-      {/* Premium Upgrade Modal */}
-      <PremiumUpgradeModal
-        isOpen={showPremiumModal}
-        onClose={() => setShowPremiumModal(false)}
-      />
     </div>
   );
 };

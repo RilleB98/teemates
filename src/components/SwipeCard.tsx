@@ -2,9 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Heart, X, MapPin, User } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { PremiumUpgradeModal } from '@/components/PremiumUpgradeModal';
-import { useSwipeLimit } from '@/hooks/useSwipeLimit';
 import { MutualFriends } from '@/components/MutualFriends';
 import { MutualFavoriteCourses } from '@/components/MutualFavoriteCourses';
 import { InfoBadges } from '@/components/InfoBadges';
@@ -47,9 +44,7 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
   const [startPos, setStartPos] = useState(0);
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const { canSwipeYes, incrementYesSwipeCount, swipeCount, FREE_SWIPE_LIMIT } = useSwipeLimit();
 
   // Debug mutual favorite courses
   console.log(`🏌️ Profile ${profile.name} mutual_favorite_courses:`, profile.mutual_favorite_courses);
@@ -183,22 +178,6 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
   };
 
   const handleSwipeRight = async () => {
-    console.log('💖 handleSwipeRight called');
-    console.log('💖 canSwipeYes():', canSwipeYes());
-    console.log('💖 swipeCount:', swipeCount, 'FREE_SWIPE_LIMIT:', FREE_SWIPE_LIMIT);
-    
-    if (!canSwipeYes()) {
-      console.log('💖 Cannot swipe yes, showing premium modal');
-      setShowPremiumModal(true);
-      return;
-    }
-
-    console.log('💖 Can swipe yes, incrementing count');
-    const success = await incrementYesSwipeCount();
-    console.log('💖 Increment success:', success);
-    
-    if (!success) return;
-
     setDragOffset(0);
     setTimeout(() => {
       onSwipeRight();
@@ -519,10 +498,6 @@ export const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }: SwipeCardProps
         </Button>
       </div>
 
-      <PremiumUpgradeModal
-        isOpen={showPremiumModal}
-        onClose={() => setShowPremiumModal(false)}
-      />
     </div>
   );
 };

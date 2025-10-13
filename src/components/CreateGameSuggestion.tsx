@@ -19,8 +19,6 @@ import { supabase } from "@/integrations/supabase/client";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { usePremium } from "@/hooks/usePremium";
-import { PremiumUpgradeModal } from "./PremiumUpgradeModal";
 
 const gameSuggestionSchema = z.object({
   golfCourseId: z.string().min(1, "Välj en golfbana"),
@@ -50,9 +48,7 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
   
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { isPremium, loading: premiumLoading } = usePremium();
   const [isLoading, setIsLoading] = useState(false);
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [golfCourses, setGolfCourses] = useState<Array<{ id: string; name: string; location: string }>>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showCourseSearch, setShowCourseSearch] = useState(false);
@@ -333,55 +329,6 @@ export const CreateGameSuggestion = ({ onSuccess, initialData, suggestionId }: C
     "21:00-21:30", "21:30-22:00"
   ];
 
-
-  // Show loading while checking premium status
-  if (premiumLoading) {
-    return (
-      <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl">
-        <CardContent className="p-8 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-golf-green mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Laddar...</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Show premium modal if user is not premium
-  if (!isPremium) {
-    return (
-      <>
-        <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-golf-premium">
-              <Crown className="w-5 h-5 text-yellow-500" />
-              Premium-funktion
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-center space-y-4">
-            <div className="space-y-2">
-              <Crown className="w-12 h-12 text-yellow-500 mx-auto" />
-              <h3 className="text-lg font-semibold">Skapa spelförslag</h3>
-              <p className="text-muted-foreground">
-                Denna funktion kräver Premium för att organisera spel med dina vänner.
-              </p>
-            </div>
-            <Button 
-              onClick={() => setShowPremiumModal(true)}
-              className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white"
-            >
-              <Crown className="w-4 h-4 mr-2" />
-              Uppgradera till Premium
-            </Button>
-          </CardContent>
-        </Card>
-        
-        <PremiumUpgradeModal
-          isOpen={showPremiumModal}
-          onClose={() => setShowPremiumModal(false)}
-        />
-      </>
-    );
-  }
 
   return (
     <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-xl">
