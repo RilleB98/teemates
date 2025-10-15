@@ -486,6 +486,7 @@ export type Database = {
           id: string
           is_main_photo: boolean
           photo_url: string
+          privacy_level: string | null
           updated_at: string
           user_id: string
         }
@@ -495,6 +496,7 @@ export type Database = {
           id?: string
           is_main_photo?: boolean
           photo_url: string
+          privacy_level?: string | null
           updated_at?: string
           user_id: string
         }
@@ -504,6 +506,7 @@ export type Database = {
           id?: string
           is_main_photo?: boolean
           photo_url?: string
+          privacy_level?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -662,6 +665,10 @@ export type Database = {
           user_count: number
         }[]
       }
+      get_swipe_profile_fields: {
+        Args: { profile_user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -671,6 +678,10 @@ export type Database = {
       }
       is_admin: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_friend_with: {
+        Args: { profile_user_id: string }
         Returns: boolean
       }
       is_group_chat_member: {
