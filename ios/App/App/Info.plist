@@ -61,5 +61,7 @@
 	<array>
 		<string>applinks:teemates.app</string>
 	</array>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>Vi behöver skicka dig notifikationer om nya meddelanden och vänförfrågningar</string>
 </dict>
 </plist>
