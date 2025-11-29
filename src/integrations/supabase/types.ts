@@ -587,7 +587,7 @@ export type Database = {
       user_tokens: {
         Row: {
           created_at: string | null
-          created_by_ip: unknown | null
+          created_by_ip: unknown
           expires_at: string
           id: string
           ip_hash: string | null
@@ -598,7 +598,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
-          created_by_ip?: unknown | null
+          created_by_ip?: unknown
           expires_at?: string
           id?: string
           ip_hash?: string | null
@@ -609,7 +609,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
-          created_by_ip?: unknown | null
+          created_by_ip?: unknown
           expires_at?: string
           id?: string
           ip_hash?: string | null
@@ -629,14 +629,8 @@ export type Database = {
         Args: { _chat_room_id: string; _user_id: string }
         Returns: boolean
       }
-      cleanup_expired_tokens: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      cleanup_old_notifications: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      cleanup_expired_tokens: { Args: never; Returns: undefined }
+      cleanup_old_notifications: { Args: never; Returns: undefined }
       create_notification_safely: {
         Args: {
           _message_type?: string
@@ -651,7 +645,7 @@ export type Database = {
         Returns: string
       }
       get_admin_user_stats: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           active_profiles: number
           incomplete_profiles: number
@@ -659,7 +653,7 @@ export type Database = {
         }[]
       }
       get_golf_club_user_counts: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           home_club: string
           user_count: number
@@ -676,14 +670,8 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_friend_with: {
-        Args: { profile_user_id: string }
-        Returns: boolean
-      }
+      is_admin: { Args: never; Returns: boolean }
+      is_friend_with: { Args: { profile_user_id: string }; Returns: boolean }
       is_group_chat_member: {
         Args: { _group_chat_id: string; _user_id: string }
         Returns: boolean
