@@ -46,14 +46,23 @@ const BrowserGuard = ({ children }: BrowserGuardProps) => {
       const urlParams = new URLSearchParams(window.location.search);
       const hasForceHideBadge = urlParams.has('forceHideBadge');
       
-      // Check if we're in Lovable development environment
-      const isLovableDev = currentUrl.includes('lovableproject.com');
+      // Check if we're in Lovable development environment (preview or editor)
+      const isLovableDev = currentUrl.includes('lovableproject.com') || 
+                          currentUrl.includes('lovable.app') ||
+                          currentUrl.includes('localhost');
+      
+      // Check if we're in an iframe (Lovable editor preview)
+      const isInIframe = window.self !== window.top;
+      
+      console.log('🔒 Is In Iframe:', isInIframe);
       
       // Allow access for:
       // - iOS/WebView/Capacitor (mobile app users)
       // - Special URL parameter
       // - Lovable development environment (for editing)
-      const allowAccess = !isDesktopBrowser && (isIOS || isCapacitorApp || isWebView || hasForceHideBadge) || isLovableDev;
+      // - Running in an iframe (Lovable preview)
+      const allowAccess = isLovableDev || isInIframe || hasForceHideBadge || 
+                         (!isDesktopBrowser && (isIOS || isCapacitorApp || isWebView));
       
       console.log('🔒 Detection Results:');
       console.log('🔒 Is Desktop Safari:', isDesktopSafari);
