@@ -652,6 +652,25 @@ export type Database = {
           total_users: number
         }[]
       }
+      get_friend_profile: {
+        Args: { target_user_id: string }
+        Returns: {
+          age: number
+          availability: string
+          avatar_url: string
+          bio: string
+          birth_date: string
+          gender: string
+          golf_id: string
+          handicap: number
+          home_city: string
+          home_club: string
+          name: string
+          play_frequency: string
+          selected_course: Json
+          user_id: string
+        }[]
+      }
       get_golf_club_user_counts: {
         Args: never
         Returns: {
@@ -662,6 +681,19 @@ export type Database = {
       get_swipe_profile_fields: {
         Args: { profile_user_id: string }
         Returns: boolean
+      }
+      get_swipe_profiles: {
+        Args: never
+        Returns: {
+          age: number
+          avatar_url: string
+          bio: string
+          gender: string
+          handicap: number
+          home_club: string
+          name: string
+          user_id: string
+        }[]
       }
       has_role: {
         Args: {
