@@ -467,7 +467,7 @@ export const Profile = () => {
   // Debounced auto-save to avoid too many API calls
   const debouncedAutoSave = useCallback(
     (() => {
-      let timeoutId: NodeJS.Timeout;
+      let timeoutId: ReturnType<typeof setTimeout>;
       return (profileData: any) => {
         clearTimeout(timeoutId);
         timeoutId = setTimeout(() => {
